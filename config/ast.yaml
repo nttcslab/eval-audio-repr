@@ -1,0 +1,18 @@
+# AR parameters such as FFT parameters.
+audio_repr: ar_ast.AR_AST
+weight_file: external/ast/pretrained_models/ast_audioset.pth
+feature_d: 768
+sample_rate: 16000
+n_fft: 400
+window_size: 400
+hop_size: 160
+n_mels: 128
+window: hanning # paper is typo (https://github.com/YuanGongND/ast/issues/13)
+
+# Training parameters.
+batch_size: 128
+lr_lineareval: 0.0003
+# not ready lr_finetune_frozen: 0.001
+# not ready lr_finetune_finetune: 0.00003
+report_per_epochs: 20
+early_stop_epochs: 20

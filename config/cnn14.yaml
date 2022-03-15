@@ -1,0 +1,19 @@
+# AR parameters such as FFT parameters.
+audio_repr: ar_cnn14.AR_Cnn14
+feature_d: 2048
+sample_rate: 16000
+n_fft: 512
+window_size: 512
+hop_size: 160
+n_mels: 64
+f_min: 50
+f_max: 8000
+# temporal_pooling_type: -> not using common temporal pooling.
+
+# Training parameters.
+batch_size: 256
+lr_lineareval: 0.0003
+# not ready lr_finetune_frozen: 0.0003
+# not ready lr_finetune_finetune: 0.0003
+report_per_epochs: 20
+early_stop_epochs: 20

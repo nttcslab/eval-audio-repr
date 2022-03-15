@@ -1,0 +1,18 @@
+# AR parameters such as FFT parameters.
+name: AR_OpenL3Env
+audio_repr: ar_openl3.AR_OpenL3
+feature_d: 6144
+sample_rate: 48000
+temporal_pooling_type: mean_max
+
+# Training parameters.
+batch_size: 64
+lr_lineareval: 0.0003
+# not ready lr_finetune_frozen: 0.0001
+# not ready lr_finetune_finetune: 0.0001
+report_per_epochs: 20
+early_stop_epochs: 20
+
+# Model specific parameters.
+openl3_input_repr: mel256
+openl3_content_type: env

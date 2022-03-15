@@ -1,0 +1,37 @@
+diff --git a/src/models/ast_models.py b/src/models/ast_models.py
+index 897d6b5..e542ad2 100644
+--- a/ast/src/models/ast_models.py
++++ b/ast/src/models/ast_models.py
+@@ -44,7 +44,7 @@ class ASTModel(nn.Module):
+     :param audioset_pretrain: if pretrain the model with full AudioSet in addition to ImageNet
+     :param model_size: the model size of AST, should be in [tiny224, small224, base224, base384], base224 and base 384 are same model, but are trained differently during pretraining.
+     """
+-    def __init__(self, label_dim=527, fstride=10, tstride=10, input_fdim=128, input_tdim=1024, imagenet_pretrain=True, audioset_pretrain=False, model_size='base384', verbose=True):
++    def __init__(self, label_dim=527, fstride=10, tstride=10, input_fdim=128, input_tdim=1024, imagenet_pretrain=True, audioset_pretrain=False, model_size='base384', verbose=True, pretrained_weight='../../pretrained_models/ast_audioset.pth'):
+ 
+         super(ASTModel, self).__init__()
+         assert timm.__version__ == '0.4.5', 'Please use timm == 0.4.5, the code might not be compatible with newer versions.'
+@@ -119,11 +119,11 @@ class ASTModel(nn.Module):
+             if model_size != 'base384':
+                 raise ValueError('currently only has base384 AudioSet pretrained model.')
+             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+-            if os.path.exists('../../pretrained_models/audioset_10_10_0.4593.pth') == False:
++            if os.path.exists(pretrained_weight) == False:
+                 # this model performs 0.4593 mAP on the audioset eval set
+                 audioset_mdl_url = 'https://www.dropbox.com/s/cv4knew8mvbrnvq/audioset_0.4593.pth?dl=1'
+-                wget.download(audioset_mdl_url, out='../../pretrained_models/audioset_10_10_0.4593.pth')
+-            sd = torch.load('../../pretrained_models/audioset_10_10_0.4593.pth', map_location=device)
++                wget.download(audioset_mdl_url, out=pretrained_weight)
++            sd = torch.load(pretrained_weight, map_location=device)
+             audio_model = ASTModel(label_dim=527, fstride=10, tstride=10, input_fdim=128, input_tdim=1024, imagenet_pretrain=False, audioset_pretrain=False, model_size='base384', verbose=False)
+             audio_model = torch.nn.DataParallel(audio_model)
+             audio_model.load_state_dict(sd, strict=False)
+@@ -178,7 +178,7 @@ class ASTModel(nn.Module):
+         x = self.v.norm(x)
+         x = (x[:, 0] + x[:, 1]) / 2
+ 
+-        x = self.mlp_head(x)
++        # x = self.mlp_head(x)
+         return x
+ 
+ if __name__ == '__main__':

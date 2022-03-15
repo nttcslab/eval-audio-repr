@@ -1,0 +1,13 @@
+pandas
+numpy
+torch
+torchvision
+torchaudio
+easydict
+fire
+tqdm
+sklearn
+nnAudio
+torchlibrosa
+torchopenl3
+pyyaml

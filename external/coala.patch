@@ -1,0 +1,20 @@
+diff --git a/encode.py b/encode.py
+index d8d892f..3646540 100755
+--- a/encode.py
++++ b/encode.py
+@@ -12,12 +12,12 @@ from pathlib import Path
+ from tqdm import tqdm
+ import librosa
+ 
+-from utils import compute_spectrogram
+-from models_t1000 import AudioEncoder, TagEncoder, CNN
++from .utils import compute_spectrogram
++from .models_t1000 import AudioEncoder, TagEncoder, CNN
+ 
+ 
+-scaler = pickle.load(open('./scaler_top_1000.pkl', 'rb'))
+-id2tag = json.load(open('./json/id2token_top_1000.json', 'rb'))
++scaler = pickle.load(open('external/coala_scaler_top_1000_plus_clip.pkl', 'rb'))
++id2tag = json.load(open('external/coala/json/id2token_top_1000.json', 'rb'))
+ tag2id = {tag: id for id, tag in id2tag.items()}
+ 

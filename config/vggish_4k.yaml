@@ -1,0 +1,29 @@
+# AR parameters such as FFT parameters.
+audio_repr: ar_vggish.AR_VGGish_4K
+feature_d: 4096
+sample_rate: 16000
+n_fft: 400
+window_size: 400
+hop_size: 160
+n_mels: 64
+f_min: 125
+f_max: 7500
+temporal_pooling_type: mean_max
+
+# Training parameters.
+batch_size: 256
+lr_lineareval: 0.0003
+# not ready lr_finetune_frozen: 0.0001
+# not ready lr_finetune_finetune: 0.0001
+report_per_epochs: 20
+early_stop_epochs: 20
+
+# SAMPLE_RATE = 16000
+# STFT_WINDOW_LENGTH_SECONDS = 0.025 -> 400
+# STFT_HOP_LENGTH_SECONDS = 0.010 -> 160
+# NUM_MEL_BINS = NUM_BANDS
+# MEL_MIN_HZ = 125
+# MEL_MAX_HZ = 7500
+# LOG_OFFSET = 0.01  # Offset used for stabilized log of input mel-spectrogram.
+# EXAMPLE_WINDOW_SECONDS = 0.96  # Each example contains 96 10ms frames
+# EXAMPLE_HOP_SECONDS = 0.96  # with zero overlap.
