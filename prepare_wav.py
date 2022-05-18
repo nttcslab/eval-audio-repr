@@ -3,7 +3,7 @@
 This converts the original audio files found in the source folder recursively,
 then store under the destination folder with the same relative path structure.
 
-Converts followings:
+The conversion process includes the following steps:
     - Stereo to mono
     - Resample to the sampling rate
 

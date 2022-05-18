@@ -10,12 +10,13 @@ This repository provides an evaluation package for audio representations (ARs) u
 
 In early 2021, we had no codebase for evaluating models on various tasks under unified test settings, which motivated us to create this repository.
 
-By the end of 2021, we had a couple similar options ([SERAB](https://github.com/Neclow/serab/), [SUPERB](https://superbbenchmark.org/), [HEAR 2021 NeurIPS Challenge](https://neuralaudio.ai/hear2021-datasets.html), [HARES](https://arxiv.org/abs/2111.12124)). Compared to them now, this has been created independently for our study.
+By the end of 2021, we had a couple of similar options ([SERAB](https://github.com/Neclow/serab/), [SUPERB](https://superbbenchmark.org/), [HEAR 2021 NeurIPS Challenge](https://neuralaudio.ai/hear2021-datasets.html), and [HARES](https://arxiv.org/abs/2111.12124)). Compared to them now, this has been created independently for our study.
 
 This is for your research if you want to compare ARs under the same test set up with us, including:
 
-- BYOL-A: *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," 2021](https://arxiv.org/abs/2103.06695)*
-- (Two more papers will be here shortly.)
+- BYOL-A (IJCNN 2021): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," 2021](https://arxiv.org/abs/2103.06695).* 👉 [GitHub](https://github.com/nttcslab/byol-a)
+- MSM-MAE (T.B.D.): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "Masked Spectrogram Modeling using Masked Autoencoders for Learning General-purpose Audio Representation," 2022](https://arxiv.org/abs/2204.12260).* 👉  [GitHub](https://github.com/nttcslab/msm-mae)
+- Niizumi et al. (EUSIPCO 2022): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "Composing General Audio Representation by Fusing Multilayer Features of a Pre-trained Model," 2022](https://arxiv.org/abs/2205.08138).* 👉  [GitHub](https://github.com/nttcslab/composing-general-audio-repr)
 
 ## 1. Quick start
 
