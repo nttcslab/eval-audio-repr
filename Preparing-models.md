@@ -32,6 +32,7 @@ The followings are command lines to prepare models.
     cd external
     wget https://github.com/AndreyGuzhov/ESResNeXt-fbsp/releases/download/v0.1/ESResNeXtFBSP_AudioSet.pt
     git clone https://github.com/AndreyGuzhov/ESResNeXt-fbsp.git esresnext
+    pip install msgpack_numpy
     cd esresnext
     sed -i 's/import ignite_trainer as it/#import ignite_trainer as it/' model/esresnet_base.py utils/transforms.py utils/datasets.py utils/datasets.py
     sed -i 's/it\.AbstractNet/torch.nn\.Module/' model/esresnet_base.py

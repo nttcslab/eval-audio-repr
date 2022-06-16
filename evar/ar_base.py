@@ -67,7 +67,7 @@ class ToLogMelSpec(nn.Module):
         return (x + torch.finfo().eps).log()
 
 
-def _calculate_stats(device, data_loader, converter, max_smaples):
+def _calculate_stats(device, data_loader, converter, max_samples):
     running_stats = RunningStats()
     sample_count = 0
     for batch_audio, _ in data_loader:
@@ -75,20 +75,20 @@ def _calculate_stats(device, data_loader, converter, max_smaples):
             converteds = converter(batch_audio.to(device)).detach().cpu()
         running_stats.put(converteds)
         sample_count += len(batch_audio)
-        if sample_count >= max_smaples:
+        if sample_count >= max_samples:
             break
     return torch.tensor(running_stats())
 
 
-def calculate_norm_stats(device, data_loader, converter, max_smaples=5000):
-    norm_stats = _calculate_stats(device, data_loader, converter, max_smaples)
+def calculate_norm_stats(device, data_loader, converter, max_samples=5000):
+    norm_stats = _calculate_stats(device, data_loader, converter, max_samples)
     logging.info(f' using spectrogram norimalization stats: {norm_stats.numpy()}')
     return norm_stats
 
 
-def calculate_scaling_stats(model, device, data_loader, max_smaples=5000):
+def calculate_scaling_stats(model, device, data_loader, max_samples=5000):
     model.eval()
-    model.scaling_stats = _calculate_stats(device, data_loader, model, max_smaples)
+    model.scaling_stats = _calculate_stats(device, data_loader, model, max_samples)
     logging.info(f' using scaling stats: {model.scaling_stats.numpy()}')
 
 

@@ -14,9 +14,9 @@ By the end of 2021, we had a couple of similar options ([SERAB](https://github.c
 
 This is for your research if you want to compare ARs under the same test set up with us, including:
 
-- BYOL-A (IJCNN 2021): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," 2021](https://arxiv.org/abs/2103.06695).* 👉 [GitHub](https://github.com/nttcslab/byol-a)
+- BYOL-A (IJCNN 2021): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," IJCNN 2021](https://arxiv.org/abs/2103.06695).* 👉 [GitHub](https://github.com/nttcslab/byol-a)
 - MSM-MAE (T.B.D.): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "Masked Spectrogram Modeling using Masked Autoencoders for Learning General-purpose Audio Representation," 2022](https://arxiv.org/abs/2204.12260).* 👉  [GitHub](https://github.com/nttcslab/msm-mae)
-- Niizumi et al. (EUSIPCO 2022): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "Composing General Audio Representation by Fusing Multilayer Features of a Pre-trained Model," 2022](https://arxiv.org/abs/2205.08138).* 👉  [GitHub](https://github.com/nttcslab/composing-general-audio-repr)
+- Niizumi et al. (EUSIPCO 2022): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "Composing General Audio Representation by Fusing Multilayer Features of a Pre-trained Model," EUSIPCO 2022](https://arxiv.org/abs/2205.08138).* 👉  [GitHub](https://github.com/nttcslab/composing-general-audio-repr)
 
 ## 1. Quick start
 
