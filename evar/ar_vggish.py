@@ -23,7 +23,7 @@ class AR_VGGish(BaseAudioRepr):
     def __init__(self, cfg, vggish_class=None):
         super().__init__(cfg=cfg)
 
-        self.vggish = vggish.VGGish if vggish_class is None else vggish_class()
+        self.vggish = vggish.VGGish() if vggish_class is None else vggish_class()
         weight_file = 'external/pytorch_vggish.pth'
         logging.info(f' using pretrained weight: {weight_file}')
         self.vggish.load_state_dict(torch.load(weight_file))
