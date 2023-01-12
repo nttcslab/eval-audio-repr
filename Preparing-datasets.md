@@ -8,6 +8,24 @@ First, create a `downloads` folder to store files and folders for datasets in th
 
     mkdir downloads
 
+## AudioSet20K and AudioSet
+
+As the AudioSet samples become disappearing, we create the CSV metadata files for AudioSet20K and AudioSet, while corresponding to the samples present within your environment.
+
+To prepare audio files, please follow these steps:
+- Download AudioSet samples in the .wav format.
+- Convert the sampling rate of the downloaded files to your desired rate.
+- Arrange the acquired files in the appropriate subfolders, namely `balanced_train_segments`, `eval_segments`, or `unbalanced_train_segments`, located under the "work/16k/as" folder. It should be noted that "16k" denotes a sampling rate of 16k Hz, and should be replaced with your rate accordingly.
+
+To create CSV metadata files, please follow these steps:
+
+    cd evar
+    python evar/utils/make_as_metadata.py work/16k/as
+    cd ..
+
+The `make_as_metadata.py` will create `evar/metadata/as20k.csv` and `evar/metadata/as.csv`.
+Please note that "16k" denotes a sampling rate of 16k Hz and should be replaced with your rate accordingly.
+
 ## CREMA-D
 
 The followings will download to `downloads/cremad`.

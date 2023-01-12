@@ -2,6 +2,7 @@
 
 from evar.utils import *
 import shutil
+import re
 from torch import nn
 import torch.nn.functional as F
 import torchaudio
@@ -17,18 +18,51 @@ RESULT_DIR = 'results'
 LOG_DIR = 'logs'
 
 
+def eval_if_possible(text):
+    for pat in [r'\[.*\]', r'\(.*\)']:
+        if re.search(pat, text):
+            return eval(text)
+    if re_valuable.match(text):
+        return eval(text)
+    return text
+
+
+def split_camma(text):
+    flag = None
+    elements = []
+    cur = []
+    for c in text:
+        if flag is not None:
+            cur.append(c)
+            if flag == '[' and c == ']': flag = None
+            if flag == '(' and c == ')': flag = None
+            if flag == '"' and c == '"': flag = None
+            if flag == "'" and c == "'": flag = None
+            continue
+        if c in ['[', '(', '"', "'"]:
+            cur.append(c)
+            flag = c
+            continue
+        if c == ',':
+            elements.append(''.join(cur))
+            cur = []
+        else:
+            cur.append(c)
+    if cur:
+            elements.append(''.join(cur))
+    return elements
+
+
 # App level utilities
 def complete_cfg(cfg, options, no_id=False):
     # Override with options.
-    for item in options.split(','):
+    print(options)
+    for item in split_camma(options):
         if item == '': continue
         keyvalues = item.split('=')
         assert len(keyvalues) == 2, f'An option need one and only one "=" in the option {item} in {options}.'
         key, value = keyvalues
-        if re_valuable.match(value):
-            value = eval(value)
-        else:
-            value = keyvalues[1] # use option value string as is
+        value = eval_if_possible(value)
         if key[0] == '+':
             key = key[1:]
             cfg[key] = None

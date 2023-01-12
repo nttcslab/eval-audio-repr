@@ -21,7 +21,7 @@ This is a template for handling embedding vectors per time frame.
     embeddings = forward(embedding_frames)
 """
 
-from evar.common import (logging, nn, torch, F, EasyDict)
+from evar.common import (logging, nn, torch, np, EasyDict)
 from evar.utils.calculations import RunningStats
 from evar.model_utils import (mean_max_pooling, mean_pooling, max_pooling,
     MLP, initialize_layers, set_layers_trainable, show_layers_trainable)
@@ -32,6 +32,7 @@ class BaseAudioRepr(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = EasyDict(cfg.copy())
+        self.aug_fn = None
 
     def precompute(self, device, data_loader):
         """Do precomputation using training data whatever needed,
@@ -44,6 +45,14 @@ class BaseAudioRepr(nn.Module):
 
     def forward(self, batch_audio):
         raise NotImplementedError(f'implement forward() to {self.__class__}')
+
+    def set_augment_tf_feature_fn(self, aug_fn):
+        self.aug_fn = aug_fn
+
+    def augment_if_training(self, tf_feature):
+        if self.aug_fn is None or not self.training:
+            return tf_feature
+        return self.aug_fn(tf_feature)
 
 
 class ToLogMelSpec(nn.Module):

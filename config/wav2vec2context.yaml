@@ -7,8 +7,6 @@ temporal_pooling_type: mean # `mean+max` severely degrades performances on some 
 # Training parameters.
 batch_size: 64
 lr_lineareval: 0.0003
-# not ready lr_finetune_frozen: 0.0001
-# not ready lr_finetune_finetune: 0.0001
 report_per_epochs: 20
 early_stop_epochs: 20
 

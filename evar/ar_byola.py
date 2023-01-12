@@ -31,6 +31,7 @@ class AR_BYOLA(BaseAudioRepr):
     def encode_frames(self, batch_audio):
         x = self.to_feature(batch_audio)
         x = normalize_spectrogram(self.norm_stats, x) # B,F,T
+        x = self.augment_if_training(x)
         x = x.unsqueeze(1)    # -> B,1,F,T
         x = self.body(x)      # -> B,T,D=C*F
         x = x.transpose(1, 2) # -> B,D,T
@@ -59,6 +60,7 @@ class AR_BYOLAX(BaseAudioRepr):
     def encode_frames(self, batch_audio):
         x = self.to_feature(batch_audio)
         x = normalize_spectrogram(self.norm_stats, x) # B,F,T
+        x = self.augment_if_training(x)
         x = x.unsqueeze(1)    # -> B,1,F,T
         x = self.body(x, layered=True) # -> B,T,D=C*F*Layer
         x = x.transpose(1, 2) # -> B,D,T

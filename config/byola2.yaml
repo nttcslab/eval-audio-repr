@@ -1,7 +1,7 @@
 # AR parameters such as FFT parameters.
-audio_repr: ar_byola.AR_BYOLA
-weight_file: external/byol_a/pretrained_weights/AudioNTT2020-BYOLA-64x96d2048.pth
-feature_d: 2048
+audio_repr: ar_byola2.AR_BYOLA2
+weight_file: external/byol_a/v2/AudioNTT2022-BYOLA-64x96d2048.pth
+feature_d: 3072
 sample_rate: 16000
 n_fft: 1024
 window_size: 1024

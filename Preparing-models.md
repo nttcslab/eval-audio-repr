@@ -12,7 +12,7 @@ The followings are command lines to prepare models.
     pip install wget
     cd ..
 
-## BYOL-A
+## BYOL-A (IJCNN2021) & BYOL-A v2 (TASLP2023)
 
     cd external/
     git clone https://github.com/nttcslab/byol-a.git

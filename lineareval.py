@@ -52,8 +52,11 @@ import evar.ar_vggish
 import evar.ar_trill
 import evar.ar_coala
 import evar.ar_wav2vec2
+import evar.ar_data2vec
 import evar.ar_ast
 import evar.ar_byola
+import evar.ar_byola2
+import evar.ar_data2vec
 
 
 # Workaround for "RuntimeError: Too many open files. Communication with the workers is no longer possible."
@@ -109,11 +112,20 @@ def _one_linear_eval(X, y, X_val, y_val, X_test, y_test, hidden_sizes, epochs, e
     return score, df
 
 
-def make_cfg(config_file, task, options, extras={}):
+def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_sec=None):
     cfg = load_yaml_config(config_file)
     cfg = complete_cfg(cfg, options, no_id=True)
-    task_metadata, task_data, n_folds, unit_sec, activation = get_defs(cfg, task)
-    # overwrite by command line
+    task_metadata, task_data, n_folds, unit_sec, activation, balanced = get_defs(cfg, task)
+    # cancel augmentation if required
+    if cancel_aug:
+        cfg.freq_mask = None
+        cfg.time_mask = None
+        cfg.mixup = 0.0
+        cfg.rotate_wav = False
+    # unit_sec can be configured at runtime
+    if abs_unit_sec is not None:
+        unit_sec = abs_unit_sec
+    # update some parameters.
     update_options = f'+task_metadata={task_metadata},+task_data={task_data}'
     update_options += f',+unit_samples={int(cfg.sample_rate * unit_sec)}'
     cfg = complete_cfg(cfg, update_options)
@@ -125,12 +137,18 @@ def make_cfg(config_file, task, options, extras={}):
     options = ','.join(options)
     if len(options) > 0:
         cfg = complete_cfg(cfg, options)
-    return cfg, n_folds, activation
+    return cfg, n_folds, activation, balanced
+
+
+def short_model_desc(model, head_len=5, tail_len=1):
+    text = repr(model).split('\n')
+    text = text[:head_len] + ['  :'] + (text[-tail_len:] if tail_len > 0 else [''])
+    return '\n'.join(text)
 
 
 def lineareval_downstream(config_file, task, options='', seed=42, lr=None, hidden=(), standard_scaler=True, mixup=False,
-                          epochs=None, early_stop_epochs=None, step='1pass'):
-    cfg, n_folds, _ = make_cfg(config_file, task, options, extras={})
+                          epochs=None, early_stop_epochs=None, unit_sec=None, step='1pass'):
+    cfg, n_folds, _, _ = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
     lr = lr or cfg.lr_lineareval
     epochs = epochs or 200
     early_stop_epochs = early_stop_epochs or cfg.early_stop_epochs
@@ -156,7 +174,7 @@ def lineareval_downstream(config_file, task, options='', seed=42, lr=None, hidde
                 ar = eval('evar.'+cfg.audio_repr)(cfg).to(device)
                 ar.precompute(device, train_loader)
                 emb_ar = torch.nn.DataParallel(ar).to(device)
-                logging.info(emb_ar)
+                logging.info(short_model_desc(ar))
 
         # Convert to embeddings.
         X, y = to_embeddings(emb_ar, train_loader, device, cfg.id, fold=fold, cache=two_pass)

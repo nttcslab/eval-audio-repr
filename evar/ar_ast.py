@@ -53,6 +53,7 @@ class AR_AST(BaseAudioRepr):
     def forward(self, batch_audio):
         x = self.to_feature(batch_audio)
         x = self.normalize_spectrogram(x)
+        x = self.augment_if_training(x)
         x = self.backbone(x)
         return x
 

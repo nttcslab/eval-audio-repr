@@ -1,30 +1,39 @@
 # EVAR ~ Evaluation package for Audio Representations
 
-This repository provides an evaluation package for audio representations (ARs) used in our papers. Features:
+This repository offers a comprehensive evaluation package for audio representations (ARs) as employed in our papers. Its key features include:
 
-- Reproducible evaluation on various audio downstream tasks.
-  - Train/valid/test set splits provided.
-- Unified AR interface.
-- Linear evaluation, run quick.
-- Initially EVAR supports 11 tasks and nine models.
+- Reproducible evaluation across a variety of audio downstream tasks, with prefixed train/valid/test set splits provided.
+- A unified AR interface for ease of use.
+- Capabilities for both linear evaluation and fine-tuning.
+- Support for 12+ tasks and 10+ models.
 
-In early 2021, we had no codebase for evaluating models on various tasks under unified test settings, which motivated us to create this repository.
+In early 2021, we lacked a cohesive codebase for evaluating models across various tasks under consistent test settings, which prompted the creation of this repository.
+By the end of 2021, other similar options, such as ([SERAB](https://github.com/Neclow/serab/), [SUPERB](https://superbbenchmark.org/), [HEAR 2021 NeurIPS Challenge](https://neuralaudio.ai/hear2021-datasets.html), and [HARES](https://arxiv.org/abs/2111.12124)), had emerged. However, this repository was developed independently for our specific study.
 
-By the end of 2021, we had a couple of similar options ([SERAB](https://github.com/Neclow/serab/), [SUPERB](https://superbbenchmark.org/), [HEAR 2021 NeurIPS Challenge](https://neuralaudio.ai/hear2021-datasets.html), and [HARES](https://arxiv.org/abs/2111.12124)). Compared to them now, this has been created independently for our study.
+This evaluation package is intended for researchers who wish to compare ARs under the same test setup as employed in our study, including:
 
-This is for your research if you want to compare ARs under the same test set up with us, including:
+- BYOL-A (IJCNN 2021): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," IJCNN 2021](https://arxiv.org/abs/2103.06695).* 👉 [GitHub](https://github.com/nttcslab/byol-a)
+- BYOL-A (TASLP 2023): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, “BYOL for Audio: Exploring pre-trained general-purpose audio representations,” IEEE/ACM Trans. Audio, Speech, Language Process., vol. 31, pp. 137–151, 2023](http://dx.doi.org/10.1109/TASLP.2022.3221007).* 👉 [GitHub](https://github.com/nttcslab/byol-a/tree/master/v2)
+- Masked Modeling Duo (M2D, T.B.D.): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Masked Modeling Duo: Learning Representations by Encouraging Both Networks to Model the Input," 2022](https://arxiv.org/abs/2210.14648).*
+- MSM-MAE (To appear in HEAR 2021 PMLR): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Masked Spectrogram Modeling using Masked Autoencoders for Learning General-purpose Audio Representation," 2022](https://arxiv.org/abs/2204.12260).* 👉  [GitHub](https://github.com/nttcslab/msm-mae)
+- Niizumi et al. (EUSIPCO 2022): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Composing General Audio Representation by Fusing Multilayer Features of a Pre-trained Model," EUSIPCO 2022](https://arxiv.org/abs/2205.08138).* 👉  [GitHub](https://github.com/nttcslab/composing-general-audio-repr)
 
-- BYOL-A (IJCNN 2021): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," IJCNN 2021](https://arxiv.org/abs/2103.06695).* 👉 [GitHub](https://github.com/nttcslab/byol-a)
-- MSM-MAE (T.B.D.): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "Masked Spectrogram Modeling using Masked Autoencoders for Learning General-purpose Audio Representation," 2022](https://arxiv.org/abs/2204.12260).* 👉  [GitHub](https://github.com/nttcslab/msm-mae)
-- Niizumi et al. (EUSIPCO 2022): *[Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "Composing General Audio Representation by Fusing Multilayer Features of a Pre-trained Model," EUSIPCO 2022](https://arxiv.org/abs/2205.08138).* 👉  [GitHub](https://github.com/nttcslab/composing-general-audio-repr)
+## What's new
 
-## 1. Quick start
+### Jan 12, 2023 -- Supported Fine-tuning on AudioSet20K and additional models.
+- Added the **fine-tuning** script for the evaluations of M2D.
+- New task: Supported AudioSet20K.
+- New model: Supported (for linear evaluation) data2vec.
+- New model: Supported (for linear evaluation and fine-tuning) BYOL-A (v2, TASLP 2023).
+
+## 1. Quick start (Linear evaluation)
 
 The following show how to prepare CREMA-D dataset and evaluate OpenL3 (music) features on CREMA-D.
 
 0. Follow the steps in "2-1. Step 1: Install modeules, and download depending source code", in short:
 
     ```sh
+    git clone https://github.com/nttcslab/eval-audio-repr.git evar
     curl https://raw.githubusercontent.com/daisukelab/general-learning/master/MLP/torch_mlp_clf2.py -o evar/utils/torch_mlp_clf2.py
     curl https://raw.githubusercontent.com/daisukelab/sound-clf-pytorch/master/for_evar/sampler.py -o evar/sampler.py
     curl https://raw.githubusercontent.com/daisukelab/sound-clf-pytorch/master/for_evar/cnn14_decoupled.py -o evar/cnn14_decoupled.py
@@ -59,6 +68,13 @@ You will:
 2. Download datasets and create metadata files.
 3. Download model implementation and weights.
 
+### 2-0. Step 0: Clone as `evar`.
+To make it easy, we clone as `evar`.
+
+```sh
+git clone https://github.com/nttcslab/eval-audio-repr.git evar
+```
+
 ### 2-1. Step 1: Install modeules, and download depending source code
 Run following once to download your copy of the external source code.
 
@@ -85,36 +101,37 @@ See 👉 [Preparing-datasets.md](Preparing-datasets.md).
 
 See 👉 [Preparing-models.md](Preparing-models.md).
 
-## 2. Overview
+## 3. Linear evaluation
 
-The following shows the evaluation flow with an example command line:
+The following describes the evaluation steps with an exemplar command line:
 
     $ python lineareval.py config/openl3mus.yaml cremad
 
-- The main program (`lineareval.py`) converts CREMA-D audio samples to embedding vectors by calling the OpenL3 model.
-  - OpenL3 requires 48 kHz audio, then samples in the `work/48k` folder are used.
-  - The model (OpenL3 in this example) is instantiated according to the config file (config/openl3.yaml). The config file describes the detail of the model instance, such as the pre-trained weight file to load.
-- The main program trains a linear model using `TorchMLPClassifier2`, an MLPClassifier implementation near compatible with [scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html).
-- The main program tests the trained linear model with test samples. It reports `accuracy` for multi-class single label classification tasks or `mAP` for multi-class multi-label tasks.
+- The main program (`lineareval.py`) converts CREMA-D audio samples into embedding vectors by calling the OpenL3 model.
+  - OpenL3 requires 48 kHz audio, thus samples located in the `work/48k` folder are used.
+  - The model (OpenL3 in this example) is instantiated according to the config file (config/openl3.yaml). The config file defines the detail of the model instance, such as the pre-trained weight file to load.
+- The main program trains a linear model utilizing `TorchMLPClassifier2`, an MLPClassifier implementation near compatible with [scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html).
+- The main program evaluates the trained linear model with test samples. It reports `accuracy` for multi-class single label classification tasks or `mAP` for multi-class multi-label tasks.
 
-The following shows the folder structure:
+The followings show the structure of the folders:
 
 ```
-/evar           Evaluation codes.
-/evar/utils     Helper utilitiy codes.
-/evar/metadata  <SOME CSVs TO BE CREATED IN SETUP STEPS> Metadata (file name/split/label) CSV files.
-/external       Folder to clone/store external resources such as codes and weights.
-/logs           <CREATED RUNTIME> Folder to store logs.
-/results        <CREATED RUNTIME> `scores.csv` will accumulate resulting scores.
-/work           <TO BE CREATED IN SETUP> Folder to serve .wav samples.
-/work/16k         for 16,000 Hz samples.
-/work/22k         for 22,000 Hz samples -- not 22,050 Hz, For COALA.
-/work/32k         for 32,000 Hz samples.
-/work/44k         for 44,100 Hz samples.
-/work/48k         for 48,000 Hz samples.
+evar/
+  evar           Evaluation codes.
+  evar/utils     Helper utilitiy codes.
+  evar/metadata  <SOME CSVs TO BE CREATED IN SETUP STEPS> Metadata (file name/split/label) CSV files.
+  external       Folder to clone/store external resources such as codes and weights.
+  logs           <CREATED RUNTIME> Folder to store logs.
+  results        <CREATED RUNTIME> `scores.csv` will accumulate resulting scores.
+  work           <TO BE CREATED IN SETUP> Folder to serve .wav samples.
+  work/16k         for 16,000 Hz samples.
+  work/22k         for 22,000 Hz samples -- not 22,050 Hz, For COALA.
+  work/32k         for 32,000 Hz samples.
+  work/44k         for 44,100 Hz samples.
+  work/48k         for 48,000 Hz samples.
 ```
 
-### 2-1. Example
+### 3-1. Example
 
 The followings is a example of evaluating [BYOL-A](https://github.com/nttcslab/byol-a) with [GTZAN](https://ieeexplore.ieee.org/document/1021072).
 (See [Evaluation-examples.md](Evaluation-examples.md) for example command lines.)
@@ -188,38 +205,112 @@ BYOLA,gtzan,0.7586206896551724,39f1b473,"Linear evaluation: gtzan_ar_byola.AR_BY
 logs/gtzan_ar_byola.AR_BYOLA_6bd7e19e/gtzan-ar-byola.BYOLA-LE_39f1b473_0.75862.csv"
 ```
 
-## 3. Other information
+## 4. Fine-tuning
 
-### 3-1. Supported datasets
+The fine-tuning command line is analogous to that of the linear evaluation; we utilize the script `finetune.py` as demonstrated in the following example:
 
-Initially supported datasets are listed below with a short name and subdomain:
+    $ python finetune.py config/byola.yaml as20k --lr=1.0 --freq_mask 30 --time_mask 100 --mixup 0.3 --rrc True
 
-- ESC-50 (esc50, SER)
-- US8K (us8k, SER)
-- FSD50K (fsd50k, SER)
-- SPCV1/V2 (spcv1 or spcv2, NOSS)
-- VoxForge (voxforge, NOSS)
-- VoxCeleb1 (vc1, NOSS)
-- CREMA-D (cremad, NOSS)
-- GTZAN (gtzan, Music)
-- NSynth instrument family (nsynth, Music)
-- Pitch Audio Dataset (Surge synthesizer) (surge, Music)
+- This example employs the BYOL-A model and fine-tunes it on the AudioSet20K with specified augmentation settings. We typically calibrate these settings to a specific task; overriding the settings in the command line streamlines the workflow.
+  - The fundamental settings are based on the file config/byola.yaml, which can be overridden by the command line parameters.
+  - The `--freq_mask 30 --time_mask 100` parameters set the SpecAugment settings.
+  - The `--mixup 0.3` parameter specifies the mixing ratio for the mixup.
+  - The `--rrc True` parameter enables the random resize crop (RRC) augmentation.
+- The script reports the `accuracy` for multi-class single-label classification tasks or `mAP` for multi-class multi-label tasks, consistent with the linear evaluation.
+- The learning rate scheduling employs the cosine annealing with a warm-up phase.
 
-### 3-2. Supported pre-trained models
+The following parameters are configurable within the .yaml file:
+  - `warmup_epochs`: The number of epochs allocated for warm-up (e.g., 5).
+  - `mixup`: The alpha value for mixup (e.g., 0.5)
+  - `ft_bs`: The batch size employed during fine-tuning (e.g., 256).
+  - `ft_lr`: The learning rate (scheduled via cosine annealing) for fine-tuning (e.g., 0.001)
+  - `ft_early_stop_epochs`: The number of early stopping epochs, set to -1 to disable early stopping
+  - `ft_epochs`: The number of epochs allocated for fine-tuning (e.g., 200)
+  - `ft_freq_mask`: The setting for SpecAugment frequency mask (e.g., 30)
+  - `ft_time_mask`: The setting for SpecAugment time mask (e.g., 100)
+  - `ft_rrc`: Set to True to enable RRC.
 
-Initially supported models are:
+### 4-1. Fine-tuning example
+
+The followings is a example of evaluating [BYOL-A](https://github.com/nttcslab/byol-a) on AudioSet20K.
+
+```sh
+/lab/eval$ python finetune.py config/byola.yaml as20k --lr=1.0 --freq_mask 30 --time_mask 100 --mixup 0.3 --rrc True
++task_metadata=evar/metadata/as20k.csv,+task_data=work/16k/as,+unit_samples=160000
+Logging to logs/as20k_ar_byola.AR_BYOLA_bd42a61e/log.txt
+  :
+🚀 Start fine-tuning  with logging in logs/as20k_ar_byola.AR_BYOLA_bd42a61e
+  :
+ ** Fine-tuning using Evaluation set result as test result **
+ using mixup with alpha=0.3
+ using SpecAugmentation with 30, 100.
+ using RandomResizeCrop(virtual_crop_size=(1.0, 1.5), time_scale=(0.6, 1.5), freq_scale=(0.6, 1.5))
+Epoch [0] iter: 0/86, elapsed: 4.085s, lr: 0.00000000 loss: 0.71351832
+Epoch [0] iter: 10/86, elapsed: 4.724s, lr: 0.02325581 loss: 0.71286535
+Epoch [0] iter: 20/86, elapsed: 4.377s, lr: 0.04651163 loss: 0.70928347
+Epoch [0] iter: 30/86, elapsed: 4.481s, lr: 0.06976744 loss: 0.70343441
+Epoch [0] iter: 40/86, elapsed: 4.372s, lr: 0.09302326 loss: 0.70040292
+Epoch [0] iter: 50/86, elapsed: 4.412s, lr: 0.11627907 loss: 0.69242024
+Epoch [0] iter: 60/86, elapsed: 4.175s, lr: 0.13953488 loss: 0.68464863
+Epoch [0] iter: 70/86, elapsed: 4.103s, lr: 0.16279070 loss: 0.67849201
+Epoch [0] iter: 80/86, elapsed: 3.967s, lr: 0.18604651 loss: 0.66996628
+validating
+Saved weight as logs/as20k_ar_byola.AR_BYOLA_bd42a61e/weights_ep0it85-0.00786_loss0.6650.pth
+as20k_ar_byola.AR_BYOLA_bd42a61e-lr1.0mu3fm30tm100tx5R | epoch/iter 0/85: val mAP: 0.00786, loss: 0.66500, best: 0.00786@0
+Epoch [1] iter: 0/86, elapsed: 37.298s, lr: 0.20000000 loss: 0.66475827
+Epoch [1] iter: 10/86, elapsed: 5.657s, lr: 0.22325581 loss: 0.65429634
+Epoch [1] iter: 20/86, elapsed: 5.761s, lr: 0.24651163 loss: 0.64519072
+  :
+Epoch [126] iter: 50/86, elapsed: 5.414s, lr: 0.29724375 loss: 0.02148895
+Epoch [126] iter: 60/86, elapsed: 5.463s, lr: 0.29640929 loss: 0.02231924
+Epoch [126] iter: 70/86, elapsed: 5.333s, lr: 0.29557552 loss: 0.02175112
+Epoch [126] iter: 80/86, elapsed: 5.238s, lr: 0.29474242 loss: 0.02414193
+validating
+Saved weight as logs/as20k_ar_byola.AR_BYOLA_bd42a61e/weights_ep126it85-0.22147_loss0.0224.pth
+as20k_ar_byola.AR_BYOLA_bd42a61e-lr1.0mu3fm30tm100tx5R | epoch/iter 126/85: val mAP: 0.22147, loss: 0.02243, best: 0.22147@126
+Epoch [127] iter: 0/86, elapsed: 34.103s, lr: 0.29424289 loss: 0.02379368
+Epoch [127] iter: 10/86, elapsed: 5.203s, lr: 0.29341089 loss: 0.02334521
+Epoch [127] iter: 20/86, elapsed: 5.037s, lr: 0.29257958 loss: 0.02348399
+Epoch [127] iter: 30/86, elapsed: 5.221s, lr: 0.29174897 loss: 0.02158570
+Epoch [127] iter: 40/86, elapsed: 5.305s, lr: 0.29091904 loss: 0.02307556
+  :
+```
+
+## 5. Other information
+
+### 5-1. Supported datasets
+
+The followings are supported datasets with a short name and subdomain:
+
+1. AudioSet20K (as20k, SER)
+2. AudioSet (as, SER) * experimental
+3. ESC-50 (esc50, SER)
+4. US8K (us8k, SER)
+5. FSD50K (fsd50k, SER)
+6. SPCV1/V2 (spcv1 or spcv2, NOSS)
+7. VoxForge (voxforge, NOSS)
+8. VoxCeleb1 (vc1, NOSS)
+9. CREMA-D (cremad, NOSS)
+10. GTZAN (gtzan, Music)
+11. NSynth instrument family (nsynth, Music)
+12. Pitch Audio Dataset (Surge synthesizer) (surge, Music)
+
+### 5-2. Supported pre-trained models
+
+The followings are supported:
 
 - VGGish
 - PANNs' CNN14
 - ESResNe(X)t-fbsp
 - OpenL3
 - AST
-- Wav2Vec2 (with a pre-trained weight on the Huggingface)
+- Wav2Vec2 (using a pre-trained weight on the Huggingface)
+- *new* Data2vec (using a pre-trained weight on the Huggingface)
 - TRILL
 - COALA
 - BYOL-A
 
-## 4. License
+## 6. License
 
 See [LICENSE](LICENSE) for the detail.
 
@@ -239,11 +330,15 @@ See [LICENSE](LICENSE) for the detail.
 - Wav2Vec2: [A. Baevski, Y. Zhou, A. Mohamed, and M. Auli, “wav2vec 2.0: A framework for self-supervised learning of speech representations,” in NeurIPS, 2020.](https://arxiv.org/abs/2006.11477)
   - https://github.com/huggingface/transformers
   - https://huggingface.co/docs/transformers/model_doc/wav2vec2
+- Data2vec: [A. Baevski, W.-N. Hsu, Q. Xu, A. Babu, J. Gu, and M. Auli, “data2vec: A general framework for self-supervised learning in speech, vision and language,” in ICML, 2022, pp. 1298–1312.](https://ai.facebook.com/research/data2vec-a-general-framework-for-self-supervised-learning-in-speech-vision-and-language/)
+  - https://github.com/huggingface/transformers
+  - https://huggingface.co/docs/transformers/model_doc/data2vec
 - TRILL: [J. Shor, A. Jansen, R. Maor, O. Lang, O. Tuval, F. d. C. Quitry, M. Tagliasacchi, I. Shavitt, D. Emanuel, and Y. Haviv, “Towards learning a universal non-semantic representation of speech,” in Interspeech, Oct 2020.](https://arxiv.org/abs/2002.12764)
   - https://aihub.cloud.google.com/u/0/p/products%2F41239b97-c960-479a-be50-ae7a23ae1561
 - COALA: [X. Favory, K. Drossos, T. Virtanen, and X. Serra, “Coala: Co-aligned autoencoders for learning semantically enriched audio representations,” in ICML, Jul 2020.](https://arxiv.org/abs/2006.08386)
   - https://github.com/xavierfav/coala
-- BYOL-A: [Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," 2021](https://arxiv.org/abs/2103.06695)
+- BYOL-A (IJCNN2021): [Daisuke Niizumi, Daiki Takeuchi, Yasunori Ohishi, Noboru Harada, and Kunio Kashino "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," IJCNN 2021](https://arxiv.org/abs/2103.06695)
   - https://github.com/nttcslab/byol-a
-
+- BYOL-A (TASLP 2023): [D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, “BYOL for Audio: Exploring pre-trained general-purpose audio representations,” IEEE/ACM Trans. Audio, Speech, Language Process., vol. 31, pp. 137–151, 2023](http://dx.doi.org/10.1109/TASLP.2022.3221007)
+  - https://github.com/nttcslab/byol-a/tree/master/v2
 

@@ -84,23 +84,24 @@ class WavDataset(BaseRawAudioDataset):
         return self.labels[index]
 
 
-def create_dataloader(cfg, fold=1, seed=42, always_one_hot=False, balanced_random=True, pin_memory=True):
+def create_dataloader(cfg, fold=1, seed=42, batch_size=None, always_one_hot=False, balanced_random=False, pin_memory=True):
+    batch_size = batch_size or cfg.batch_size
     train_dataset = WavDataset(cfg, 'train', holdout_fold=fold, always_one_hot=always_one_hot, random_crop=True)
     valid_dataset = WavDataset(cfg, 'valid', holdout_fold=fold, always_one_hot=always_one_hot, random_crop=True,
         classes=train_dataset.classes)
     test_dataset = WavDataset(cfg, 'test', holdout_fold=fold, always_one_hot=always_one_hot, random_crop=False,
         classes=train_dataset.classes)
 
-    train_sampler = BalancedRandomSampler(train_dataset, cfg.batch_size, seed) if train_dataset.multi_label else \
-        InfiniteSampler(train_dataset, cfg.batch_size, seed, shuffle=True)
+    train_sampler = BalancedRandomSampler(train_dataset, batch_size, seed) if train_dataset.multi_label else \
+        InfiniteSampler(train_dataset, batch_size, seed, shuffle=True)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_sampler=train_sampler, pin_memory=pin_memory,
                                             num_workers=multiprocessing.cpu_count()) if balanced_random else \
-                   torch.utils.data.DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True, pin_memory=pin_memory,
+                   torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=pin_memory,
                                             num_workers=multiprocessing.cpu_count())
-    valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=cfg.batch_size, shuffle=False, pin_memory=pin_memory,
+    valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, shuffle=False, pin_memory=pin_memory,
                                            num_workers=multiprocessing.cpu_count())
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False, pin_memory=pin_memory,
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, pin_memory=pin_memory,
                                            num_workers=multiprocessing.cpu_count())
 
     return (train_loader, valid_loader, test_loader, train_dataset.multi_label)

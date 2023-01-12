@@ -53,10 +53,13 @@ def set_layers_trainable(layer, trainable=False):
         p.requires_grad = trainable
 
 
-def show_layers_trainable(layer):
+def show_layers_trainable(layer, show_all_trainable=True):
+    total_params = sum(p.numel() for p in layer.parameters())
+    total_trainable_params = sum(p.numel() for p in layer.parameters() if p.requires_grad)
+    print(f'Total number of parameters: {total_params:,} (trainable {total_trainable_params:,})')
     trainable = [n for n, p in layer.named_parameters() if p.requires_grad]
     frozen = [n for n, p in layer.named_parameters() if not p.requires_grad]
-    print('Trainable parameters:', trainable)
+    print('Trainable parameters:', trainable if show_all_trainable else f'{trainable[:10]} ...')
     print('Others are frozen such as:', frozen[:3], '...' if len(frozen) >= 3 else '')
 
 
@@ -79,17 +82,20 @@ def initialize_layers(layer):
 
 
 class MLP(nn.Module):
-    def __init__(self, input_size, hidden_sizes, output_size, hidden_dropout=0.5):
+    def __init__(self, input_size, hidden_sizes, output_size, hidden_dropout=0.5, mean=0.0, std=0.01, bias=0.):
         super().__init__()
         sizes = [input_size] + list(hidden_sizes) + [output_size]
         fcs = []
         for l, (in_size, out_size) in enumerate(zip(sizes[:-1], sizes[1:])):
             if l > 0:
                 fcs.append(nn.Dropout(hidden_dropout))
-            fcs.append(nn.Linear(in_size, out_size))
+            linear = nn.Linear(in_size, out_size)
+            nn.init.normal_(linear.weight, mean=mean, std=std)
+            nn.init.constant_(linear.bias, bias)
+            fcs.append(linear)
             fcs.append(nn.ReLU())
         self.mlp = nn.Sequential(*fcs[:-1])
-        
+
     def forward(self, x):
         out = self.mlp(x)
         return out

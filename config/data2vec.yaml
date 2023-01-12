@@ -1,9 +1,8 @@
 # AR parameters such as FFT parameters.
-name: AR_OpenL3Mus
-audio_repr: ar_openl3.AR_OpenL3
-feature_d: 6144
-sample_rate: 48000
-temporal_pooling_type: mean_max
+audio_repr: ar_data2vec.AR_Data2Vec
+feature_d: 768
+sample_rate: 16000
+temporal_pooling_type: mean
 
 # Training parameters.
 batch_size: 64
@@ -12,5 +11,4 @@ report_per_epochs: 20
 early_stop_epochs: 20
 
 # Model specific parameters.
-openl3_input_repr: mel256
-openl3_content_type: music
+data2vec_model: facebook/data2vec-audio-base-960h
