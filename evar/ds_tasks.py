@@ -35,10 +35,11 @@ def get_defs(cfg, task):
 
     Returns:
         pathname (str): Metadata .csv file path.
-        wavfolder (str): "work/16k/us8k" for example.
+        wav_folder (str): "work/16k/us8k" for example.
         folds (int): Number of LOOCV folds or 1. 1 means no cross validation.
         unit_sec (float): Unit duration in seconds.
         activation (str): Type of activation for the task: softmax for single label, sigmoid for multi-label.
+        balanced (bool): True if the training requires a class-balanced sampling.
     """
     folds, unit_sec, activation, folder, balanced = _defs[task]
     folder = folder or task

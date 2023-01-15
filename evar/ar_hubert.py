@@ -1,27 +1,28 @@
 """Wrapper code for:
 
-Data2vec: A General Framework for Self-supervised Learning in Speech, Vision and Language
+HuBERT: Self-Supervised Speech Representation Learning by Masked Prediction of Hidden Units
 
 ## Reference
-- [1] https://ai.facebook.com/research/data2vec-a-general-framework-for-self-supervised-learning-in-speech-vision-and-language/
-- [2] https://huggingface.co/facebook/data2vec-audio-large-960h
+- [1] https://ai.facebook.com/blog/hubert-self-supervised-representation-learning-for-speech-recognition-generation-and-compression/
+- [2] https://huggingface.co/facebook/hubert-large-ls960-ft
+- [3] https://github.com/huggingface/transformers/blob/main/src/transformers/models/hubert/modeling_hubert.py
 """
 
 from evar.ar_base import BaseAudioRepr, temporal_pooling
 import logging
 try:
-    from transformers import Data2VecAudioModel, Wav2Vec2Processor
+    from transformers import HubertModel, Wav2Vec2Processor
 except:
     logging.error('Install transformers.\n>>> pip install transformers')
 
 
-class AR_Data2Vec(BaseAudioRepr):
+class AR_Hubert(BaseAudioRepr):
 
     def __init__(self, cfg):
         super().__init__(cfg=cfg)
 
-        self.processor = Wav2Vec2Processor.from_pretrained(cfg.pretrained_model)
-        self.backbone = Data2VecAudioModel.from_pretrained(cfg.pretrained_model)
+        self.processor = Wav2Vec2Processor.from_pretrained('facebook/wav2vec2-base-960h') # instead of cfg.pretrained_model because non-ft models fail. wav2vec2-base-960h should be fine for preprocessing.
+        self.backbone = HubertModel.from_pretrained(cfg.pretrained_model)
 
     def encode_frames(self, batch_audio):
         device = batch_audio.device

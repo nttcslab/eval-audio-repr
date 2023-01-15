@@ -53,6 +53,8 @@ import evar.ar_trill
 import evar.ar_coala
 import evar.ar_wav2vec2
 import evar.ar_data2vec
+import evar.ar_hubert
+import evar.ar_wavlm
 import evar.ar_ast
 import evar.ar_byola
 import evar.ar_byola2

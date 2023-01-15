@@ -1,27 +1,29 @@
 """Wrapper code for:
 
-Data2vec: A General Framework for Self-supervised Learning in Speech, Vision and Language
+WavLM: Large-Scale Self-Supervised Pre-Training for Full Stack Speech Processing
 
 ## Reference
-- [1] https://ai.facebook.com/research/data2vec-a-general-framework-for-self-supervised-learning-in-speech-vision-and-language/
-- [2] https://huggingface.co/facebook/data2vec-audio-large-960h
+- [1] https://arxiv.org/abs/2110.13900
+- [2] https://huggingface.co/microsoft/wavlm-large
+- [3] https://github.com/microsoft/unilm/tree/master/wavlm
+- [4] https://github.com/huggingface/transformers/blob/main/src/transformers/models/wavlm/modeling_wavlm.py
 """
 
 from evar.ar_base import BaseAudioRepr, temporal_pooling
 import logging
 try:
-    from transformers import Data2VecAudioModel, Wav2Vec2Processor
+    from transformers import WavLMModel, Wav2Vec2Processor
 except:
     logging.error('Install transformers.\n>>> pip install transformers')
 
 
-class AR_Data2Vec(BaseAudioRepr):
+class AR_WavLM(BaseAudioRepr):
 
     def __init__(self, cfg):
         super().__init__(cfg=cfg)
 
-        self.processor = Wav2Vec2Processor.from_pretrained(cfg.pretrained_model)
-        self.backbone = Data2VecAudioModel.from_pretrained(cfg.pretrained_model)
+        self.processor = Wav2Vec2Processor.from_pretrained('facebook/wav2vec2-base-960h') # instead of cfg.pretrained_model because non-ft models fail. wav2vec2-base-960h should be fine for preprocessing.
+        self.backbone = WavLMModel.from_pretrained(cfg.pretrained_model)
 
     def encode_frames(self, batch_audio):
         device = batch_audio.device

@@ -1,5 +1,5 @@
 # AR parameters such as FFT parameters.
-audio_repr: ar_data2vec.AR_Data2Vec
+audio_repr: ar_hubert.AR_Hubert
 feature_d: 768
 sample_rate: 16000
 temporal_pooling_type: mean
@@ -11,5 +11,5 @@ report_per_epochs: 20
 early_stop_epochs: 20
 
 # Model specific parameters.
-# pretrained_model: facebook/data2vec-audio-base-960h
-pretrained_model: facebook/data2vec-audio-large-960h
+# pretrained_model: facebook/hubert-base-ls960
+pretrained_model: facebook/hubert-large-ls960-ft

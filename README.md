@@ -23,7 +23,7 @@ This evaluation package is intended for researchers who wish to compare ARs unde
 ### Jan 12, 2023 -- Supported Fine-tuning on AudioSet20K and additional models.
 - Added the **fine-tuning** script for the evaluations of M2D.
 - New task: Supported AudioSet20K.
-- New model: Supported (for linear evaluation) data2vec.
+- New model: Supported (for linear evaluation) data2vec, HuBERT, and WavLM.
 - New model: Supported (for linear evaluation and fine-tuning) BYOL-A (v2, TASLP 2023).
 
 ## 1. Quick start (Linear evaluation)
@@ -274,7 +274,15 @@ Epoch [127] iter: 20/86, elapsed: 5.037s, lr: 0.29257958 loss: 0.02348399
 Epoch [127] iter: 30/86, elapsed: 5.221s, lr: 0.29174897 loss: 0.02158570
 Epoch [127] iter: 40/86, elapsed: 5.305s, lr: 0.29091904 loss: 0.02307556
   :
+Epoch [199] iter: 70/86, elapsed: 4.784s, lr: 0.00000224 loss: 0.02135683
+Epoch [199] iter: 80/86, elapsed: 4.399s, lr: 0.00000040 loss: 0.02403579
+validating
+as20k_ar_byola.AR_BYOLA_bd42a61e-lr1.0mu3fm30tm100tx5R | epoch/iter 199/85: val mAP: 0.22109, loss: 0.02174, best: 0.22579@159
+Best mAP: 0.22579
+Finetuning as20k_ar_byola.AR_BYOLA_bd42a61e-lr1.0mu3fm30tm100tx5R on as20k -> mean score: 0.22579, best weight: logs/as20k_ar_byola.AR_BYOLA_bd42a61e/weights_ep159it85-0.22579_loss0.0214.pth, score file: logs/as20k_ar_byola.AR_BYOLA_bd42a61e/as20k_ar-byola.BYOLA-FT_bd42a61e_0.22579.csv, config: {'audio_repr': 'ar_byola.AR_BYOLA', 'weight_file': 'external/byol_a/pretrained_weights/AudioNTT2020-BYOLA-64x96d2048.pth', 'feature_d': 2048, 'sample_rate': 16000, 'n_fft': 1024, 'window_size': 1024, 'hop_size': 160, 'n_mels': 64, 'f_min': 60, 'f_max': 7800, 'temporal_pooling_type': 'mean_max', 'batch_size': 256, 'lr_lineareval': 0.0003, 'report_per_epochs': 20, 'early_stop_epochs': 20, 'warmup_epochs': 5, 'mixup': 0.3, 'ft_bs': 256, 'ft_lr': 0.001, 'ft_early_stop_epochs': -1, 'ft_epochs': 200, 'ft_freq_mask': 30, 'ft_time_mask': 100, 'ft_rrc': True, 'task_metadata': 'evar/metadata/as20k.csv', 'task_data': 'work/16k/as', 'unit_samples': 160000, 'id': 'as20k_ar_byola.AR_BYOLA_bd42a61e', 'training_mask': 0.5, 'optim': 'sgd', 'unit_sec': None, 'runtime_cfg': {'lr': 1.0, 'seed': 42, 'hidden': [], 'mixup': 0.3, 'bs': 256, 'freq_mask': 30, 'time_mask': 100, 'rrc': True, 'epochs': 200, 'early_stop_epochs': -1, 'n_class': 527, 'id': '1f5f3070'}}
 ```
+
+The fine-tuning results will be stored in `results/ft-scores.csv`.
 
 ## 5. Other information
 
@@ -306,6 +314,8 @@ The followings are supported:
 - AST
 - Wav2Vec2 (using a pre-trained weight on the Huggingface)
 - *new* Data2vec (using a pre-trained weight on the Huggingface)
+- *new* HuBERT (using a pre-trained weight on the Huggingface)
+- *new* WavLM (using a pre-trained weight on the Huggingface)
 - TRILL
 - COALA
 - BYOL-A
@@ -331,8 +341,11 @@ See [LICENSE](LICENSE) for the detail.
   - https://github.com/huggingface/transformers
   - https://huggingface.co/docs/transformers/model_doc/wav2vec2
 - Data2vec: [A. Baevski, W.-N. Hsu, Q. Xu, A. Babu, J. Gu, and M. Auli, “data2vec: A general framework for self-supervised learning in speech, vision and language,” in ICML, 2022, pp. 1298–1312.](https://ai.facebook.com/research/data2vec-a-general-framework-for-self-supervised-learning-in-speech-vision-and-language/)
-  - https://github.com/huggingface/transformers
   - https://huggingface.co/docs/transformers/model_doc/data2vec
+- HuBERT: [Hsu, Wei-Ning, et al. “HuBERT: Self-Supervised Speech Representation Learning by Masked Prediction of Hidden Units.” IEEE/ACM Transactions on Audio, Speech, and Language Processing, vol. 29, 2021, pp. 3451–60.](https://ai.facebook.com/blog/hubert-self-supervised-representation-learning-for-speech-recognition-generation-and-compression/)
+  - https://huggingface.co/docs/transformers/model_doc/hubert
+- WavLM: [Chen, Sanyuan, et al. “WavLM: Large-Scale Self-Supervised Pre-Training for Full Stack Speech Processing.” IEEE Journal of Selected Topics in Signal Processing, vol. 16, no. 6, Oct. 2022, pp. 1505–18.](https://arxiv.org/abs/2110.13900)
+  - https://huggingface.co/docs/transformers/model_doc/wavlm
 - TRILL: [J. Shor, A. Jansen, R. Maor, O. Lang, O. Tuval, F. d. C. Quitry, M. Tagliasacchi, I. Shavitt, D. Emanuel, and Y. Haviv, “Towards learning a universal non-semantic representation of speech,” in Interspeech, Oct 2020.](https://arxiv.org/abs/2002.12764)
   - https://aihub.cloud.google.com/u/0/p/products%2F41239b97-c960-479a-be50-ae7a23ae1561
 - COALA: [X. Favory, K. Drossos, T. Virtanen, and X. Serra, “Coala: Co-aligned autoencoders for learning semantically enriched audio representations,” in ICML, Jul 2020.](https://arxiv.org/abs/2006.08386)
