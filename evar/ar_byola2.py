@@ -10,7 +10,10 @@ BYOL for Audio: Exploring Pre-trained General-purpose Audio Representations
 from evar.ar_base import (BaseAudioRepr, ToLogMelSpec, calculate_norm_stats, normalize_spectrogram, temporal_pooling)
 from evar.model_utils import load_pretrained_weights
 import logging
-from external.byol_a.v2.byol_a2.models import AudioNTT2022Encoder
+try:
+    from external.byol_a.v2.byol_a2.models import AudioNTT2022Encoder
+except Exception as e:
+    logging.info(f'Make your copy of BYOL-A under external folder. Check Preparing-models.md for the details.')
 
 
 class AR_BYOLA2(BaseAudioRepr):
