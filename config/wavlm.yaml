@@ -13,3 +13,4 @@ early_stop_epochs: 20
 # Model specific parameters.
 # pretrained_model: microsoft/wavlm-base
 pretrained_model: microsoft/wavlm-large
+output_layers: [-1]  # list of layers to stack

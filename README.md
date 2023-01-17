@@ -20,6 +20,9 @@ This evaluation package is intended for researchers who wish to compare ARs unde
 
 ## What's new
 
+### Jan 17, 2023 -- Supported evaluating multilayer features by stacking layer-wise features.
+- Added the `output_layers` option in the wav2vec2/data2vec/hubert/wavlm config files.
+
 ### Jan 12, 2023 -- Supported Fine-tuning on AudioSet20K and additional models.
 - Added the **fine-tuning** script for the evaluations of M2D.
 - New task: Supported AudioSet20K.

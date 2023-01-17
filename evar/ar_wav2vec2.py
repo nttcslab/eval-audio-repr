@@ -46,7 +46,11 @@ class AR_Wav2Vec2Context(AR_Wav2Vec2Logit):
         device = batch_audio.device
         preprocessed = self.processor(batch_audio.cpu().numpy(), return_tensors="pt", sampling_rate=16000).input_values
         preprocessed = preprocessed[0].to(device) # [1, B, raw wave length] -> [B, raw wave length]
-        features = self.backbone.wav2vec2(preprocessed)[0] # [B, T, D]
+        features = self.backbone.wav2vec2(preprocessed, output_hidden_states=True).hidden_states # [B, T, D]
+        hidden_states = self.backbone(preprocessed, output_hidden_states=True).hidden_states # [B, T, D]
+        # stack layer outputs
+        states_to_stack = [hidden_states[index] for index in self.cfg.output_layers] if self.cfg.output_layers else hidden_states
+        features = torch.cat(states_to_stack, axis=-1)
         return features.transpose(1, 2) # [B, D, T]
 
 
