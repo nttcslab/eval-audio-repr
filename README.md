@@ -37,6 +37,7 @@ The following show how to prepare CREMA-D dataset and evaluate OpenL3 (music) fe
 
     ```sh
     git clone https://github.com/nttcslab/eval-audio-repr.git evar
+    cd evar
     curl https://raw.githubusercontent.com/daisukelab/general-learning/master/MLP/torch_mlp_clf2.py -o evar/utils/torch_mlp_clf2.py
     curl https://raw.githubusercontent.com/daisukelab/sound-clf-pytorch/master/for_evar/sampler.py -o evar/sampler.py
     curl https://raw.githubusercontent.com/daisukelab/sound-clf-pytorch/master/for_evar/cnn14_decoupled.py -o evar/cnn14_decoupled.py
