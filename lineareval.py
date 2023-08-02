@@ -56,6 +56,7 @@ import evar.ar_data2vec
 import evar.ar_hubert
 import evar.ar_wavlm
 import evar.ar_ast
+import evar.ar_m2d
 import evar.ar_byola
 import evar.ar_byola2
 import evar.ar_data2vec
