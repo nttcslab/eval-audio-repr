@@ -9,6 +9,7 @@ import timm.scheduler
 from evar.data import create_dataloader
 from evar.model_utils import show_layers_trainable, MLP
 from lineareval import make_cfg
+import evar.ar_m2d
 import evar.ar_byola
 import evar.ar_byola2
 
