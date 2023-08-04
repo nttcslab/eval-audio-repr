@@ -10,11 +10,11 @@ AST: Audio Spectrogram Transformer
 from evar.ar_base import (BaseAudioRepr, calculate_norm_stats)
 import torch
 import torchaudio
-import logging
+
 try:
     from external.ast.src.models import ASTModel
 except Exception as e:
-    logging.info(f'Make your copy of AST under external folder. Check Preparing-models.md for the details.')
+    print(f'(For AST users) Make your copy of AST under external folder. Check Preparing-models.md for the details.')
 
 
 class AST_Feature(torch.nn.Module):

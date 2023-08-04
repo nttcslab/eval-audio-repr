@@ -7,11 +7,15 @@ Masked Modeling Duo for Speech: Specializing General-Purpose Audio Representatio
 https://arxiv.org/abs/2305.14079
 """
 
-import sys
-sys.path.append('..')
 from evar.ar_base import BaseAudioRepr, calculate_norm_stats, normalize_spectrogram
 import torch
-from m2d.runtime_audio import RuntimeM2D
+
+try:
+    import sys
+    sys.path.append('..')
+    from m2d.runtime_audio import RuntimeM2D
+except Exception as e:
+    print(f'(For M2D users) Build your EVAR in your M2D folder.')
 
 
 class AR_M2D_BatchNormStats(BaseAudioRepr):
