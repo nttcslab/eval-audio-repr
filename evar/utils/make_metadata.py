@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import json
-import urllib
+import requests
 import fire
 
 
@@ -86,14 +86,14 @@ def convert_gtzan_metadata(root):
     file_labels = [[str(f).replace(root + '/', ''), f.parent.name] for f in sorted(Path(root).glob('*/*.wav'))]
     df = pd.DataFrame(file_labels, columns=['file_name', 'label'])
     # Set splits
-    file = urllib.request.urlopen('https://raw.githubusercontent.com/jongpillee/music_dataset_split/master/GTZAN_split/test_filtered.txt')
-    _files = [line.decode('utf-8').strip() for line in file]
+    contents = requests.get('https://raw.githubusercontent.com/jongpillee/music_dataset_split/master/GTZAN_split/test_filtered.txt')
+    _files = contents.text.splitlines()
     df.loc[df.file_name.isin(_files), 'split'] = 'test'
-    file = urllib.request.urlopen('https://raw.githubusercontent.com/jongpillee/music_dataset_split/master/GTZAN_split/valid_filtered.txt')
-    _files = [line.decode('utf-8').strip() for line in file]
+    contents = requests.get('https://raw.githubusercontent.com/jongpillee/music_dataset_split/master/GTZAN_split/valid_filtered.txt')
+    _files = contents.text.splitlines()
     df.loc[df.file_name.isin(_files), 'split'] = 'valid'
-    file = urllib.request.urlopen('https://raw.githubusercontent.com/jongpillee/music_dataset_split/master/GTZAN_split/train_filtered.txt')
-    _files = [line.decode('utf-8').strip() for line in file]
+    contents = requests.get('https://raw.githubusercontent.com/jongpillee/music_dataset_split/master/GTZAN_split/train_filtered.txt')
+    _files = contents.text.splitlines()
     df.loc[df.file_name.isin(_files), 'split'] = 'train'
     np.all(df.isna().values) == False
     df.to_csv(f'{BASE}/gtzan.csv', index=None)
@@ -231,8 +231,8 @@ def spcv2(root):
 
 
 def vc1():
-    file = urllib.request.urlopen('https://www.robots.ox.ac.uk/~vgg/data/voxceleb/meta/iden_split.txt')
-    texts = [line.decode('utf-8') for line in file]
+    contents = requests.get('https://www.robots.ox.ac.uk/~vgg/data/voxceleb/meta/iden_split.txt')
+    texts = contents.text.splitlines()
     num_files = [text.split(' ') for text in texts]
     splits = [{'1': 'train', '2': 'valid', '3': 'test'}[nf[0]] for nf in num_files]
     files = ['wav/'+nf[1].strip() for nf in num_files]
@@ -311,8 +311,8 @@ def __making_cremad_metadata(not_working_just_a_note):
     ## CAUTION: following will not work, leaving here for providing the detail.
     TFDS_URL = 'https://storage.googleapis.com/tfds-data/manual_checksums/crema_d.txt'
 
-    lines = urllib.request.urlopen(TFDS_URL)
-    urls = [line.decode('utf-8').strip().split()[0] for line in lines]
+    contents = requests.get(TFDS_URL)
+    urls = [line.strip().split()[0] for line in contents.text.splitlines()]
     urls = [url for url in urls if url[-4:] == '.wav'] # wav only, excluding summaryTable.csv
 
     filenames = [url.split('/')[-1] for url in urls]

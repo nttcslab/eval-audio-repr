@@ -40,7 +40,7 @@ The followings will get resampled copies ready.
     python prepare_wav.py downloads/cremad work/44k/cremad 44100
     python prepare_wav.py downloads/cremad work/48k/cremad 48000
 
-The metadata is provided by default for the reproducibility as `evar/metadata/cremad.csv`.
+We provide the metadata as `evar/metadata/cremad.csv` by default for reproducibility purposes.
 
 ## ESC-50
 
@@ -61,7 +61,7 @@ The followings will get resampled copies ready.
 
 The following creates metadata/esc50.csv:
 
-    python evar/utils/make_metadata.py esc50 /data/A/ESC-50-master
+    python evar/utils/make_metadata.py esc50 /your/ESC-50-master
 
 ## FSD50K
 
@@ -76,7 +76,7 @@ If we have FSD50K files under a folder `downloads/fsd50k`, the followings will g
 
 The following creates metadata/fsd50k.csv:
 
-    python evar/utils/make_metadata.py fsd50k /data/A/fsd50k
+    python evar/utils/make_metadata.py fsd50k /your/fsd50k
 
 ## GTZAN
 
@@ -98,7 +98,7 @@ The followings will get resampled copies ready.
 
 The following creates metadata/gtzan.csv:
 
-    python evar/utils/make_metadata.py gtzan /data/A/gtzan
+    python evar/utils/make_metadata.py gtzan /your/gtzan
 
 ## NSynth
 
@@ -113,7 +113,7 @@ If we have FSD50K files under a folder `downloads/nsynth`, the followings will g
 
 The following creates metadata/nsynth.csv:
 
-    python evar/utils/make_metadata.py nsynth /data/A/nsynth
+    python evar/utils/make_metadata.py nsynth /your/nsynth
 
 ## SPCV1/V2
 
@@ -134,8 +134,8 @@ If we have files under folder `downloads/spcv1` and  `downloads/spcv2`, the foll
 
 The following creates metadata/spcvX.csv:
 
-    python evar/utils/make_metadata.py spcv2 /data/A/spcv2
-    python evar/utils/make_metadata.py spcv1 /data/A/spcv1
+    python evar/utils/make_metadata.py spcv2 /your/spcv2
+    python evar/utils/make_metadata.py spcv1 /your/spcv1
 
 ## Pitch Audio Dataset (Surge synthesizer)
 
@@ -165,7 +165,7 @@ If we have files under a folder `downloads/us8k`, the followings will get resamp
 
 The following creates metadata/us8k.csv:
 
-    python evar/utils/make_metadata.py us8k /data/A/us8k
+    python evar/utils/make_metadata.py us8k /your/us8k
 
 ## VoxCeleb1
 
@@ -196,7 +196,7 @@ The followings will get resampled copies ready.
     python prepare_wav.py downloads/voxforge work/44k/voxforge 44100
     python prepare_wav.py downloads/voxforge work/48k/voxforge 48000
 
-The metadata is provided by default for the reproducibility as `evar/metadata/voxforge.csv`.
+We provide the metadata as `evar/metadata/voxforge.csv` by default for reproducibility purposes.
 
 
 (end of document)
