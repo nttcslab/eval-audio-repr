@@ -62,6 +62,7 @@ import evar.ar_byola2
 import evar.ar_data2vec
 
 
+torch.backends.cudnn.benchmark = True
 # Workaround for "RuntimeError: Too many open files. Communication with the workers is no longer possible."
 torch.multiprocessing.set_sharing_strategy('file_system')
 

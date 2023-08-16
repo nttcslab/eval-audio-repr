@@ -14,6 +14,9 @@ import evar.ar_byola
 import evar.ar_byola2
 
 
+torch.backends.cudnn.benchmark = True
+
+
 # copied and modified from https://github.com/nttcslab/byol-a
 import random
 class RandomResizeCrop(torch.nn.Module):
@@ -336,7 +339,7 @@ class TaskNetwork(torch.nn.Module):
 def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=None, batch_size=None,
                           epochs=None, early_stop_epochs=None, warmup_epochs=None,
                           freq_mask=None, time_mask=None, rrc=None, training_mask=None,
-                          optim='sgd', unit_sec=None, verbose=True):
+                          optim='sgd', unit_sec=None, verbose=True, data_path='work'):
     cfg, n_folds, activation, balanced = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
     lr = lr or cfg.ft_lr
     cfg.mixup = mixup if mixup is not None else cfg.mixup
@@ -350,6 +353,7 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
     cfg.ft_bs = batch_size or cfg.ft_bs
     cfg.optim = optim
     cfg.unit_sec = unit_sec
+    cfg.data_path = data_path
 
     # Make audio representation model and downstream task model.
     train_loader, _, _, _ = create_dataloader(cfg, fold=0, seed=seed, batch_size=cfg.ft_bs, balanced_random=balanced, pin_memory=False)
@@ -373,7 +377,10 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
 
         # Make a fresh model
         ar = eval('evar.'+cfg.audio_repr)(cfg).to(device)
-        ar.precompute(device, train_loader)
+        if hasattr(train_loader, 'lms_mode') and train_loader.lms_mode:
+            ar.precompute_lms(device, train_loader)
+        else:
+            ar.precompute(device, train_loader)
         task_model = TaskNetwork(cfg, ar).to(device)
         task_model_dp = torch.nn.DataParallel(task_model).to(device)
         logging.info(f'Head = {task_model.head}')
@@ -390,11 +397,11 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
 
 def finetune_main(config_file, task, options='', seed=42, lr=None, hidden=(), epochs=None, early_stop_epochs=None, warmup_epochs=None,
                   mixup=None, freq_mask=None, time_mask=None, rrc=None, training_mask=None, batch_size=None,
-                  optim='sgd', unit_sec=None, verbose=False):
+                  optim='sgd', unit_sec=None, verbose=False, data_path='work'):
     scores, best_path, name, cfg, logpath = run_eval(config_file, task, options=options, seed=seed, lr=lr, hidden=hidden, mixup=mixup,
         batch_size=batch_size, epochs=epochs, early_stop_epochs=early_stop_epochs, warmup_epochs=warmup_epochs,
         freq_mask=freq_mask, time_mask=time_mask, rrc=rrc, training_mask=training_mask, optim=optim,
-        unit_sec=unit_sec, verbose=verbose)
+        unit_sec=unit_sec, verbose=verbose, data_path=data_path)
     mean_score = np.mean(scores)
     score_file = logpath/f'{task}_{cfg.audio_repr.replace("AR_", "").replace("_", "-")}-FT_{cfg.id[-8:]}_{mean_score:.5f}.csv'
     best_report = logpath/(best_path.stem.split('_')[1] + '.csv')

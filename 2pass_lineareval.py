@@ -20,9 +20,9 @@ import fire
 
 
 def lineareval_two_pass(config_file, task, options='', lr=None, hidden=(), standard_scaler=True, mixup=False,
-    early_stop_epochs=None, step=None, repeat=3):
+    early_stop_epochs=None, step=None, repeat=3, seed=None):
 
-    seed = 42
+    seed = seed or 42
     command_line = [
         'python',
         'lineareval.py',
