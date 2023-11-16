@@ -9,6 +9,14 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from torch.utils.data import WeightedRandomSampler
 
 
+# Thanks to https://stackoverflow.com/questions/31953272/logging-print-message-only-once
+# Keep track of 10 different messages and then warn again
+from functools import lru_cache
+@lru_cache(10)
+def warn_once(msg: str):
+    print(msg)
+
+
 class BaseRawAudioDataset(torch.utils.data.Dataset):
     def __init__(self, unit_samples, tfms=None, random_crop=False):
         self.unit_samples = unit_samples
@@ -77,7 +85,9 @@ class WavDataset(BaseRawAudioDataset):
     def get_audio(self, index):
         filename = self.cfg.task_data + '/' + self.df.file_name.values[index]
         wav, sr = torchaudio.load(filename)
-        assert sr == self.cfg.sample_rate, f'Convert .wav files to {self.cfg.sample_rate} Hz. {filename} has {sr} Hz.'
+        if sr != self.cfg.sample_rate:
+            warn_once(f'Convert .wav files from {sr} Hz to {self.cfg.sample_rate} Hz.')
+            wav = torchaudio.transforms.Resample(sr, self.cfg.sample_rate, dtype=wav.dtype)(wav)
         return wav[0]
 
     def get_label(self, index):
