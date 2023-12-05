@@ -8,7 +8,7 @@ First, create a `downloads` folder to store files and folders for datasets in th
 
     mkdir downloads
 
-## AudioSet20K and AudioSet
+## AudioSet20K and AudioSet (2M)
 
 As the AudioSet samples become disappearing, we create the CSV metadata files for AudioSet20K and AudioSet, while corresponding to the samples present within your environment.
 
@@ -23,7 +23,7 @@ To create CSV metadata files, please follow these steps:
     python evar/utils/make_as_metadata.py work/16k/as
     cd ..
 
-The `make_as_metadata.py` will create `evar/metadata/as20k.csv` and `evar/metadata/as.csv`.
+The `make_as_metadata.py` will create `evar/metadata/as20k.csv`, `evar/metadata/as.csv`, and `evar/metadata/weight_as.csv`.
 Please note that "16k" denotes a sampling rate of 16k Hz and should be replaced with your rate accordingly.
 
 ## CREMA-D

@@ -35,6 +35,8 @@ import urllib.request
 import json
 from pathlib import Path
 import pandas as pd
+import numpy as np
+import csv
 import fire
 
 
@@ -42,8 +44,9 @@ def download_segment_csv():
     EVAL_URL = 'http://storage.googleapis.com/us_audioset/youtube_corpus/v1/csv/eval_segments.csv'
     BALANCED_TRAIN_URL = 'http://storage.googleapis.com/us_audioset/youtube_corpus/v1/csv/balanced_train_segments.csv'
     UNBALANCED_TRAIN_URL = 'http://storage.googleapis.com/us_audioset/youtube_corpus/v1/csv/unbalanced_train_segments.csv'
+    CLASS_LABEL_URL = 'http://storage.googleapis.com/us_audioset/youtube_corpus/v1/csv/class_labels_indices.csv'
 
-    for subset_url in [EVAL_URL, BALANCED_TRAIN_URL, UNBALANCED_TRAIN_URL]:
+    for subset_url in [EVAL_URL, BALANCED_TRAIN_URL, UNBALANCED_TRAIN_URL, CLASS_LABEL_URL]:
         subset_path = '/tmp/' + Path(subset_url).name
         if Path(subset_path).is_file():
             continue
@@ -51,6 +54,44 @@ def download_segment_csv():
             subset_data = urllib.request.urlopen(subset_url).read().decode()
             f.write(subset_data)
             print('Wrote', subset_path)
+
+
+def gen_weight(train_files_csv, label_file, output_file):
+    def make_index_dict(label_csv):
+        index_lookup = {}
+        with open(label_csv, 'r') as f:
+            csv_reader = csv.DictReader(f)
+            line_count = 0
+            for row in csv_reader:
+                index_lookup[row['mid']] = row['index']
+                line_count += 1
+        return index_lookup
+
+    # Following AudioMAE https://github.com/facebookresearch/AudioMAE/blob/main/dataset/audioset/gen_weight.py
+    index_dict = make_index_dict(label_file)
+    label_count = np.zeros(527)
+
+    df = pd.read_csv(train_files_csv)
+    df = df[df.split == 'train']
+
+    for sample in df.label.values:
+        sample_labels = sample.split(',')
+        for label in sample_labels:
+            label_idx = int(index_dict[label])
+            label_count[label_idx] = label_count[label_idx] + 1
+
+    label_weight = 1000.0 / (label_count + 0.01)
+    #label_weight = 1000.0 / (label_count + 100)
+
+    sample_weight = np.zeros(len(df))
+    for i, sample in enumerate(df.label.values):
+        sample_labels = sample.split(',')
+        for label in sample_labels:
+            label_idx = int(index_dict[label])
+            # summing up the weight of all appeared classes in the sample, note audioset is multiple-label classification
+            sample_weight[i] += label_weight[label_idx]
+    pd.DataFrame({'file_name': df.file_name.values, 'weight': sample_weight}).to_csv(output_file, index=None)
+    print('Saved AudioSet label weight as:', output_file)
 
 
 def make_metadata(as_dir='work/16k/as'):
@@ -95,6 +136,9 @@ def make_metadata(as_dir='work/16k/as'):
     print('The full "as" has', len(d), 'files.')
     d['split'] = [{'balanced_train_segments': 'train', 'unbalanced_train_segments': 'train', 'eval_segments': 'test'}[s] for s in d.split.values]
     d[['file_name', 'label', 'split']].to_csv('evar/metadata/as.csv', index=None)
+
+    ## as weight
+    gen_weight('evar/metadata/as.csv', '/tmp/class_labels_indices.csv', 'evar/metadata/weight_as.csv')
 
     ### as20k
     d = df[df.split.isin(['eval_segments', 'balanced_train_segments'])].copy()
