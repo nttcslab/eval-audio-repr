@@ -22,6 +22,10 @@ This evaluation package is intended for researchers who wish to compare ARs unde
 
 ## What's new
 
+### Jan 12, 2024 -- Supported weighted CE loss with fine-tuning and added more models.
+- Loss function: Supported (for fine-tuning) weighted cross entropy loss.
+- New model: Supported (for linear evaluation) ATST/ATST-Frame, BEATs, CED, HTSAT.
+
 ### Jan 17, 2023 -- Supported evaluating multilayer features by stacking layer-wise features.
 - Added the `output_layers` option in the wav2vec2/data2vec/hubert/wavlm config files.
 
@@ -313,15 +317,19 @@ The followings are supported datasets with a short name and subdomain:
 
 The followings are supported:
 
+- *new* ATST(-Clip), ATST-Frame
+- *new* BEATs
+- *new* CED (using a pre-trained weight on the Huggingface)
+- *new* HTS-AT
 - VGGish
 - PANNs' CNN14
 - ESResNe(X)t-fbsp
 - OpenL3
 - AST
 - Wav2Vec2 (using a pre-trained weight on the Huggingface)
-- *new* Data2vec (using a pre-trained weight on the Huggingface)
-- *new* HuBERT (using a pre-trained weight on the Huggingface)
-- *new* WavLM (using a pre-trained weight on the Huggingface)
+- Data2vec (using a pre-trained weight on the Huggingface)
+- HuBERT (using a pre-trained weight on the Huggingface)
+- WavLM (using a pre-trained weight on the Huggingface)
 - TRILL
 - COALA
 - BYOL-A

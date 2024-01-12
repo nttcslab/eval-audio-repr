@@ -16,7 +16,7 @@ try:
     assert tf.executing_eagerly()
     import tensorflow_hub as hub
 except:
-    logging.error('Install tensorflow and tensorflow_hub.\n>>> pip install tensorflow tensorflow_hub')
+    pass  # logging.error('Install tensorflow and tensorflow_hub.\n>>> pip install tensorflow tensorflow_hub')
 
 
 class AR_TRILL(BaseAudioRepr):

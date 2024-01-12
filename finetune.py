@@ -3,7 +3,7 @@ from evar.common import (sys, np, pd, EasyDict, kwarg_cfg,
 import torchaudio
 import fire
 import time
-from sklearn import metrics
+from sklearn import metrics, utils
 import timm.scheduler
 
 from evar.data import create_dataloader
@@ -113,6 +113,18 @@ class AudioFineuneAug:
         return lms
 
 
+class WeightedCE:
+    def __init__(self, labels, device) -> None:
+        weights = utils.class_weight.compute_class_weight('balanced', classes=np.unique(labels), y=labels)
+        self.celoss = torch.nn.CrossEntropyLoss(weight=torch.tensor(weights).to(device))
+        self.__name__ = f'CrossEntropyLoss(weight={weights})'
+
+    def __call__(self, logits, gts):
+        preds = F.softmax(logits, dim=-1)
+        loss = self.celoss(preds, gts)
+        return loss
+
+
 def loss_nll(logits, gts):
     # Args: logits: (N, C), gts: (N, C) [0,1] hot soft label after mixup is applied.
     preds = F.log_softmax(logits, dim=-1)
@@ -207,10 +219,13 @@ def arg_conf_str(args, defaults={
     return confstr
 
 
-def _train(cfg, ar_model, device, logpath, train_loader, valid_loader, test_loader, multi_label, seed, lr, balanced, verbose):
+def _train(cfg, ar_model, device, logpath, train_loader, valid_loader, test_loader, multi_label, weighted, seed, lr, balanced, verbose):
     classes = train_loader.dataset.classes
 
     loss_fn = loss_bce if multi_label else loss_nll
+    if weighted:
+        labels = np.argmax(train_loader.dataset.labels, axis=1)  # OH to numbers
+        loss_fn = WeightedCE(labels.numpy(), device)
     eval_fn = eval_map if multi_label else eval_acc
     crit_str = 'mAP' if eval_fn == eval_map else 'acc'
     optimizer = {
@@ -340,7 +355,7 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
                           epochs=None, early_stop_epochs=None, warmup_epochs=None,
                           freq_mask=None, time_mask=None, rrc=None, training_mask=None,
                           optim='sgd', unit_sec=None, verbose=True, data_path='work'):
-    cfg, n_folds, activation, balanced = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
+    cfg, n_folds, weighted, balanced = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
     lr = lr or cfg.ft_lr
     cfg.mixup = mixup if mixup is not None else cfg.mixup
     cfg.ft_early_stop_epochs = early_stop_epochs if early_stop_epochs is not None else cfg.ft_early_stop_epochs
@@ -386,7 +401,7 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
         logging.info(f'Head = {task_model.head}')
 
         best_result, best_path, name = _train(cfg, task_model_dp, device, logpath, train_loader, valid_loader, test_loader,
-            multi_label, seed, lr, balanced, verbose)
+            multi_label, weighted, seed, lr, balanced, verbose)
 
         scores.append(best_result)
         if n_folds > 1:
@@ -421,6 +436,7 @@ def finetune_main(config_file, task, options='', seed=42, lr=None, hidden=(), ep
         'report': [report],
     })
     append_to_csv(f'{RESULT_DIR}/ft-scores.csv', result_df)
+    return report, scores, best_path, name, cfg, logpath
 
 
 if __name__ == '__main__':

@@ -60,6 +60,11 @@ import evar.ar_m2d
 import evar.ar_byola
 import evar.ar_byola2
 import evar.ar_data2vec
+import evar.ar_atst
+import evar.ar_atst_frame
+import evar.ar_beats
+import evar.ar_ced
+import evar.ar_htsat
 
 
 torch.backends.cudnn.benchmark = True
@@ -119,7 +124,7 @@ def _one_linear_eval(X, y, X_val, y_val, X_test, y_test, hidden_sizes, epochs, e
 def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_sec=None):
     cfg = load_yaml_config(config_file)
     cfg = complete_cfg(cfg, options, no_id=True)
-    task_metadata, task_data, n_folds, unit_sec, activation, balanced = get_defs(cfg, task)
+    task_metadata, task_data, n_folds, unit_sec, weighted, balanced = get_defs(cfg, task)
     # cancel augmentation if required
     if cancel_aug:
         cfg.freq_mask = None
@@ -141,7 +146,7 @@ def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_s
     options = ','.join(options)
     if len(options) > 0:
         cfg = complete_cfg(cfg, options)
-    return cfg, n_folds, activation, balanced
+    return cfg, n_folds, weighted, balanced
 
 
 def short_model_desc(model, head_len=5, tail_len=1):

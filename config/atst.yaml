@@ -1,0 +1,32 @@
+# AR parameters such as FFT parameters.
+audio_repr: ar_atst.AR_ATST
+weight_file: external/atst_base.ckpt
+feature_d: 1536
+sample_rate: 16000
+n_fft: 1024
+window_size: 1024
+hop_size: 160
+n_mels: 64
+window: hanning
+
+n_blocks: 1
+
+# Training parameters.
+batch_size: 128
+lr_lineareval: 0.0003
+# not ready lr_finetune_frozen: 0.001
+# not ready lr_finetune_finetune: 0.00003
+report_per_epochs: 20
+early_stop_epochs: 20
+
+# Fine-tuning parameters.
+warmup_epochs: 5
+mixup: 0.5
+ft_bs: 64
+ft_lr: 2.0
+ft_early_stop_epochs: -1 # -1: no early stopping
+ft_epochs: 200
+ft_freq_mask: 30
+ft_time_mask: 192
+ft_noise: 0.0
+ft_rrc: True

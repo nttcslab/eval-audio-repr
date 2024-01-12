@@ -19,6 +19,32 @@ The followings are command lines to prepare models.
     mv byol-a byol_a
     cd ..
 
+## ATST, ATST-Frame
+
+In addition to the following steps, please download the ATST-Frame checkpoint as `external/atstframe_base.ckpt` from https://github.com/Audio-WestlakeU/audiossl/tree/main/audiossl/methods/atstframe.
+
+    (cd external && git clone https://github.com/Audio-WestlakeU/audiossl.git)
+    (cd external && wget https://checkpointstorage.oss-cn-beijing.aliyuncs.com/atst/base.ckpt -O atst_base.ckpt)
+    pip install pytorch_lightning fairseq
+
+## BEATs
+
+In addition to the following steps, please download the BEATs_iter3 and BEATs_iter3_plus checkpoints as `external/BEATs_iter3.pt` and `external/BEATs_iter3_plus_AS2M.pt` from https://github.com/microsoft/unilm/tree/master/beats.
+
+    (cd external && git clone https://github.com/microsoft/unilm.git)
+
+## CED
+
+    (cd external && git clone https://github.com/jimbozhang/hf_transformers_custom_model_ced.git)
+    pip install transformers
+
+## HTS-AT
+
+In addition to the following steps, please download the checkpoint as `external/HTSAT_AudioSet_Saved_1.ckpt` from https://github.com/RetroCirce/HTS-Audio-Transformer?tab=readme-ov-file#model-checkpoints.
+
+    (cd external && git clone https://github.com/RetroCirce/HTS-Audio-Transformer.git htsat)
+    pip install h5py museval
+
 ## COALA
 
     cd external/

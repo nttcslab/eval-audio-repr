@@ -15,7 +15,7 @@ try:
     import torchopenl3
     from torchopenl3.utils import preprocess_audio_batch
 except:
-    logging.error('Install toprchopenl3.\n>>> pip install torchopenl3')
+    pass  # logging.error('Install toprchopenl3.\n>>> pip install torchopenl3')
 
 
 class AR_OpenL3(BaseAudioRepr):

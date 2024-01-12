@@ -14,7 +14,7 @@ import torchaudio
 try:
     from external.ast.src.models import ASTModel
 except Exception as e:
-    print(f'(For AST users) Make your copy of AST under external folder. Check Preparing-models.md for the details.')
+    pass  # print(f'(For AST users) Make your copy of AST under external folder. Check Preparing-models.md for the details.')
 
 
 class AST_Feature(torch.nn.Module):

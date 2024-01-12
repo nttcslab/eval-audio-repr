@@ -16,7 +16,7 @@ try:
     from external.tcvrick_vggish import vggish
     from external.tcvrick_vggish.audioset import vggish_input
 except:
-    logging.error('Make your copy of VGGish under external folder. Check Preparing-models.md for the details.')
+    pass  # logging.error('Make your copy of VGGish under external folder. Check Preparing-models.md for the details.')
 
 
 class AR_VGGish(BaseAudioRepr):

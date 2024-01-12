@@ -49,14 +49,20 @@ class AR_M2D(BaseAudioRepr):
     def precompute(self, device, data_loader):
         self.norm_stats = calculate_norm_stats(device, data_loader, self.runtime.to_feature)
 
+    def using_non_last_layer_output(self):
+        if self.cfg.output_layers is None: return True
+        if len(self.cfg.output_layers) > 1: return True
+        return self.cfg.output_layers[0] != -1
+
     def encode_frames(self, batch_audio):
         x = self.runtime.to_feature(batch_audio)
         x = normalize_spectrogram(self.norm_stats, x)
         x = self.augment_if_training(x)
-        hidden_states = self.runtime.encode_lms(x, return_layers=True)
+        features = self.runtime.encode_lms(x, return_layers=self.using_non_last_layer_output())
         # stack layer outputs
-        states_to_stack = [hidden_states[index] for index in self.cfg.output_layers] if self.cfg.output_layers else [h for h in hidden_states]
-        features = torch.cat(states_to_stack, axis=-1)
+        if self.using_non_last_layer_output():
+            states_to_stack = [features[index] for index in self.cfg.output_layers] if self.cfg.output_layers else [h for h in features]
+            features = torch.cat(states_to_stack, axis=-1)
         return features.transpose(1, 2) # [B, T, D] -> [B, D, T]
 
     def forward(self, batch_audio):

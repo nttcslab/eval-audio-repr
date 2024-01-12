@@ -22,7 +22,7 @@ try:
     from external.coala.models_t1000 import AudioEncoder
     from external.coala.utils import pad
 except:
-    logging.error('Make your copy of COALA under external folder. Check Preparing-models.md for the details.')
+    pass  # logging.error('Make your copy of COALA under external folder. Check Preparing-models.md for the details.')
 
 
 def _compute_spectrogram(audio, sr=22000, n_mels=96):
