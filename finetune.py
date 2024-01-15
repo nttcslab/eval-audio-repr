@@ -274,7 +274,7 @@ def _train(cfg, ar_model, device, logpath, train_loader, valid_loader, test_load
 
             if iter % console_iters == 0:
                 logging.info(f'Epoch [{epoch}] iter: {iter}/{epoch_iters}, elapsed: {time.time() - time1:.3f}s,'
-                           + f' lr: {scheduler.get_epoch_values(micro_epoch)[0]:.8f} loss: {float(loss):.8f}')
+                           + f' lr: {optimizer.param_groups[0]["lr"]:.8f} loss: {float(loss):.8f}')
                 time1 = time.time()
 
             # balanced training = infinity training iterations -> manually break

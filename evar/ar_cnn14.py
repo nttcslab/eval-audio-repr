@@ -28,6 +28,7 @@ class AR_Cnn14(BaseAudioRepr):
 
     def encode_frames(self, batch_audio):
         x = self.feature_extractor(batch_audio)  # (B, 1, T, F(mel_bins))
+        x = self.augment_if_training(x.transpose(-2, -1)).transpose(-2, -1)  # (..., T, F) -> (..., F, T) -augment-> (..., T, F)
         return self.body.encode(x)               # (B, D, T)
 
     def forward(self, batch_audio):

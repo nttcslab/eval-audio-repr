@@ -1,5 +1,6 @@
 # AR parameters such as FFT parameters.
 audio_repr: ar_cnn14.AR_Cnn14
+weight_file: external/Cnn14_16k_mAP=0.438.pth
 feature_d: 2048
 sample_rate: 16000
 n_fft: 512
@@ -15,3 +16,15 @@ batch_size: 256
 lr_lineareval: 0.0003
 report_per_epochs: 20
 early_stop_epochs: 20
+
+# Fine-tuning parameters.
+## CAUTION: The following parameters not confirmed to work. ##
+warmup_epochs: 5
+mixup: 0.5
+ft_bs: 256
+ft_lr: 0.001
+ft_early_stop_epochs: -1 # -1: no early stopping
+ft_epochs: 200
+ft_freq_mask: 30
+ft_time_mask: 100
+ft_rrc: False
