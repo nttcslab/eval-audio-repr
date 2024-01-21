@@ -12,6 +12,7 @@ import torch
 
 try:
     import sys
+    sys.path.append('external/m2d')
     sys.path.append('..')
     from m2d.runtime_audio import RuntimeM2D
 except Exception as e:

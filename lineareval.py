@@ -206,10 +206,10 @@ def lineareval_downstream(config_file, task, options='', seed=42, lr=None, hidde
     score_file = logpath/f'{cfg.id[:-9].replace("AR_", "").replace("_", "-")}-LE_{re_hashed}_{mean_score:.5f}.csv'
     df.to_csv(score_file, index=False)
 
-    report = f'Linear evaluation: {cfg.id[:-8]+re_hashed} {task} -> {mean_score:.5f}\n{cfg}\n{score_file}'
+    report = f'Linear evaluation: {cfg.id[:-8]+re_hashed} {cfg.task_name} -> {mean_score:.5f}\n{cfg}\n{score_file}'
     result_df = pd.DataFrame({
         'representation': [cfg.id.split('_')[-2]], # AR name
-        'task': [task],
+        'task': [cfg.task_name],
         'score': [mean_score],
         'run_id': [re_hashed],
         'report': [report],

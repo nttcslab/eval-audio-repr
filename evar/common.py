@@ -72,10 +72,13 @@ def complete_cfg(cfg, options, no_id=False):
             raise Exception(f'Cannot find a setting named: {key} of the option {item}')
         cfg[key] = value
     # Set ID.
+    task = Path(cfg.task_metadata).stem if 'task_metadata' in cfg else ''
     if not no_id:
-        task = Path(cfg.task_metadata).stem if 'task_metadata' in cfg else ''
         name = cfg.name if 'name' in cfg and len(cfg['name']) > 0 else str(cfg.audio_repr.split(',')[-1])
         cfg.id = task + '_' + name + '_' + hash_text(str(cfg), L=8)
+    # Set task name
+    if 'task_name' not in cfg:
+        cfg['task_name'] = task
     return cfg
 
 

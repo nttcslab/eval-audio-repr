@@ -418,11 +418,11 @@ def finetune_main(config_file, task, options='', seed=42, lr=None, hidden=(), ep
         freq_mask=freq_mask, time_mask=time_mask, rrc=rrc, training_mask=training_mask, optim=optim,
         unit_sec=unit_sec, verbose=verbose, data_path=data_path)
     mean_score = np.mean(scores)
-    score_file = logpath/f'{task}_{cfg.audio_repr.replace("AR_", "").replace("_", "-")}-FT_{cfg.id[-8:]}_{mean_score:.5f}.csv'
+    score_file = logpath/f'{cfg.task_name}_{cfg.audio_repr.replace("AR_", "").replace("_", "-")}-FT_{cfg.id[-8:]}_{mean_score:.5f}.csv'
     best_report = logpath/(best_path.stem.split('_')[1] + '.csv')
     best_report.rename(score_file)
 
-    report = f'Finetuning {name} on {task} -> mean score: {mean_score:.5f}'
+    report = f'Finetuning {name} on {cfg.task_name} -> mean score: {mean_score:.5f}'
     if len(scores) > 1:
         report += ', scores: [' + ', '.join([f'{score:.5f}' for score in scores]) + ']'
     report += f', best weight: {best_path}, score file: {score_file}, config: {cfg}'
@@ -430,7 +430,7 @@ def finetune_main(config_file, task, options='', seed=42, lr=None, hidden=(), ep
 
     result_df = pd.DataFrame({
         'representation': [cfg.id.split('_')[-2]], # AR name
-        'task': [task],
+        'task': [cfg.task_name],
         'score': [mean_score],
         'run_id': [cfg.id],
         'report': [report],
