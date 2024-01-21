@@ -146,6 +146,9 @@ def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_s
     options = ','.join(options)
     if len(options) > 0:
         cfg = complete_cfg(cfg, options)
+    # Set task name
+    if 'task_name' not in cfg:
+        cfg['task_name'] = task
     return cfg, n_folds, weighted, balanced
 
 
