@@ -1,0 +1,62 @@
+diff --git a/retrieval/models/ase_model.py b/retrieval/models/ase_model.py
+index 04e2d02..ca8ae98 100644
+--- a/retrieval/models/ase_model.py
++++ b/retrieval/models/ase_model.py
+@@ -6,12 +6,12 @@
+ 
+ import torch
+ import torch.nn as nn
+-from models.audio_encoder import AudioEncoder
+-from models.text_encoder import TextEncoder
++from ..models.audio_encoder import AudioEncoder
++from ..models.text_encoder import TextEncoder
+ import torch.nn.functional as F
+ import copy
+-from tools.losses import AudioTextContrastiveLoss, NTXent
+-from tools.utils import remove_grad
++from ..tools.losses import AudioTextContrastiveLoss, NTXent
++from ..tools.utils import remove_grad
+ 
+ 
+ class ASE(nn.Module):
+diff --git a/retrieval/models/audio_encoder.py b/retrieval/models/audio_encoder.py
+index e3b9394..2201e7f 100644
+--- a/retrieval/models/audio_encoder.py
++++ b/retrieval/models/audio_encoder.py
+@@ -6,8 +6,8 @@
+ 
+ import torch
+ import torch.nn as nn
+-from models.cnns import ResNet38, Cnn14
+-from models.htsat import HTSAT_Swin_Transformer
++from ..models.cnns import ResNet38, Cnn14
++from ..models.htsat import HTSAT_Swin_Transformer
+ 
+ 
+ class AudioEncoder(nn.Module):
+diff --git a/retrieval/models/cnns.py b/retrieval/models/cnns.py
+index be2ed5a..61ccd7c 100644
+--- a/retrieval/models/cnns.py
++++ b/retrieval/models/cnns.py
+@@ -12,7 +12,7 @@ import torch
+ import torch.nn as nn
+ import torch.nn.functional as F
+ from torchlibrosa.augmentation import SpecAugmentation
+-from models.feature_extractor import AudioFeature
++from ..models.feature_extractor import AudioFeature
+ 
+ 
+ def init_layer(layer):
+diff --git a/retrieval/models/htsat.py b/retrieval/models/htsat.py
+index b5a9ff2..4795f45 100644
+--- a/retrieval/models/htsat.py
++++ b/retrieval/models/htsat.py
+@@ -23,7 +23,7 @@ from torch.nn.init import _calculate_fan_in_and_fan_out
+ from itertools import repeat
+ from typing import List
+ 
+-from models.feature_extractor import AudioFeature
++from ..models.feature_extractor import AudioFeature
+ 
+ 
+ def interpolate(x, ratio):

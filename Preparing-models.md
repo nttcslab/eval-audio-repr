@@ -77,3 +77,10 @@ In addition to the following steps, please download the checkpoint as `external/
     wget https://github.com/tcvrick/audioset-vggish-tensorflow-to-pytorch/releases/download/v0.1/pytorch_vggish.zip
     unzip pytorch_vggish.zip
     cd ..
+
+## WavCaps
+
+In addition to the following steps, please download the checkpoint as `external/WavCaps/HTSAT-BERT-PT.pt` from https://github.com/XinhaoMei/WavCaps/tree/master/retrieval.
+
+    (cd external && git clone https://github.com/XinhaoMei/WavCaps.git)
+    (cd external/WavCaps && git apply ../../external/wavcaps.patch)

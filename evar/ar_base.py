@@ -29,10 +29,11 @@ import nnAudio.Spectrogram
 
 
 class BaseAudioRepr(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg, filename_mode=False):
         super().__init__()
         self.cfg = EasyDict(cfg.copy())
         self.aug_fn = None
+        self.filename_mode = filename_mode  # True if the repr accepts file name as audio input.
 
     def precompute(self, device, data_loader):
         """Do precomputation using training data whatever needed,
@@ -41,10 +42,10 @@ class BaseAudioRepr(nn.Module):
         pass
 
     def encode_frames(self, batch_audio):
-        raise NotImplementedError(f'implement encode_frames() to {self.__class__}')
+        raise NotImplementedError(f'implement encode_frames() in {self.__class__}')
 
     def forward(self, batch_audio):
-        raise NotImplementedError(f'implement forward() to {self.__class__}')
+        raise NotImplementedError(f'implement forward() in {self.__class__}')
 
     def set_augment_tf_feature_fn(self, aug_fn):
         self.aug_fn = aug_fn
@@ -53,6 +54,21 @@ class BaseAudioRepr(nn.Module):
         if self.aug_fn is None or not self.training:
             return tf_feature
         return self.aug_fn(tf_feature)
+
+
+class BaseCLAP(BaseAudioRepr):
+    def encode_audio(self, batch_audio):
+        raise NotImplementedError(f'implement encode_audio() in {self.__class__}')
+
+    def encode_text(self, batch_text):
+        raise NotImplementedError(f'implement encode_audio() in {self.__class__}')
+
+    def compute_similarity(self, text_embs, audio_embs):
+        # This implementation follows: https://github.com/microsoft/CLAP/blob/main/msclap/CLAPWrapper.py#L329
+        audio_embs = audio_embs / torch.norm(audio_embs, dim=-1, keepdim=True)
+        text_embs = text_embs / torch.norm(text_embs, dim=-1, keepdim=True)
+        similarity = text_embs @ audio_embs.T
+        return similarity
 
 
 class ToLogMelSpec(nn.Module):

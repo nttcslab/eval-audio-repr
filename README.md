@@ -4,7 +4,7 @@ This repository offers a comprehensive evaluation package for audio representati
 
 - Reproducible evaluation across a variety of audio downstream tasks, with prefixed train/valid/test set splits provided.
 - A unified AR interface for ease of use.
-- Capabilities for both linear evaluation and fine-tuning.
+- Support linear evaluation, zero-shot evaluation, and fine-tuning.
 - Support for 12+ tasks and 10+ models.
 
 In early 2021, we lacked a cohesive codebase for evaluating models across various tasks under consistent test settings, which prompted the creation of this repository.
@@ -21,6 +21,10 @@ This evaluation package is intended for researchers who wish to compare ARs unde
 - BYOL-A (IJCNN 2021): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," in IJCNN, 2021](https://arxiv.org/abs/2103.06695).* 👉 [GitHub](https://github.com/nttcslab/byol-a)
 
 ## What's new
+
+### Jan 12, 2024 -- Supported zero-shot evaluation for CLAP models.
+- Zero-shot evaluator: `zeroshot.py`
+- New model: Supported (for linear and zero-shot evaluation) WavCaps, MS CLAP.
 
 ### Jan 12, 2024 -- Supported weighted CE loss with fine-tuning and added more models.
 - Loss function: Supported (for fine-tuning) weighted cross entropy loss.
@@ -294,9 +298,43 @@ Finetuning as20k_ar_byola.AR_BYOLA_bd42a61e-lr1.0mu3fm30tm100tx5R on as20k -> me
 
 The fine-tuning results will be stored in `results/ft-scores.csv`.
 
-## 5. Other information
+## 5. Zero-shot example
 
-### 5-1. Supported datasets
+```sh
+$ python zeroshot.py config/wavcaps.yaml esc50
+
+Logging to logs/esc50_ar_wavcaps.AR_WavCaps_d7371b11/log.txt                                                                               
+{'audio_repr': 'ar_wavcaps.AR_WavCaps', 'weight_file': 'external/WavCaps/HTSAT-BERT-PT.pt', 'feature_d': 768, 'sample_rate': 32000, 'n_fft': 1024, 'window_size': 1024, 'hop_size': 320, 'n_mels': 64, 'f_min': 50, 'f_max': 14000, 'window': 'hanning', 'training_mask': 0.0, 'flat_f
+eatures': False, 'batch_size': 128, 'lr_lineareval': 0.0003, 'report_per_epochs': 50, 'early_stop_epochs': 20, 'warmup_epochs': 5, 'mixup': 0.5, 'ft_bs': 128, 'ft_lr': 2.0, 'ft_early_stop_epochs': -1, 'ft_epochs': 200, 'ft_freq_mask': 8, 'ft_time_mask': 64, 'ft_noise': 0.0, 'ft
+_rrc': True, 'name': '', 'task_metadata': 'evar/metadata/esc50.csv', 'task_data': 'work/32k/esc50', 'unit_samples': 160000, 'id': 'esc50_ar_wavcaps.AR_WavCaps_d7371b11', 'task_name': 'esc50', 'return_filename': False, 'runtime_cfg': {'id': '468067f3'}}
+Train:1600, valid:0, test:400, multi label:False  
+
+Captions: ['airplane can be heard', 'breathing can be heard', 'brushing teeth can be heard'] ...
+Getting esc50_ar_wavcaps.AR_WavCaps_d7371b11 test embeddings...      
+100%|████████████████████████████████████████████████| 4/4 [00:04<00:00,  1.07s/it]
+Train:1600, valid:0, test:400, multi label:False   
+Getting esc50_ar_wavcaps.AR_WavCaps_d7371b11 test embeddings...
+100%|████████████████████████████████████████████████| 4/4 [00:02<00:00,  1.49it/s]
+Train:1600, valid:0, test:400, multi label:False
+Getting esc50_ar_wavcaps.AR_WavCaps_d7371b11 test embeddings...
+100%|████████████████████████████████████████████████| 4/4 [00:02<00:00,  1.53it/s]
+Train:1600, valid:0, test:400, multi label:False
+Getting esc50_ar_wavcaps.AR_WavCaps_d7371b11 test embeddings...
+100%|████████████████████████████████████████████████| 4/4 [00:02<00:00,  1.48it/s]
+Train:1600, valid:0, test:400, multi label:False            
+Getting esc50_ar_wavcaps.AR_WavCaps_d7371b11 test embeddings...                                                                            
+100%|████████████████████████████████████████████████| 4/4 [00:02<00:00,  1.51it/s]
+esc50 Accuracy 0.9345                                       
+Zero-shot evaluation: esc50_ar_wavcaps.AR_WavCaps_4d5d522b zs_esc50 -> 0.93450
+{'audio_repr': 'ar_wavcaps.AR_WavCaps', 'weight_file': 'external/WavCaps/HTSAT-BERT-PT.pt', 'feature_d': 768, 'sample_rate': 32000, 'n_fft': 1024, 'window_size': 1024, 'hop_size': 320, 'n_mels': 64, 'f_min': 50, 'f_max': 14000, 'window': 'hanning', 'training_mask': 0.0, 'flat_f
+eatures': False, 'batch_size': 128, 'lr_lineareval': 0.0003, 'report_per_epochs': 50, 'early_stop_epochs': 20, 'warmup_epochs': 5, 'mixup': 0.5, 'ft_bs': 128, 'ft_lr': 2.0, 'ft_early_stop_epochs': -1, 'ft_epochs': 200, 'ft_freq_mask': 8, 'ft_time_mask': 64, 'ft_noise': 0.0, 'ft
+_rrc': True, 'name': '', 'task_metadata': 'evar/metadata/esc50.csv', 'task_data': 'work/32k/esc50', 'unit_samples': 160000, 'id': 'esc50_ar_wavcaps.AR_WavCaps_d7371b11', 'task_name': 'esc50', 'return_filename': False, 'runtime_cfg': {'id': '468067f3'}}
+ -> results/scores.csv            
+```
+
+## 6. Other information
+
+### 6-1. Supported datasets
 
 The followings are supported datasets with a short name and subdomain:
 
@@ -313,10 +351,12 @@ The followings are supported datasets with a short name and subdomain:
 11. NSynth instrument family (nsynth, Music)
 12. Pitch Audio Dataset (Surge synthesizer) (surge, Music)
 
-### 5-2. Supported pre-trained models
+### 6-2. Supported pre-trained models
 
 The followings are supported:
 
+- *new* WavCaps
+- *new* MS CLAP  (caution: very slow to load audio files.)
 - *new* ATST(-Clip), ATST-Frame
 - *new* BEATs
 - *new* CED (using a pre-trained weight on the Huggingface)
@@ -334,7 +374,7 @@ The followings are supported:
 - COALA
 - BYOL-A
 
-## 6. License
+## 7. License
 
 See [LICENSE](LICENSE) for the detail.
 

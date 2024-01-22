@@ -18,10 +18,11 @@ def warn_once(msg: str):
 
 
 class BaseRawAudioDataset(torch.utils.data.Dataset):
-    def __init__(self, unit_samples, tfms=None, random_crop=False):
+    def __init__(self, unit_samples, tfms=None, random_crop=False, return_filename=False):
         self.unit_samples = unit_samples
         self.tfms = tfms
         self.random_crop = random_crop
+        self.return_filename = return_filename
 
     def __len__(self):
         raise NotImplementedError
@@ -33,6 +34,11 @@ class BaseRawAudioDataset(torch.utils.data.Dataset):
         return None # implement me
 
     def __getitem__(self, index):
+        label = self.get_label(index)
+
+        if self.return_filename:
+            fn = self.cfg.task_data + '/' + self.df.file_name.values[index]  # requires self.cfg & self.df to be set in advance.
+            return fn if label is None else (fn, label)
         wav = self.get_audio(index) # shape is expected to be (self.unit_samples,)
 
         # Trim or stuff padding
@@ -49,13 +55,12 @@ class BaseRawAudioDataset(torch.utils.data.Dataset):
             wav = self.tfms(wav)
 
         # Return item
-        label = self.get_label(index)
         return wav if label is None else (wav, label)
 
 
 class WavDataset(BaseRawAudioDataset):
     def __init__(self, cfg, split, holdout_fold=1, always_one_hot=False, random_crop=True, classes=None):
-        super().__init__(cfg.unit_samples, tfms=None, random_crop=random_crop)
+        super().__init__(cfg.unit_samples, tfms=None, random_crop=random_crop, return_filename=cfg.return_filename)
         self.cfg = cfg
         self.split = split
 

@@ -65,6 +65,8 @@ import evar.ar_atst_frame
 import evar.ar_beats
 import evar.ar_ced
 import evar.ar_htsat
+import evar.ar_msclap
+import evar.ar_wavcaps
 
 
 torch.backends.cudnn.benchmark = True
@@ -94,7 +96,8 @@ def to_embeddings(emb_ar, data_loader, device, _id=None, fold=1, cache=False):
     embs, gts = [], []
     for X, y in tqdm(data_loader):
         with torch.no_grad():
-            embs.append(emb_ar(X.to(device)).detach().cpu())
+            X = X if emb_ar.module.cfg.return_filename else X.to(device)
+            embs.append(emb_ar(X).detach().cpu())
         gts.append(y)
     embs = torch.vstack(embs).numpy()
     if len(gts[0].shape) > 1:
@@ -149,6 +152,10 @@ def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_s
     # Set task name
     if 'task_name' not in cfg:
         cfg['task_name'] = task
+    # Return file_name instead of waveform when loading an audio
+    if 'return_filename' not in cfg:
+        cfg['return_filename'] = False
+
     return cfg, n_folds, weighted, balanced
 
 
