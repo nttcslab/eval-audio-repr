@@ -7,9 +7,8 @@ WavCaps: A ChatGPT-Assisted Weakly-Labelled Audio Captioning Dataset for Audio-L
 - [2] https://github.com/XinhaoMei/WavCaps
 """
 
-from evar.ar_base import BaseCLAP, temporal_pooling
+from evar.ar_base import BaseCLAP
 import sys
-import logging
 import torch
 try:
     sys.path.append('external/WavCaps')

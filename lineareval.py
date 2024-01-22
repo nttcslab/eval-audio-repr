@@ -124,10 +124,10 @@ def _one_linear_eval(X, y, X_val, y_val, X_test, y_test, hidden_sizes, epochs, e
     return score, df
 
 
-def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_sec=None):
+def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_sec=None, original_data=False):
     cfg = load_yaml_config(config_file)
     cfg = complete_cfg(cfg, options, no_id=True)
-    task_metadata, task_data, n_folds, unit_sec, weighted, balanced = get_defs(cfg, task)
+    task_metadata, task_data, n_folds, unit_sec, weighted, balanced = get_defs(cfg, task, original_data=original_data)
     # cancel augmentation if required
     if cancel_aug:
         cfg.freq_mask = None
@@ -177,7 +177,7 @@ def lineareval_downstream(config_file, task, options='', seed=42, lr=None, hidde
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     seed_everything(seed)
-    logpath = app_setup_logger(cfg, level=logging.DEBUG) # Add this when debugging deeper: level=logging.DEBUG
+    logpath = app_setup_logger(cfg, level=logging.INFO) # Add this when debugging deeper: level=logging.DEBUG
 
     scores, ar, emb_ar = [], None, None
     for fold in range(1, n_folds + 1):

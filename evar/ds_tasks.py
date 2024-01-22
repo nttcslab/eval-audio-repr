@@ -29,8 +29,17 @@ _fs_table = {
     48000: '48k',
 }
 
+def get_original_folder(task):
+    orgs = {
+        'us8k': 'UrbanSound8K',
+        'esc50': 'ESC-50-master',
+        'as20k': 'AudioSet',
+        'as': 'AudioSet',
+    }
+    return orgs[task] if task in orgs else task
 
-def get_defs(cfg, task):
+
+def get_defs(cfg, task, original_data=False):
     """Get task definition parameters.
 
     Returns:
@@ -43,4 +52,5 @@ def get_defs(cfg, task):
     """
     folds, unit_sec, weighted, folder, balanced = _defs[task]
     folder = folder or task
-    return f'{METADATA_DIR}/{task}.csv', f'{WORK}/{_fs_table[cfg.sample_rate]}/{folder}', folds, unit_sec, weighted, balanced
+    workfolder = f'{WORK}/original/{get_original_folder(task)}' if original_data else f'{WORK}/{_fs_table[cfg.sample_rate]}/{folder}'
+    return f'{METADATA_DIR}/{task}.csv', workfolder, folds, unit_sec, weighted, balanced

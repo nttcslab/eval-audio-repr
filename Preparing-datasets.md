@@ -103,7 +103,7 @@ The following creates metadata/gtzan.csv:
 ## NSynth
 
 Download NSynth dataset and uncompress files.
-If we have FSD50K files under a folder `downloads/nsynth`, the followings will get resampled copies ready.
+If we have NSynth files under a folder `downloads/nsynth`, the followings will get resampled copies ready.
 
     python prepare_wav.py downloads/nsynth work/16k/nsynth 16000
     python prepare_wav.py downloads/nsynth work/22k/nsynth 22000

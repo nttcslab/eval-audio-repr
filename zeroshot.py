@@ -20,9 +20,8 @@ FLAGS
 
 from evar.common import (np, pd, Path, kwarg_cfg, hash_text,
                          torch, logging, append_to_csv,
-                         app_setup_logger, RESULT_DIR, os)
+                         app_setup_logger, RESULT_DIR)
 from evar.data import create_dataloader
-from evar.ds_tasks import get_defs
 import fire
 from tqdm import tqdm
 from pathlib import Path
@@ -72,7 +71,7 @@ def to_embeddings(ar, data_loader, device, _id=None, fold=1):
     for X, y in tqdm(data_loader):
         with torch.no_grad():
             X = X if ar.cfg.return_filename else X.to(device)
-            cur_emb = ar(X)
+            cur_emb = ar.encode_audio(X)
             embs.append(cur_emb.detach().cpu())
         gts.append(y)
     embs = torch.vstack(embs).to(torch.float)
@@ -89,11 +88,11 @@ def is_zeroshot_ready(cfg):
 
 
 def zeroshot_downstream(config_file, task, options='', unit_sec=None):
-    cfg, n_folds, _, _ = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
+    cfg, n_folds, _, _ = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec, original_data=True)
     seed = 42
     cfg.runtime_cfg = kwarg_cfg()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    logpath = app_setup_logger(cfg, level=logging.DEBUG) # Add this when debugging deeper: level=logging.DEBUG
+    logpath = app_setup_logger(cfg, level=logging.INFO) # Add this when debugging deeper: level=logging.DEBUG
     if not is_zeroshot_ready(cfg):
         logging.info(f'ZS not supported with {config_file}')
         return

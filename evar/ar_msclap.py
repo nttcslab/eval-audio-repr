@@ -42,4 +42,4 @@ class AR_MSCLAP(BaseCLAP):
 
     def compute_similarity(self, text_embs, audio_embs):
         similarity = self.backbone.compute_similarity(audio_embs, text_embs)
-        return similarity
+        return similarity.T

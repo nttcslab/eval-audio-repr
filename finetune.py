@@ -379,7 +379,7 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     seed_everything(seed)
-    logpath = app_setup_logger(cfg, level=logging.DEBUG) # Add this when debugging deeper: level=logging.DEBUG
+    logpath = app_setup_logger(cfg, level=logging.INFO) # Add this when debugging deeper: level=logging.DEBUG
 
     scores = []
     for fold in range(1, n_folds + 1):

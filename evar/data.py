@@ -3,10 +3,11 @@
 Balanced sampler is supported for multi-label tasks.
 """
 
-from .common import (np, pd, torch, torchaudio, F, Path)
+from .common import (np, pd, torch, F, Path, torchaudio)
 from .sampler import BalancedRandomSampler, InfiniteSampler
 from sklearn.preprocessing import MultiLabelBinarizer
 from torch.utils.data import WeightedRandomSampler
+import librosa
 
 
 # Thanks to https://stackoverflow.com/questions/31953272/logging-print-message-only-once
@@ -89,7 +90,11 @@ class WavDataset(BaseRawAudioDataset):
 
     def get_audio(self, index):
         filename = self.cfg.task_data + '/' + self.df.file_name.values[index]
-        wav, sr = torchaudio.load(filename)
+        if '/original/' in self.cfg.task_data:
+            wav, sr = librosa.load(filename, sr=self.cfg.sample_rate, mono=True)
+            wav = torch.tensor(wav).to(torch.float32).unsqueeze(0)
+        else:
+            wav, sr = torchaudio.load(filename)
         if sr != self.cfg.sample_rate:
             warn_once(f'Convert .wav files from {sr} Hz to {self.cfg.sample_rate} Hz.')
             wav = torchaudio.transforms.Resample(sr, self.cfg.sample_rate, dtype=wav.dtype)(wav)
