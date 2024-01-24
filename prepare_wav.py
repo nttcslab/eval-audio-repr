@@ -13,10 +13,12 @@ Usage:
     python convert_wav.py /data/A/VoxCeleb1 work/16k/vc1 16000
 """
 
-from evar.common import (sys, Path, torch, torchaudio, AT)
+from pathlib import Path
 from multiprocessing import Pool
 import fire
 from tqdm import tqdm
+import soundfile as sf
+import librosa
 
 
 def _converter_worker(args):
@@ -27,21 +29,19 @@ def _converter_worker(args):
         print(from_dir, '->', to_name)
 
     # load wav
-    wav, org_sr = torchaudio.load(from_dir/subpathname)
+    wav, org_sr = sf.read(from_dir/subpathname, dtype='float32', always_2d=True)
+    wav = wav.T  # (wave length, 1 or 2) -> (1 or 2, wave length)
 
     # stereo to mono (compatible with librosa)
     # ref: https://librosa.org/doc/main/generated/librosa.to_mono.html#librosa.to_mono
-    wav = wav.mean(0, keepdims=True)
+    wav = wav.mean(axis=0)
 
     # resample
-    wav = AT.Resample(org_sr, sample_rate)(wav)
-
-    # to int16
-    wav = (wav * 32767.0).to(torch.int16)
+    wav = librosa.resample(wav, orig_sr=org_sr, target_sr=sample_rate)
 
     # save wav
     to_name.parent.mkdir(exist_ok=True, parents=True)
-    torchaudio.save(to_name, wav, sample_rate)
+    sf.write(to_name, data=wav, samplerate=sample_rate)  # subtype=sf.default_subtype('WAV') -- not always wav
 
     return to_name.name
 

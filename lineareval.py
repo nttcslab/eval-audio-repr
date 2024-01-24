@@ -218,7 +218,7 @@ def lineareval_downstream(config_file, task, options='', seed=42, lr=None, hidde
 
     report = f'Linear evaluation: {cfg.id[:-8]+re_hashed} {cfg.task_name} -> {mean_score:.5f}\n{cfg}\n{score_file}'
     result_df = pd.DataFrame({
-        'representation': [cfg.id.split('_')[-2]], # AR name
+        'representation': [cfg.id.split('.')[-1][3:-9]], # AR name
         'task': [cfg.task_name],
         'score': [mean_score],
         'run_id': [re_hashed],

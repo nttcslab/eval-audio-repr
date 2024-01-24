@@ -136,7 +136,7 @@ def zeroshot_downstream(config_file, task, options='', unit_sec=None):
 
     report = f'Zero-shot evaluation: {cfg.id[:-8]+re_hashed} {task_name} -> {acc:.5f}\n{cfg}'
     result_df = pd.DataFrame({
-        'representation': [cfg.id.split('_')[-2]], # AR name
+        'representation': [cfg.id.split('.')[-1][3:-9]], # AR name
         'task': [task_name],
         'score': [acc],
         'run_id': [re_hashed],

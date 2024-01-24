@@ -44,24 +44,25 @@ We provide the metadata as `evar/metadata/cremad.csv` by default for reproducibi
 
 ## ESC-50
 
-The followings will create a folder `downloads/ESC-50-master`.
+The followings will create a folder `downloads/esc50`.
 
     cd downloads
     wget https://github.com/karoldvl/ESC-50/archive/master.zip
     unzip master.zip
+    mv ESC-50-master esc50
     cd ..
 
 The followings will get resampled copies ready.
 
-    python prepare_wav.py downloads/ESC-50-master work/16k/esc50 16000
-    python prepare_wav.py downloads/ESC-50-master work/22k/esc50 22000
-    python prepare_wav.py downloads/ESC-50-master work/32k/esc50 32000
-    python prepare_wav.py downloads/ESC-50-master work/44k/esc50 44100
-    python prepare_wav.py downloads/ESC-50-master work/48k/esc50 48000
+    python prepare_wav.py downloads/esc50 work/16k/esc50 16000
+    python prepare_wav.py downloads/esc50 work/22k/esc50 22000
+    python prepare_wav.py downloads/esc50 work/32k/esc50 32000
+    python prepare_wav.py downloads/esc50 work/44k/esc50 44100
+    python prepare_wav.py downloads/esc50 work/48k/esc50 48000
 
 The following creates metadata/esc50.csv:
 
-    python evar/utils/make_metadata.py esc50 /your/ESC-50-master
+    python evar/utils/make_metadata.py esc50 /your/esc50
 
 ## FSD50K
 
@@ -103,6 +104,12 @@ The following creates metadata/gtzan.csv:
 ## NSynth
 
 Download NSynth dataset and uncompress files.
+
+    mkdir nsynth
+    (cd nsynth && tar xf /path/to/nsynth-test.jsonwav.tar.gz)
+    (cd nsynth && tar xf /path/to/nsynth-valid.jsonwav.tar.gz)
+    (cd nsynth && tar xf /path/to/nsynth-train.jsonwav.tar.gz)
+
 If we have NSynth files under a folder `downloads/nsynth`, the followings will get resampled copies ready.
 
     python prepare_wav.py downloads/nsynth work/16k/nsynth 16000
@@ -118,6 +125,11 @@ The following creates metadata/nsynth.csv:
 ## SPCV1/V2
 
 Download Speech commands datasets and uncompress files.
+
+    mkdir spcv2
+    (cd spcv2 && tar xf /path/to/speech_commands_v0.02.tar.gz)
+
+
 If we have files under folder `downloads/spcv1` and  `downloads/spcv2`, the followings will get resampled copies ready.
 
     python prepare_wav.py downloads/spcv1 work/16k/spcv1 16000
@@ -142,11 +154,11 @@ The following creates metadata/spcvX.csv:
 Download Surge dataset from [https://zenodo.org/record/4677097](https://zenodo.org/record/4677097) and uncompress files.
 If we have files under a folder `downloads/surge`, the followings will get resampled copies ready.
 
-    python prepare_wav.py downloads/surge work/16k/surge 16000
-    python prepare_wav.py downloads/surge work/22k/surge 22000
-    python prepare_wav.py downloads/surge work/32k/surge 32000
-    python prepare_wav.py downloads/surge work/44k/surge 44100
-    python prepare_wav.py downloads/surge work/48k/surge 48000
+    python prepare_wav.py downloads/surge work/16k/surge 16000 --suffix .ogg
+    python prepare_wav.py downloads/surge work/22k/surge 22000 --suffix .ogg
+    python prepare_wav.py downloads/surge work/32k/surge 32000 --suffix .ogg
+    python prepare_wav.py downloads/surge work/44k/surge 44100 --suffix .ogg
+    python prepare_wav.py downloads/surge work/48k/surge 48000 --suffix .ogg
 
 The following creates metadata/surge.csv:
 
@@ -155,6 +167,10 @@ The following creates metadata/surge.csv:
 ## UrbanSound8K
 
 Download Surge dataset from [UrbanSound8K](https://urbansounddataset.weebly.com/urbansound8k.html) and uncompress files.
+
+    tar xf /path/to/UrbanSound8K.tgz
+    mv UrbanSound8K us8k
+
 If we have files under a folder `downloads/us8k`, the followings will get resampled copies ready.
 
     python prepare_wav.py downloads/us8k work/16k/us8k 16000
@@ -170,6 +186,11 @@ The following creates metadata/us8k.csv:
 ## VoxCeleb1
 
 Download Surge dataset from [The VoxCeleb1 Dataset](https://www.robots.ox.ac.uk/~vgg/data/voxceleb/vox1.html) and uncompress files.
+
+    tar xf /path/to/VoxCeleb1/VoxCeleb1.tgz
+    mv VoxCeleb1\ Dataset vc1
+    (cd vc1 && unzip /path/to/VoxCeleb1/vox1_test_wav.zip)
+
 If we have files under a folder `downloads/vc1`, the followings will get resampled copies ready.
 
     python prepare_wav.py downloads/vc1 work/16k/vc1 16000
@@ -198,5 +219,47 @@ The followings will get resampled copies ready.
 
 We provide the metadata as `evar/metadata/voxforge.csv` by default for reproducibility purposes.
 
+
+## Example command lines
+
+Once all the original datasets are ready in the `$FROM` folder, the following command lines will convert the sampling rate of files and store them in the `$TO` folder.
+
+### For 16 kHz
+
+```sh
+export FROM=/hdd/datasets/evar_original
+export TO=/lab/evar_work_new/16k
+export SR=16000
+python prepare_wav.py $FROM/cremad $TO/cremad $SR
+python prepare_wav.py $FROM/esc50 $TO/esc50 $SR
+python prepare_wav.py $FROM/gtzan $TO/gtzan $SR
+python prepare_wav.py $FROM/nsynth $TO/nsynth $SR
+python prepare_wav.py $FROM/spcv1 $TO/spcv1 $SR
+python prepare_wav.py $FROM/spcv2 $TO/spcv2 $SR
+python prepare_wav.py $FROM/surge $TO/surge $SR --suffix .ogg
+python prepare_wav.py $FROM/us8k $TO/us8k $SR
+python prepare_wav.py $FROM/vc1 $TO/vc1 $SR
+python prepare_wav.py $FROM/voxforge $TO/voxforge $SR
+python prepare_wav.py $FROM/fsd50k $TO/fsd50k $SR
+```
+
+### For 32 kHz
+
+```sh
+export FROM=/hdd/datasets/evar_original
+export TO=/biglab/evar_work_new/32k
+export SR=32000
+python prepare_wav.py $FROM/cremad $TO/cremad $SR
+python prepare_wav.py $FROM/esc50 $TO/esc50 $SR
+python prepare_wav.py $FROM/gtzan $TO/gtzan $SR
+python prepare_wav.py $FROM/nsynth $TO/nsynth $SR
+python prepare_wav.py $FROM/spcv1 $TO/spcv1 $SR
+python prepare_wav.py $FROM/spcv2 $TO/spcv2 $SR
+python prepare_wav.py $FROM/surge $TO/surge $SR --suffix .ogg
+python prepare_wav.py $FROM/us8k $TO/us8k $SR
+python prepare_wav.py $FROM/vc1 $TO/vc1 $SR
+python prepare_wav.py $FROM/voxforge $TO/voxforge $SR
+python prepare_wav.py $FROM/fsd50k $TO/fsd50k $SR
+```
 
 (end of document)

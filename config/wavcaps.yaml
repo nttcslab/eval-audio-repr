@@ -2,7 +2,7 @@
 
 # AR parameters such as FFT parameters.
 audio_repr: ar_wavcaps.AR_WavCaps
-weight_file: external/WavCaps/HTSAT_BERT_zero_shot.pt  # HTSAT-BERT-PT.pt
+weight_file: external/WavCaps/HTSAT-BERT-PT.pt
 feature_d: 768
 sample_rate: 32000
 n_fft: 1024
