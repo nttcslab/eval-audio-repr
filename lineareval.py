@@ -65,6 +65,7 @@ import evar.ar_atst_frame
 import evar.ar_beats
 import evar.ar_ced
 import evar.ar_htsat
+import evar.ar_laionclap
 import evar.ar_msclap
 import evar.ar_wavcaps
 
@@ -155,6 +156,9 @@ def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_s
     # Return file_name instead of waveform when loading an audio
     if 'return_filename' not in cfg:
         cfg['return_filename'] = False
+    # Statistics for normalization
+    if 'mean' not in cfg:
+        cfg['mean'] = cfg['std'] = None
 
     return cfg, n_folds, weighted, balanced
 
@@ -218,7 +222,7 @@ def lineareval_downstream(config_file, task, options='', seed=42, lr=None, hidde
 
     report = f'Linear evaluation: {cfg.id[:-8]+re_hashed} {cfg.task_name} -> {mean_score:.5f}\n{cfg}\n{score_file}'
     result_df = pd.DataFrame({
-        'representation': [cfg.id.split('.')[-1][3:-9]], # AR name
+        'representation': [cfg.id.split('.')[-1][3:-9] if '.AR_' in cfg.id else cfg.id[:-9]], # AR name
         'task': [cfg.task_name],
         'score': [mean_score],
         'run_id': [re_hashed],

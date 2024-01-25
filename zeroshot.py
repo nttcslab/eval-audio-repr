@@ -1,5 +1,8 @@
 """Zero-shot evaluation runner.
 
+* Download the AudioSet class label definition if you evaluate models on it. *
+    wget http://storage.googleapis.com/us_audioset/youtube_corpus/v1/csv/class_labels_indices.csv
+
 NAME
     zeroshot.py
 
@@ -25,7 +28,8 @@ from evar.data import create_dataloader
 import fire
 from tqdm import tqdm
 from pathlib import Path
-from sklearn.metrics import accuracy_score
+from sklearn import metrics
+from functools import partial
 
 import evar.ar_m2d
 from lineareval import make_cfg, short_model_desc
@@ -49,6 +53,10 @@ def class_to_caption(task, classes):
         classes = [c + ' music' for c in classes]  # 0.7482758620689656
     elif task == 'nsynth':
         classes = ['the musical instrument sound of ' + c for c in classes]  # 0.319
+    elif task == 'as':
+        df = pd.read_csv('class_labels_indices.csv')
+        labelmap = {k:v for k, v in df[['mid', 'display_name']].values}
+        classes = [labelmap[c] for c in classes]
 
     captions = [x.replace('_', ' ') + " can be heard" for x in classes]
     return captions
@@ -87,6 +95,18 @@ def is_zeroshot_ready(cfg):
     return True
 
 
+def eval_map(y_score, y_true):
+    average_precision = metrics.average_precision_score(
+        y_true, y_score)
+    return average_precision
+
+
+def eval_acc(y_score, y_true):
+    preds = np.argmax(y_score, axis=-1)
+    accuracy = metrics.accuracy_score(y_true=y_true, y_pred=preds)
+    return accuracy
+
+
 def zeroshot_downstream(config_file, task, options='', unit_sec=None):
     cfg, n_folds, _, _ = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec, original_data=True)
     seed = 42
@@ -101,8 +121,9 @@ def zeroshot_downstream(config_file, task, options='', unit_sec=None):
     y_preds = []
     y_labels = []
     for fold in range(1, n_folds + 1):
-        train_loader, valid_loader, test_loader, multi_label = create_dataloader(cfg, fold=fold, seed=seed, balanced_random=False, pin_memory=False)
+        train_loader, valid_loader, test_loader, multi_label = create_dataloader(cfg, fold=fold, seed=seed, balanced_random=False, pin_memory=False, always_wav=True)
         logging.info(f'Train:{len(train_loader.dataset)}, valid:{len(valid_loader.dataset)}, test:{len(test_loader.dataset)}, multi label:{multi_label}')
+        activation_fn = torch.nn.functional.sigmoid if multi_label else partial(torch.nn.functional.softmax, dim=1)
 
         if ar is None:
             ar = eval('evar.'+cfg.audio_repr)(cfg).to(device)
@@ -122,23 +143,24 @@ def zeroshot_downstream(config_file, task, options='', unit_sec=None):
 
         # zero-shot inference
         similarity = ar.compute_similarity(audio_embeddings, caption_embeddings)
-        y_pred = torch.nn.functional.softmax(similarity.detach().cpu(), dim=1).numpy()
+        y_pred = activation_fn(similarity.detach().cpu()).numpy()
         y_preds.append(y_pred)
         y_labels.append(gts.detach().cpu().numpy())
 
     y_labels, y_preds = np.concatenate(y_labels, axis=0), np.concatenate(y_preds, axis=0)
-    acc = accuracy_score(y_labels, np.argmax(y_preds, axis=1))
-    print(f'{task} Accuracy {acc}')
+    metric_fn = eval_map if multi_label else eval_acc
+    result = metric_fn(y_preds, y_labels)
+    print(f'{task} result: {result}')
 
     re_hashed = hash_text(str(cfg), L=8)
 
     task_name = 'zs_'+task if task == cfg.task_name else cfg.task_name
 
-    report = f'Zero-shot evaluation: {cfg.id[:-8]+re_hashed} {task_name} -> {acc:.5f}\n{cfg}'
+    report = f'Zero-shot evaluation: {cfg.id[:-8]+re_hashed} {task_name} -> {result:.5f}\n{cfg}'
     result_df = pd.DataFrame({
-        'representation': [cfg.id.split('.')[-1][3:-9]], # AR name
+        'representation': [cfg.id.split('.')[-1][3:-9] if '.AR_' in cfg.id else cfg.id[:-9]], # AR name
         'task': [task_name],
-        'score': [acc],
+        'score': [result],
         'run_id': [re_hashed],
         'report': [report],
     })

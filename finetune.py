@@ -429,7 +429,7 @@ def finetune_main(config_file, task, options='', seed=42, lr=None, hidden=(), ep
     logging.info(report)
 
     result_df = pd.DataFrame({
-        'representation': [cfg.id.split('.')[-1][3:-9]], # AR name
+        'representation': [cfg.id.split('.')[-1][3:-9] if '.AR_' in cfg.id else cfg.id[:-9]], # AR name
         'task': [cfg.task_name],
         'score': [mean_score],
         'run_id': [cfg.id],

@@ -13,7 +13,7 @@ import logging
 try:
     from external.byol_a.v2.byol_a2.models import AudioNTT2022Encoder
 except Exception as e:
-    logging.info(f'Make your copy of BYOL-A under external folder. Check Preparing-models.md for the details.')
+    pass  # logging.info(f'Make your copy of BYOL-A under external folder. Check Preparing-models.md for the details.')
 
 
 class AR_BYOLA2(BaseAudioRepr):

@@ -9,6 +9,7 @@ https://arxiv.org/abs/2305.14079
 
 from evar.ar_base import BaseAudioRepr, calculate_norm_stats, normalize_spectrogram
 import torch
+import logging
 
 try:
     import sys
@@ -16,7 +17,7 @@ try:
     sys.path.append('..')
     from m2d.runtime_audio import RuntimeM2D
 except Exception as e:
-    print(f'(For M2D users) Build your EVAR in your M2D folder.')
+    pass  # print(f'(For M2D users) Build your EVAR in your M2D folder.')
 
 
 class AR_M2D_BatchNormStats(BaseAudioRepr):
@@ -48,7 +49,15 @@ class AR_M2D(BaseAudioRepr):
             self.runtime.eval()
 
     def precompute(self, device, data_loader):
-        self.norm_stats = calculate_norm_stats(device, data_loader, self.runtime.to_feature)
+        if not self.cfg.mean or not self.cfg.std:
+            self.norm_stats = calculate_norm_stats(device, data_loader, self.to_feature)
+        else:
+            self.norm_stats = [self.cfg.mean, self.cfg.std]
+            logging.info(f' using spectrogram norimalization stats: {self.norm_stats}')
+
+    def precompute_lms(self, device, data_loader):
+        self.precompute(device, data_loader)
+        self.lms_mode = True
 
     def using_non_last_layer_output(self):
         if self.cfg.output_layers is None: return True
@@ -72,10 +81,6 @@ class AR_M2D(BaseAudioRepr):
         else:
             x = self.encode_frames(batch_audio)
         return x.mean(dim=-1) # [B, D, T] -> [B, D]
-
-    def precompute_lms(self, device, data_loader):
-        self.norm_stats = calculate_norm_stats(device, data_loader, lambda x: x)
-        self.lms_mode = True
 
     def encode_frames_lms(self, batch_lms):
         x = normalize_spectrogram(self.norm_stats, batch_lms)

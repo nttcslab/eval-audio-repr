@@ -11,6 +11,10 @@ f_min: 50
 f_max: 8000
 window: hanning
 
+# Statistics for normalization: average and standard deviation
+mean: -7.1
+std: 4.2
+
 # Model specific parameters.
 cls_token: False # Use CLS token
 output_layers: [-1]  # List of layers to stack

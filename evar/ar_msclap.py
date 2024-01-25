@@ -5,8 +5,6 @@ Natural Language Supervision for General-Purpose Audio Representations
 ## Reference
 - [1] https://arxiv.org/abs/2309.05767
 - [2] https://github.com/microsoft/CLAP
-
-pip install msclap
 """
 
 from evar.ar_base import BaseCLAP

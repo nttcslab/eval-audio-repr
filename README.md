@@ -22,9 +22,11 @@ This evaluation package is intended for researchers who wish to compare ARs unde
 
 ## What's new
 
-### Jan 12, 2024 -- Supported zero-shot evaluation for CLAP models.
+### ~Jan 25, 2024 -- Supported zero-shot evaluation for CLAP models.
 - Zero-shot evaluator: `zeroshot.py`
-- New model: Supported (for linear and zero-shot evaluation) WavCaps, MS CLAP.
+- New model: Supported (for linear and zero-shot evaluation) WavCaps, LAION CLAP, and MS CLAP.
+- Fix: Migrated from torchaudio to soundfile+librosa to avoid an issue related to resampling quality.
+- Fix: M2D to use fixed normalization statistic values.
 
 ### Jan 12, 2024 -- Supported weighted CE loss with fine-tuning and added more models.
 - Loss function: Supported (for fine-tuning) weighted cross entropy loss.
@@ -300,6 +302,15 @@ The fine-tuning results will be stored in `results/ft-scores.csv`.
 
 ## 5. Zero-shot example
 
+*NOTE for AudioSet (as):*
+
+1. Download the AudioSet class label definition if you evaluate models on it.
+2. Make sure the sampling rate is correct with your AudioSet samples under the `work/original/as`.
+
+    wget http://storage.googleapis.com/us_audioset/youtube_corpus/v1/csv/class_labels_indices.csv
+
+The ESC-50 example follows:
+
 ```sh
 $ python zeroshot.py config/wavcaps.yaml esc50
 
@@ -356,6 +367,7 @@ The followings are supported datasets with a short name and subdomain:
 The followings are supported:
 
 - *new* WavCaps
+- *new* LAION CLAP
 - *new* MS CLAP  (caution: very slow to load audio files.)
 - *new* ATST(-Clip), ATST-Frame
 - *new* BEATs

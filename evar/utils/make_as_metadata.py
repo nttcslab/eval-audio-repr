@@ -90,6 +90,7 @@ def gen_weight(train_files_csv, label_file, output_file):
             label_idx = int(index_dict[label])
             # summing up the weight of all appeared classes in the sample, note audioset is multiple-label classification
             sample_weight[i] += label_weight[label_idx]
+    sample_weight = np.power(sample_weight, 1.0/1.5)  # making the weights softer
     pd.DataFrame({'file_name': df.file_name.values, 'weight': sample_weight}).to_csv(output_file, index=None)
     print('Saved AudioSet label weight as:', output_file)
 

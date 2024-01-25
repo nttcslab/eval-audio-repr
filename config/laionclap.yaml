@@ -1,20 +1,12 @@
 # Zero-shot-ready
 
 # AR parameters such as FFT parameters.
-audio_repr: ar_msclap.AR_MSCLAP
+audio_repr: ar_laionclap.AR_LAIONCLAP
 weight_file: 
 feature_d: 768
-sample_rate: 32000
-n_fft: 1024
-window_size: 1024
-hop_size: 320
-n_mels: 64
-f_min: 50
-f_max: 14000
-window: hanning
+sample_rate: 48000
 
 # Model specific parameters.
-return_filename: True
 
 # Linear evaluation/Fine-tuning common parameters.
 

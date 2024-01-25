@@ -3,19 +3,11 @@
 Balanced sampler is supported for multi-label tasks.
 """
 
-from .common import (np, pd, torch, F, Path, torchaudio)
+from .common import (np, pd, torch, F, Path)
 from .sampler import BalancedRandomSampler, InfiniteSampler
 from sklearn.preprocessing import MultiLabelBinarizer
 from torch.utils.data import WeightedRandomSampler
 import librosa
-
-
-# Thanks to https://stackoverflow.com/questions/31953272/logging-print-message-only-once
-# Keep track of 10 different messages and then warn again
-from functools import lru_cache
-@lru_cache(10)
-def warn_once(msg: str):
-    print(msg)
 
 
 class BaseRawAudioDataset(torch.utils.data.Dataset):
@@ -90,15 +82,10 @@ class WavDataset(BaseRawAudioDataset):
 
     def get_audio(self, index):
         filename = self.cfg.task_data + '/' + self.df.file_name.values[index]
-        if '/original/' in self.cfg.task_data:
-            wav, sr = librosa.load(filename, sr=self.cfg.sample_rate, mono=True)
-            wav = torch.tensor(wav).to(torch.float32).unsqueeze(0)
-        else:
-            wav, sr = torchaudio.load(filename)
-        if sr != self.cfg.sample_rate:
-            warn_once(f'Convert .wav files from {sr} Hz to {self.cfg.sample_rate} Hz.')
-            wav = torchaudio.transforms.Resample(sr, self.cfg.sample_rate, dtype=wav.dtype)(wav)
-        return wav[0]
+        wav, sr = librosa.load(filename, sr=(self.cfg.sample_rate if '/original/' in self.cfg.task_data else None), mono=True)
+        wav = torch.tensor(wav).to(torch.float32)
+        assert sr == self.cfg.sample_rate, f'Invalid sampling rate: {sr} Hz, expected: {self.cfg.sample_rate} Hz.'
+        return wav
 
     def get_label(self, index):
         return self.labels[index]
@@ -178,8 +165,8 @@ def create_as_dataloader(cfg, batch_size, always_one_hot=False, balanced_random=
     return (train_loader, valid_loader, test_loader, train_dataset.multi_label)
 
 
-def create_dataloader(cfg, fold=1, seed=42, batch_size=None, always_one_hot=False, balanced_random=False, pin_memory=True, num_workers=8):
-    if Path(cfg.task_metadata).stem == 'as':
+def create_dataloader(cfg, fold=1, seed=42, batch_size=None, always_one_hot=False, balanced_random=False, pin_memory=True, num_workers=8, always_wav=False):
+    if Path(cfg.task_metadata).stem == 'as' and not always_wav:
         return create_as_dataloader(cfg, batch_size=batch_size, always_one_hot=always_one_hot, balanced_random=balanced_random, pin_memory=pin_memory, num_workers=num_workers)
 
     batch_size = batch_size or cfg.batch_size

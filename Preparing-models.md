@@ -19,7 +19,7 @@ The followings are command lines to prepare models.
     mv byol-a byol_a
     cd ..
 
-## ATST, ATST-Frame
+## ATST & ATST-Frame
 
 In addition to the following steps, please download the ATST-Frame checkpoint as `external/atstframe_base.ckpt` from https://github.com/Audio-WestlakeU/audiossl/tree/main/audiossl/methods/atstframe.
 
@@ -84,3 +84,10 @@ In addition to the following steps, please download the checkpoint `HTSAT-BERT-P
 
     (cd external && git clone https://github.com/XinhaoMei/WavCaps.git)
     (cd external/WavCaps && git apply ../../external/wavcaps.patch)
+    pip install ruamel.yaml sentence_transformers wandb loguru
+
+## MS-CLAP, LAION-CLAP
+
+    pip install msclap
+    pip install laion-clap
+
