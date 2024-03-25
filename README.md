@@ -23,8 +23,8 @@ This evaluation package is intended for researchers who wish to compare ARs unde
 ## What's new
 
 ### Mar 25, 2024 -- Fixed minor issues.
-- New feature: Fine-tuning program supports "eval-only" option.
-- Refactoring: Logging folder name to reflect weight path name and other minor issues.
+- New feature: Fine-tuning program supports a new option "eval-only".
+- Refactoring: Logging folder name so that it uses the weight path name.
 - Fix: Small issues with CLAP model wrappers.
 
 ### Jan 25, 2024 -- Supported zero-shot evaluation for CLAP models.
@@ -305,7 +305,7 @@ Be sure to download the AudioSet class label definition if you evaluate models o
 
 **NOTE about Captions:**
 
-While ZS requires converting a label into a caption text, we implemented it in a function `class_to_caption` in the `zeroshot.py`.
+While ZS requires converting a label into caption text, we implemented it in the `class_to_caption` function in the `zeroshot.py`.
 You can edit the conversion rule in the function for your purposes.
 
 

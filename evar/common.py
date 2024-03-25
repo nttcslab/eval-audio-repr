@@ -76,9 +76,10 @@ def complete_cfg(cfg, options, no_id=False):
         task = Path(cfg.task_metadata).stem if 'task_metadata' in cfg else ''
         if 'name' in cfg and len(cfg['name']) > 0:
             name = cfg.name
-        elif 'weight_file' in cfg and len(cfg['weight_file']) > 0:
-            weight_path = Path(cfg['weight_file'])
-            name = f'{weight_path.parent.stem}-{weight_path.stem}'
+        elif 'weight_file' in cfg and len(str(cfg['weight_file'])) > 0:
+            weight_path = Path(str(cfg['weight_file']))
+            parent = weight_path.parent.stem if len(weight_path.parent.stem) > 0 else str(cfg.audio_repr.split(',')[-1])
+            name = f'{parent}-{weight_path.stem}'
         else:
             str(cfg.audio_repr.split(',')[-1])
         cfg.id = name + '_' + task + '_' + hash_text(str(cfg), L=8)

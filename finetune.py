@@ -13,7 +13,7 @@ import timm.optim
 
 from evar.data import create_dataloader
 from evar.model_utils import show_layers_trainable, MLP
-from lineareval import make_cfg
+from lineareval import *
 
 
 torch.backends.cudnn.benchmark = True
