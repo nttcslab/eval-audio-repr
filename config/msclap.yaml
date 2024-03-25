@@ -2,7 +2,7 @@
 
 # AR parameters such as FFT parameters.
 audio_repr: ar_msclap.AR_MSCLAP
-weight_file: 
+weight_file: 2023
 feature_d: 768
 sample_rate: 32000
 n_fft: 1024

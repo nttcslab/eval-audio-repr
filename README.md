@@ -22,10 +22,15 @@ This evaluation package is intended for researchers who wish to compare ARs unde
 
 ## What's new
 
-### ~Jan 25, 2024 -- Supported zero-shot evaluation for CLAP models.
+### Mar 25, 2024 -- Fixed minor issues.
+- New feature: Fine-tuning program supports "eval-only" option.
+- Refactoring: Logging folder name to reflect weight path name and other minor issues.
+- Fix: Small issues with CLAP model wrappers.
+
+### Jan 25, 2024 -- Supported zero-shot evaluation for CLAP models.
 - Zero-shot evaluator: `zeroshot.py`
 - New model: Supported (for linear and zero-shot evaluation) WavCaps, LAION CLAP, and MS CLAP.
-- Fix: Migrated from torchaudio to soundfile+librosa to avoid an issue related to resampling quality.
+- Fix: An issue related to resampling quality by migrating from torchaudio to soundfile+librosa.
 - Fix: M2D to use fixed normalization statistic values.
 
 ### Jan 12, 2024 -- Supported weighted CE loss with fine-tuning and added more models.
@@ -275,20 +280,6 @@ Saved weight as logs/as20k_ar_byola.AR_BYOLA_bd42a61e/weights_ep0it85-0.00786_lo
 as20k_ar_byola.AR_BYOLA_bd42a61e-lr1.0mu3fm30tm100tx5R | epoch/iter 0/85: val mAP: 0.00786, loss: 0.66500, best: 0.00786@0
 Epoch [1] iter: 0/86, elapsed: 37.298s, lr: 0.20000000 loss: 0.66475827
 Epoch [1] iter: 10/86, elapsed: 5.657s, lr: 0.22325581 loss: 0.65429634
-Epoch [1] iter: 20/86, elapsed: 5.761s, lr: 0.24651163 loss: 0.64519072
-  :
-Epoch [126] iter: 50/86, elapsed: 5.414s, lr: 0.29724375 loss: 0.02148895
-Epoch [126] iter: 60/86, elapsed: 5.463s, lr: 0.29640929 loss: 0.02231924
-Epoch [126] iter: 70/86, elapsed: 5.333s, lr: 0.29557552 loss: 0.02175112
-Epoch [126] iter: 80/86, elapsed: 5.238s, lr: 0.29474242 loss: 0.02414193
-validating
-Saved weight as logs/as20k_ar_byola.AR_BYOLA_bd42a61e/weights_ep126it85-0.22147_loss0.0224.pth
-as20k_ar_byola.AR_BYOLA_bd42a61e-lr1.0mu3fm30tm100tx5R | epoch/iter 126/85: val mAP: 0.22147, loss: 0.02243, best: 0.22147@126
-Epoch [127] iter: 0/86, elapsed: 34.103s, lr: 0.29424289 loss: 0.02379368
-Epoch [127] iter: 10/86, elapsed: 5.203s, lr: 0.29341089 loss: 0.02334521
-Epoch [127] iter: 20/86, elapsed: 5.037s, lr: 0.29257958 loss: 0.02348399
-Epoch [127] iter: 30/86, elapsed: 5.221s, lr: 0.29174897 loss: 0.02158570
-Epoch [127] iter: 40/86, elapsed: 5.305s, lr: 0.29091904 loss: 0.02307556
   :
 Epoch [199] iter: 70/86, elapsed: 4.784s, lr: 0.00000224 loss: 0.02135683
 Epoch [199] iter: 80/86, elapsed: 4.399s, lr: 0.00000040 loss: 0.02403579
@@ -300,21 +291,33 @@ Finetuning as20k_ar_byola.AR_BYOLA_bd42a61e-lr1.0mu3fm30tm100tx5R on as20k -> me
 
 The fine-tuning results will be stored in `results/ft-scores.csv`.
 
-## 5. Zero-shot example
+## 5. Zero-shot
 
-*NOTE for AudioSet (as):*
+You can evaluate a zero-shot (ZS) classification using an evaluator script, `zeroshot.py`.
 
-1. Download the AudioSet class label definition if you evaluate models on it.
-2. Make sure the sampling rate is correct with your AudioSet samples under the `work/original/as`.
+**Prepare data for ZS**
+
+ZS uses the original, intact task data to ensure the best performance. You need to prepare data specifically for ZS. Please see the [Zero-shot evaluation data](Preparing-datasets.md#zero-shot-evaluation-data).
+
+Be sure to download the AudioSet class label definition if you evaluate models on it.
 
     wget http://storage.googleapis.com/us_audioset/youtube_corpus/v1/csv/class_labels_indices.csv
+
+**NOTE about Captions:**
+
+While ZS requires converting a label into a caption text, we implemented it in a function `class_to_caption` in the `zeroshot.py`.
+You can edit the conversion rule in the function for your purposes.
+
+
+### 5-1. ZS example
 
 The ESC-50 example follows:
 
 ```sh
 $ python zeroshot.py config/wavcaps.yaml esc50
 
-Logging to logs/esc50_ar_wavcaps.AR_WavCaps_d7371b11/log.txt                                                                               
++task_metadata=evar/metadata/esc50.csv,+task_data=work/original/ESC-50-master,+unit_samples=160000
+Logging to logs/esc50_ar_wavcaps.AR_WavCaps_be6742a7/log.txt
 {'audio_repr': 'ar_wavcaps.AR_WavCaps', 'weight_file': 'external/WavCaps/HTSAT-BERT-PT.pt', 'feature_d': 768, 'sample_rate': 32000, 'n_fft': 1024, 'window_size': 1024, 'hop_size': 320, 'n_mels': 64, 'f_min': 50, 'f_max': 14000, 'window': 'hanning', 'training_mask': 0.0, 'flat_f
 eatures': False, 'batch_size': 128, 'lr_lineareval': 0.0003, 'report_per_epochs': 50, 'early_stop_epochs': 20, 'warmup_epochs': 5, 'mixup': 0.5, 'ft_bs': 128, 'ft_lr': 2.0, 'ft_early_stop_epochs': -1, 'ft_epochs': 200, 'ft_freq_mask': 8, 'ft_time_mask': 64, 'ft_noise': 0.0, 'ft
 _rrc': True, 'name': '', 'task_metadata': 'evar/metadata/esc50.csv', 'task_data': 'work/32k/esc50', 'unit_samples': 160000, 'id': 'esc50_ar_wavcaps.AR_WavCaps_d7371b11', 'task_name': 'esc50', 'return_filename': False, 'runtime_cfg': {'id': '468067f3'}}
@@ -325,22 +328,12 @@ Getting esc50_ar_wavcaps.AR_WavCaps_d7371b11 test embeddings...
 100%|████████████████████████████████████████████████| 4/4 [00:04<00:00,  1.07s/it]
 Train:1600, valid:0, test:400, multi label:False   
 Getting esc50_ar_wavcaps.AR_WavCaps_d7371b11 test embeddings...
-100%|████████████████████████████████████████████████| 4/4 [00:02<00:00,  1.49it/s]
-Train:1600, valid:0, test:400, multi label:False
-Getting esc50_ar_wavcaps.AR_WavCaps_d7371b11 test embeddings...
-100%|████████████████████████████████████████████████| 4/4 [00:02<00:00,  1.53it/s]
-Train:1600, valid:0, test:400, multi label:False
-Getting esc50_ar_wavcaps.AR_WavCaps_d7371b11 test embeddings...
-100%|████████████████████████████████████████████████| 4/4 [00:02<00:00,  1.48it/s]
-Train:1600, valid:0, test:400, multi label:False            
-Getting esc50_ar_wavcaps.AR_WavCaps_d7371b11 test embeddings...                                                                            
+  :
 100%|████████████████████████████████████████████████| 4/4 [00:02<00:00,  1.51it/s]
-esc50 Accuracy 0.9345                                       
-Zero-shot evaluation: esc50_ar_wavcaps.AR_WavCaps_4d5d522b zs_esc50 -> 0.93450
-{'audio_repr': 'ar_wavcaps.AR_WavCaps', 'weight_file': 'external/WavCaps/HTSAT-BERT-PT.pt', 'feature_d': 768, 'sample_rate': 32000, 'n_fft': 1024, 'window_size': 1024, 'hop_size': 320, 'n_mels': 64, 'f_min': 50, 'f_max': 14000, 'window': 'hanning', 'training_mask': 0.0, 'flat_f
-eatures': False, 'batch_size': 128, 'lr_lineareval': 0.0003, 'report_per_epochs': 50, 'early_stop_epochs': 20, 'warmup_epochs': 5, 'mixup': 0.5, 'ft_bs': 128, 'ft_lr': 2.0, 'ft_early_stop_epochs': -1, 'ft_epochs': 200, 'ft_freq_mask': 8, 'ft_time_mask': 64, 'ft_noise': 0.0, 'ft
-_rrc': True, 'name': '', 'task_metadata': 'evar/metadata/esc50.csv', 'task_data': 'work/32k/esc50', 'unit_samples': 160000, 'id': 'esc50_ar_wavcaps.AR_WavCaps_d7371b11', 'task_name': 'esc50', 'return_filename': False, 'runtime_cfg': {'id': '468067f3'}}
- -> results/scores.csv            
+esc50 result: 0.9485
+Zero-shot evaluation: esc50_ar_wavcaps.AR_WavCaps_221affa2 zs_esc50 -> 0.94850
+{'audio_repr': 'ar_wavcaps.AR_WavCaps', 'weight_file': 'external/WavCaps/HTSAT-BERT-PT.pt', 'feature_d': 768, 'sample_rate': 32000, 'n_fft': 1024, 'window_size': 1024, 'hop_size': 320, 'n_mels': 64, 'f_min': 50, 'f_max': 14000, 'window': 'hanning', 'batch_size': 128, 'lr_lineareval': 0.0003, 'report_per_epochs': 50, 'early_stop_epochs': 20, 'warmup_epochs': 5, 'mixup': 0.5, 'ft_bs': 128, 'ft_lr': 2.0, 'ft_early_stop_epochs': -1, 'ft_epochs': 200, 'ft_freq_mask': 8, 'ft_time_mask': 64, 'ft_noise': 0.0, 'ft_rrc': True, 'name': '', 'task_metadata': 'evar/metadata/esc50.csv', 'task_data': 'work/original/ESC-50-master', 'unit_samples': 160000, 'id': 'esc50_ar_wavcaps.AR_WavCaps_be6742a7', 'task_name': 'esc50', 'return_filename': False, 'mean': None, 'std': None, 'runtime_cfg': {'id': '468067f3'}}
+ -> results/scores.csv
 ```
 
 ## 6. Other information

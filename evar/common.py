@@ -55,7 +55,7 @@ def split_camma(text):
 
 # App level utilities
 def complete_cfg(cfg, options, no_id=False):
-    # Override with options.
+    # Override parameter values with given "options".
     if 'name' not in cfg or not isinstance(cfg['name'], str):
         cfg['name'] = ''
     print(options)
@@ -74,8 +74,14 @@ def complete_cfg(cfg, options, no_id=False):
     # Set ID.
     if not no_id:
         task = Path(cfg.task_metadata).stem if 'task_metadata' in cfg else ''
-        name = cfg.name if 'name' in cfg and len(cfg['name']) > 0 else str(cfg.audio_repr.split(',')[-1])
-        cfg.id = task + '_' + name + '_' + hash_text(str(cfg), L=8)
+        if 'name' in cfg and len(cfg['name']) > 0:
+            name = cfg.name
+        elif 'weight_file' in cfg and len(cfg['weight_file']) > 0:
+            weight_path = Path(cfg['weight_file'])
+            name = f'{weight_path.parent.stem}-{weight_path.stem}'
+        else:
+            str(cfg.audio_repr.split(',')[-1])
+        cfg.id = name + '_' + task + '_' + hash_text(str(cfg), L=8)
     return cfg
 
 

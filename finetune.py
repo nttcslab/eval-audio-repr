@@ -1,17 +1,19 @@
+"""Fine-tuning evaluator.
+"""
+
 from evar.common import (sys, np, pd, EasyDict, kwarg_cfg,
     torch, F, logging, append_to_csv, app_setup_logger, seed_everything, RESULT_DIR)
-import torchaudio
 import fire
 import time
 from sklearn import metrics, utils
+
+import torchaudio
 import timm.scheduler
+import timm.optim
 
 from evar.data import create_dataloader
 from evar.model_utils import show_layers_trainable, MLP
 from lineareval import make_cfg
-import evar.ar_m2d
-import evar.ar_byola
-import evar.ar_byola2
 
 
 torch.backends.cudnn.benchmark = True
@@ -113,18 +115,6 @@ class AudioFineuneAug:
         return lms
 
 
-class WeightedCE:
-    def __init__(self, labels, device) -> None:
-        weights = utils.class_weight.compute_class_weight('balanced', classes=np.unique(labels), y=labels)
-        self.celoss = torch.nn.CrossEntropyLoss(weight=torch.tensor(weights).to(device))
-        self.__name__ = f'CrossEntropyLoss(weight={weights})'
-
-    def __call__(self, logits, gts):
-        preds = F.softmax(logits, dim=-1)
-        loss = self.celoss(preds, gts)
-        return loss
-
-
 def loss_nll(logits, gts):
     # Args: logits: (N, C), gts: (N, C) [0,1] hot soft label after mixup is applied.
     preds = F.log_softmax(logits, dim=-1)
@@ -219,18 +209,17 @@ def arg_conf_str(args, defaults={
     return confstr
 
 
-def _train(cfg, ar_model, device, logpath, train_loader, valid_loader, test_loader, multi_label, weighted, seed, lr, balanced, verbose):
+def _train(cfg, ar_model, device, logpath, train_loader, valid_loader, test_loader, multi_label, seed, lr, balanced, verbose):
     classes = train_loader.dataset.classes
 
     loss_fn = loss_bce if multi_label else loss_nll
-    if weighted:
-        labels = np.argmax(train_loader.dataset.labels, axis=1)  # OH to numbers
-        loss_fn = WeightedCE(labels.numpy(), device)
     eval_fn = eval_map if multi_label else eval_acc
     crit_str = 'mAP' if eval_fn == eval_map else 'acc'
     optimizer = {
         'adamw': torch.optim.AdamW(ar_model.parameters(), lr=lr, weight_decay=0.0001, betas=(0.9, 0.95), eps=1e-08, amsgrad=True),
         'sgd': torch.optim.SGD(ar_model.parameters(), lr, momentum=0.9, weight_decay=0),
+        'lars': timm.optim.Lars(ar_model.parameters(), lr, momentum=0.9, weight_decay=0),
+        'lamb': timm.optim.Lamb(ar_model.parameters(), lr),
     }[cfg.optim]
     scheduler = timm.scheduler.CosineLRScheduler(optimizer, t_initial=cfg.ft_epochs, lr_min=1e-7, warmup_t=cfg.warmup_epochs, warmup_lr_init=0)
     logging.info(f'Using {loss_fn.__name__}, {eval_fn.__name__}, and {optimizer}')
@@ -340,7 +329,7 @@ class TaskNetwork(torch.nn.Module):
         print(cfg.feature_d, cfg.runtime_cfg.hidden, cfg.runtime_cfg.n_class)
         self.head = TaskHead(dim=cfg.feature_d, n_class=cfg.runtime_cfg.n_class, hidden=cfg.runtime_cfg.hidden)
 
-        print('Backbone representation:')
+        print('Backbone encoder:')
         show_layers_trainable(self.ar, show_all_trainable=False)
         print('Head:')
         show_layers_trainable(self.head)
@@ -354,8 +343,8 @@ class TaskNetwork(torch.nn.Module):
 def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=None, batch_size=None,
                           epochs=None, early_stop_epochs=None, warmup_epochs=None,
                           freq_mask=None, time_mask=None, rrc=None, training_mask=None,
-                          optim='sgd', unit_sec=None, verbose=True, data_path='work'):
-    cfg, n_folds, weighted, balanced = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
+                          optim='sgd', unit_sec=None, verbose=True, eval_only=False, data_path='work'):
+    cfg, n_folds, balanced = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
     lr = lr or cfg.ft_lr
     cfg.mixup = mixup if mixup is not None else cfg.mixup
     cfg.ft_early_stop_epochs = early_stop_epochs if early_stop_epochs is not None else cfg.ft_early_stop_epochs
@@ -400,8 +389,15 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
         task_model_dp = torch.nn.DataParallel(task_model).to(device)
         logging.info(f'Head = {task_model.head}')
 
+        if eval_only:
+            task_model_dp.load_state_dict(torch.load(cfg.weight_file, map_location=device))
+            eval_fn, crit_str = (eval_map, 'mAP') if multi_label else (eval_acc, 'acc')
+            best_result, df = evaluate(task_model_dp, test_loader, device, eval_fn, train_loader.dataset.classes)
+            logging.info(f'Evaluation result of {crit_str}: {best_result:.5f}')
+            return [best_result], cfg.weight_file, 'eval only', cfg, logpath
+
         best_result, best_path, name = _train(cfg, task_model_dp, device, logpath, train_loader, valid_loader, test_loader,
-            multi_label, weighted, seed, lr, balanced, verbose)
+            multi_label, seed, lr, balanced, verbose)
 
         scores.append(best_result)
         if n_folds > 1:
@@ -412,17 +408,21 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
 
 def finetune_main(config_file, task, options='', seed=42, lr=None, hidden=(), epochs=None, early_stop_epochs=None, warmup_epochs=None,
                   mixup=None, freq_mask=None, time_mask=None, rrc=None, training_mask=None, batch_size=None,
-                  optim='sgd', unit_sec=None, verbose=False, data_path='work'):
+                  optim='sgd', unit_sec=None, verbose=False, eval_only=False, data_path='work'):
     scores, best_path, name, cfg, logpath = run_eval(config_file, task, options=options, seed=seed, lr=lr, hidden=hidden, mixup=mixup,
         batch_size=batch_size, epochs=epochs, early_stop_epochs=early_stop_epochs, warmup_epochs=warmup_epochs,
         freq_mask=freq_mask, time_mask=time_mask, rrc=rrc, training_mask=training_mask, optim=optim,
-        unit_sec=unit_sec, verbose=verbose, data_path=data_path)
+        unit_sec=unit_sec, verbose=verbose, eval_only=eval_only, data_path=data_path)
     mean_score = np.mean(scores)
+    report = f'Finetuning {name} on {cfg.task_name} -> mean score: {mean_score:.5f}'
+    if eval_only:
+        print(report)
+        return '', scores, best_path, name, cfg, logpath
+
     score_file = logpath/f'{cfg.task_name}_{cfg.audio_repr.replace("AR_", "").replace("_", "-")}-FT_{cfg.id[-8:]}_{mean_score:.5f}.csv'
     best_report = logpath/(best_path.stem.split('_')[1] + '.csv')
     best_report.rename(score_file)
 
-    report = f'Finetuning {name} on {cfg.task_name} -> mean score: {mean_score:.5f}'
     if len(scores) > 1:
         report += ', scores: [' + ', '.join([f'{score:.5f}' for score in scores]) + ']'
     report += f', best weight: {best_path}, score file: {score_file}, config: {cfg}'

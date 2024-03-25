@@ -20,25 +20,6 @@ except Exception as e:
     pass  # print(f'(For M2D users) Build your EVAR in your M2D folder.')
 
 
-class AR_M2D_BatchNormStats(BaseAudioRepr):
-
-    def __init__(self, cfg):
-        super().__init__(cfg=cfg)
-
-        self.backbone = RuntimeM2D(cfg=cfg, weight_file=cfg.weight_file)
-        self.backbone.eval()
-
-    def encode_frames(self, batch_audio):
-        with torch.no_grad():
-            x = self.backbone.get_timestamp_embeddings(batch_audio)
-        return x.transpose(1, 2) # [B, T, D] -> [B, D, T]
-
-    def forward(self, batch_audio):
-        with torch.no_grad():
-            x = self.backbone.get_scene_embeddings(batch_audio)
-        return x
-
-
 class AR_M2D(BaseAudioRepr):
 
     def __init__(self, cfg, make_runtime=True):
@@ -47,6 +28,7 @@ class AR_M2D(BaseAudioRepr):
         if make_runtime:
             self.runtime = RuntimeM2D(cfg=cfg, weight_file=cfg.weight_file)
             self.runtime.eval()
+            self.cfg = self.runtime.cfg
 
     def precompute(self, device, data_loader):
         if not self.cfg.mean or not self.cfg.std:

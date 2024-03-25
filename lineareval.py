@@ -128,7 +128,7 @@ def _one_linear_eval(X, y, X_val, y_val, X_test, y_test, hidden_sizes, epochs, e
 def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_sec=None, original_data=False):
     cfg = load_yaml_config(config_file)
     cfg = complete_cfg(cfg, options, no_id=True)
-    task_metadata, task_data, n_folds, unit_sec, weighted, balanced = get_defs(cfg, task, original_data=original_data)
+    task_metadata, task_data, n_folds, unit_sec, balanced = get_defs(cfg, task, original_data=original_data)
     # cancel augmentation if required
     if cancel_aug:
         cfg.freq_mask = None
@@ -141,15 +141,14 @@ def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_s
     # update some parameters.
     update_options = f'+task_metadata={task_metadata},+task_data={task_data}'
     update_options += f',+unit_samples={int(cfg.sample_rate * unit_sec)}'
-    cfg = complete_cfg(cfg, update_options)
+    cfg = complete_cfg(cfg, update_options, no_id=True)
     # overwrite by extra command line
     options = []
     for k, v in extras.items():
         if v is not None:
             options.append(f'{k}={v}')
     options = ','.join(options)
-    if len(options) > 0:
-        cfg = complete_cfg(cfg, options)
+    cfg = complete_cfg(cfg, options)
     # Set task name
     if 'task_name' not in cfg:
         cfg['task_name'] = task
@@ -160,7 +159,7 @@ def make_cfg(config_file, task, options, extras={}, cancel_aug=False, abs_unit_s
     if 'mean' not in cfg:
         cfg['mean'] = cfg['std'] = None
 
-    return cfg, n_folds, weighted, balanced
+    return cfg, n_folds, balanced
 
 
 def short_model_desc(model, head_len=5, tail_len=1):
@@ -171,7 +170,7 @@ def short_model_desc(model, head_len=5, tail_len=1):
 
 def lineareval_downstream(config_file, task, options='', seed=42, lr=None, hidden=(), standard_scaler=True, mixup=False,
                           epochs=None, early_stop_epochs=None, unit_sec=None, step='1pass'):
-    cfg, n_folds, _, _ = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
+    cfg, n_folds, _ = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
     lr = lr or cfg.lr_lineareval
     epochs = epochs or 200
     early_stop_epochs = early_stop_epochs or cfg.early_stop_epochs

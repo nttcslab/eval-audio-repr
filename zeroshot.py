@@ -62,12 +62,6 @@ def class_to_caption(task, classes):
     return captions
 
 
-def get_cache_info(data_loader, _id, fold):
-    cache_file = Path(f'work/cache/embs-{_id}-{data_loader.dataset.split}-{fold}.npy')
-    cache_gt_file = Path(f'work/cache/embs-{_id}-{data_loader.dataset.split}-{fold}-gt.npy')
-    return cache_file.exists(), cache_file, cache_gt_file
-
-
 def to_embeddings(ar, data_loader, device, _id=None, fold=1):
     if len(data_loader) == 0:
         return None, None
@@ -108,7 +102,7 @@ def eval_acc(y_score, y_true):
 
 
 def zeroshot_downstream(config_file, task, options='', unit_sec=None):
-    cfg, n_folds, _, _ = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec, original_data=True)
+    cfg, n_folds, _ = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec, original_data=True)
     seed = 42
     cfg.runtime_cfg = kwarg_cfg()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

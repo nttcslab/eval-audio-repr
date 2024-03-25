@@ -262,4 +262,21 @@ python prepare_wav.py $FROM/voxforge $TO/voxforge $SR
 python prepare_wav.py $FROM/fsd50k $TO/fsd50k $SR
 ```
 
+## Zero-shot evaluation data
+
+The zero-shot evaluation uses the original data files from the tasks. Store (or make symbolic links) the folders of the original data under a folder `work/original` as follows:
+
+    work/original/AudioSet
+    work/original/ESC-50-master
+    work/original/UrbanSound8K
+    work/original/cremad
+    work/original/fsd50k
+    work/original/gtzan
+    work/original/nsynth
+
+For AudioSet, download the class definition CSV.
+
+    wget http://storage.googleapis.com/us_audioset/youtube_corpus/v1/csv/class_labels_indices.csv
+
+
 (end of document)

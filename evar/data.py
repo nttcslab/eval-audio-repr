@@ -99,10 +99,11 @@ class ASSpectrogramDataset(WavDataset):
 
         self.df.file_name = self.df.file_name.str.replace('.wav', '.npy', regex=False)
         self.folder = Path(cfg.data_path)
+        assert cfg.dur_frames == 1001, 'Set dur_frames=1001 or any number that suits your model.'
         self.crop_frames = cfg.dur_frames
         self.random_crop = random_crop
 
-        print(f'Dataset contains {len(self.df)} files without normalizing stats.')
+        print(f'Dataset ({split}) contains {len(self.df)} files without normalizing stats.')
 
     def get_audio_file(self, filename):
         lms = torch.tensor(np.load(filename))

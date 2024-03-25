@@ -12,8 +12,8 @@ def get_weight(weight_file):
 
 
 def available_tasks(df):
-    ALL_TASKS = ['esc50', 'us8k', 'spcv2', 'vc1', 'voxforge', 'cremad', 'gtzan', 'nsynth', 'surge'] \
-        + ['zs_esc50', 'zs_us8k', 'zs_spcv2', 'zs_vc1', 'zs_voxforge', 'zs_cremad', 'zs_gtzan', 'zs_nsynth', 'zs_surge']
+    ALL_TASKS = ['esc50', 'us8k', 'spcv2', 'vc1', 'voxforge', 'cremad', 'gtzan', 'nsynth', 'surge', 'fsd50k'] \
+        + ['zs_esc50', 'zs_us8k', 'zs_spcv2', 'zs_vc1', 'zs_voxforge', 'zs_cremad', 'zs_gtzan', 'zs_nsynth', 'zs_surge', 'zs_fsd50k', 'zs_as']
     tasks = [t for t in ALL_TASKS if t in list(df.columns)]
     return tasks
 

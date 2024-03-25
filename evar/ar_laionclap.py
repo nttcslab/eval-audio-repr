@@ -10,7 +10,7 @@ Large-Scale Contrastive Language-Audio Pretraining with Feature Fusion and Keywo
 from evar.ar_base import BaseCLAP
 from packaging import version
 import torch
-import transformers, os, wget
+import transformers, os
 try:
     import laion_clap
 except:
@@ -51,6 +51,7 @@ def load_ckpt(self, ckpt = None, model_id = -1, verbose = True):
             id = 3 --> 630k+audioset fusion ckpt \n
         Note that if your model is specied as non-fusion model but you download a fusion model ckpt, you will face an error.
     """
+    import wget
     download_link = 'https://huggingface.co/lukewys/laion_clap/resolve/main/'
     download_names = [
         '630k-best.pt',
