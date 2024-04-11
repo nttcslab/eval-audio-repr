@@ -17,7 +17,7 @@ std: 4.2
 
 # Model specific parameters.
 output_layers: [-1]  # List of layers to stack
-encoder_only: False
+encoder_only: True
 dur_frames:  # None for no desired number of frames
 freeze_embed:  # Set True if freezing PatchEmbed during fine-tuning [2211.09359] How to Fine-Tune Vision Models with SGD
 
