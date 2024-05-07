@@ -43,7 +43,7 @@ In addition to the following steps, please download the BEATs_iter3 and BEATs_it
 In addition to the following steps, please download the checkpoint as `external/HTSAT_AudioSet_Saved_1.ckpt` from https://github.com/RetroCirce/HTS-Audio-Transformer?tab=readme-ov-file#model-checkpoints.
 
     (cd external && git clone https://github.com/RetroCirce/HTS-Audio-Transformer.git htsat)
-    pip install h5py museval
+    pip install h5py museval torchlibrosa
 
 ## COALA
 
