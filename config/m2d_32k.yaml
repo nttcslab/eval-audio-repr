@@ -1,0 +1,44 @@
+# AR parameters such as FFT parameters.
+audio_repr: ar_m2d.AR_M2D
+weight_file: m2d_vit_base-80x208p16x16p32k-random/random
+feature_d: 3840
+sample_rate: 32000
+n_fft: 800
+window_size: 800
+hop_size: 320
+n_mels: 80
+f_min: 50
+f_max: 16000
+window: hanning
+
+# Statistics for normalization: average and standard deviation
+mean: -7.1
+std: 4.2
+
+# Model specific parameters.
+output_layers: [-1]  # List of layers to stack
+encoder_only: False
+dur_frames:  # None for no desired number of frames
+freeze_embed:  # Set True if freezing PatchEmbed during fine-tuning [2211.09359] How to Fine-Tune Vision Models with SGD
+
+# Linear evaluation/Fine-tuning common parameters.
+flat_features: False  # 768-d if True else 3840-d
+
+# Linear evaluaition parameters.
+batch_size: 128
+lr_lineareval: 0.00003
+report_per_epochs: 50
+early_stop_epochs: 20
+
+# Fine-tuning parameters.
+training_mask: 0.0
+warmup_epochs: 5
+mixup: 0.5
+ft_bs: 128
+ft_lr: 2.0
+ft_early_stop_epochs: -1  # -1: no early stopping
+ft_epochs: 200
+ft_freq_mask: 30
+ft_time_mask: 192
+ft_noise: 0.0
+ft_rrc: True

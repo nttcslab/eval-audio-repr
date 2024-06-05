@@ -7,7 +7,7 @@ Masked Modeling Duo for Speech: Specializing General-Purpose Audio Representatio
 https://arxiv.org/abs/2305.14079
 """
 
-from evar.ar_base import BaseAudioRepr, calculate_norm_stats, normalize_spectrogram
+from evar.ar_base import BaseAudioRepr, BaseCLAP, calculate_norm_stats, normalize_spectrogram
 import torch
 import logging
 
@@ -72,4 +72,16 @@ class AR_M2D(BaseAudioRepr):
         states_to_stack = [hidden_states[index] for index in self.cfg.output_layers] if self.cfg.output_layers else [h for h in hidden_states]
         features = torch.cat(states_to_stack, axis=-1)
         return features.transpose(1, 2) # [B, T, D] -> [B, D, T]
+
+
+class AR_M2D_CLAP(AR_M2D, BaseCLAP):
+
+    def __init__(self, cfg, make_runtime=True):
+        super().__init__(cfg=cfg, make_runtime=make_runtime)
+
+    def encode_audio(self, batch_audio):
+        return self.runtime.encode_clap_audio(batch_audio)
+
+    def encode_text(self, batch_text):
+        return self.runtime.encode_clap_text(batch_text)
 
