@@ -219,6 +219,40 @@ The followings will get resampled copies ready.
 
 We provide the metadata as `evar/metadata/voxforge.csv` by default for reproducibility purposes.
 
+## Audio Captioning (Audio to Text Retrieval) Datasets
+
+### AudioCaps/ML-AudioCaps
+
+For downloading the audio data, refer to the instruction: https://github.com/XinhaoMei/ACT?tab=readme-ov-file#set-up-dataset
+
+Place the files under `work/original` folder:
+
+    work/original/audiocaps
+      /train
+      /test
+      /val
+        *.wav files
+
+The following will make the metadata for AudioCaps.
+
+    python evar/utils/make_metadata.py audiocaps /path/to/ml-audiocaps/en
+
+The following will make the metadata for the Japanese captions of ML-AudioCaps.
+
+    python evar/utils/make_metadata.py ja_audiocaps /path/to/ml-audiocaps/ja
+
+### Clotho
+
+Unpack the 7z archives and place the files under `work/original` folder:
+
+    work/original/clotho
+      /evaluation
+      /validation
+        *.wav files
+
+The following will make the metadata for Clotho. The `/path/to/clotho` should have *.csv files.
+
+    python evar/utils/make_metadata.py clotho /path/to/clotho
 
 ## Example command lines
 

@@ -26,6 +26,9 @@ The papers used EVAR are:
 
 ## What's new
 
+### Jun 20, 2024 -- Supported autio to text or text to audio retrieval (ATR).
+- ATR evaluator: `retr_a2t_t2a.py`
+
 ### Mar 25, 2024 -- Fixed minor issues.
 - New feature: Fine-tuning program supports a new option "eval-only".
 - Refactoring: Logging folder name so that it uses the weight path name.
@@ -62,6 +65,7 @@ The following show how to prepare CREMA-D dataset and evaluate OpenL3 (music) fe
     curl https://raw.githubusercontent.com/daisukelab/general-learning/master/MLP/torch_mlp_clf2.py -o evar/utils/torch_mlp_clf2.py
     curl https://raw.githubusercontent.com/daisukelab/sound-clf-pytorch/master/for_evar/sampler.py -o evar/sampler.py
     curl https://raw.githubusercontent.com/daisukelab/sound-clf-pytorch/master/for_evar/cnn14_decoupled.py -o evar/cnn14_decoupled.py
+    wget https://raw.githubusercontent.com/XinhaoMei/WavCaps/master/retrieval/tools/utils.py -O evar/utils/wavcaps_utils.py
     pip install -r requirements.txt
     ```
 
@@ -340,9 +344,53 @@ Zero-shot evaluation: esc50_ar_wavcaps.AR_WavCaps_221affa2 zs_esc50 -> 0.94850
  -> results/scores.csv
 ```
 
-## 6. Other information
+## 8. Autio to text or text to audio retrieval (ATR)
 
-### 6-1. Supported datasets
+ATR is available with the `retr_a2t_t2a.py`.
+
+Refer to the [data setup instructions](Preparing-datasets.md#audio-captioning-audio-to-text-retrieval-datasets).
+
+**NOTE: Our current implementation is evaluation only (for testing the CLAP models).**
+
+Tasks are:
+
+- `clotho`: ATR using the [Clotho](https://github.com/audio-captioning/clotho-dataset) dataset
+- `audiocaps`: ATR using the [AudioCaps](https://audiocaps.github.io/) dataset
+- `ja_audiocaps`: ATR using the Japanese captions of the [ML-AudioCaps](https://github.com/sarulab-speech/ml-audiocaps) dataset
+
+### 8-1. ATR example
+
+WavCaps examples.
+
+    python retr_a2t_t2a.py config/wavcaps.yaml clotho
+    python retr_a2t_t2a.py config/wavcaps.yaml audiocaps
+    python retr_a2t_t2a.py config/wavcaps.yaml ja_audiocaps
+
+The following is the WavCaps example evaluated on AudioCaps. We confirm the results close to the paper.
+
+```sh
+$ python retr_a2t_t2a.py config/wavcaps.yaml audiocaps
++task_metadata=evar/metadata/audiocaps.csv,+task_data=work/original/audiocaps,+unit_samples=320000
+
+Logging to logs/WavCaps-HTSAT-BERT-PT_audiocaps_0afe26da/log.txt
+{'audio_repr': 'ar_wavcaps.AR_WavCaps', 'weight_file': 'external/WavCaps/HTSAT-BERT-PT.pt', 'feature_d': 768, 'sample_rate': 32000, 'n_fft': 1024, 'window_size': 1024, 'hop_size': 320, 'n_mels': 64, 'f_min': 50, 'f_max': 14000, 'window': 'hanning', 'batch_size': 128, 'lr_lineareval': 0.0003, 'report_per_epochs': 50, 'early_stop_epochs': 20, 'warmup_epochs': 5, 'mixup': 0.5, 'ft_bs': 128, 'ft_lr': 2.0, 'ft_early_stop_epochs': -1, 'ft_epochs': 200, 'ft_freq_mask': 8, 'ft_time_mask': 64, 'ft_noise': 0.0, 'ft_rrc': True, 'name': '', 'task_metadata': 'evar/metadata/audiocaps.csv', 'task_data': 'work/original/audiocaps', 'unit_samples': 320000, 'id': 'WavCaps-HTSAT-BERT-PT_audiocaps_0afe26da', 'task_name': 'audiocaps', 'return_filename': False, 'mean': None, 'std': None, 'runtime_cfg': {'id': '468067f3'}}
+AR_WavCaps(
+  (backbone): ASE(
+    (audio_encoder): AudioEncoder(
+      (audio_enc): HTSAT_Swin_Transformer(
+        (audio_feats_extractor): AudioFeature(
+  :
+)
+Getting WavCaps-HTSAT-BERT-PT_audiocaps_0afe26da embeddings for 957 samples from test split ...
+100%|█████████████████████████████| 957/957 [00:16<00:00, 58.52it/s]
+Embedding dimensions = audio:torch.Size([4785, 1024]), caption:torch.Size([4785, 1024])
+test: Caption to audio: r1: 50.99, r5: 82.24, r10: 88.82, r50: 98.75, medr: 1.00, meanr: 5.48, mAP10: 36.491
+test: Audio to caption: r1: 37.43, r5: 72.12, r10: 84.74, r50: 97.66, medr: 2.00, meanr: 7.32, mAP10: 52.044
+```
+
+## 7. Other information
+
+### 7-1. Supported datasets
 
 The followings are supported datasets with a short name and subdomain:
 
@@ -358,18 +406,20 @@ The followings are supported datasets with a short name and subdomain:
 10. GTZAN (gtzan, Music)
 11. NSynth instrument family (nsynth, Music)
 12. Pitch Audio Dataset (Surge synthesizer) (surge, Music)
+13. (ML-)AudioCaps (ATR)
+14. Clotho (ATR)
 
-### 6-2. Supported pre-trained models
+### 7-2. Supported pre-trained models
 
 The followings are supported:
 
-- *new* WavCaps
-- *new* LAION CLAP
-- *new* MS CLAP  (caution: very slow to load audio files.)
-- *new* ATST(-Clip), ATST-Frame
-- *new* BEATs
-- *new* CED (using a pre-trained weight on the Huggingface)
-- *new* HTS-AT
+- WavCaps
+- LAION CLAP
+- MS CLAP  (caution: very slow to load audio files.)
+- ATST(-Clip), ATST-Frame
+- BEATs
+- CED (using a pre-trained weight on the Huggingface)
+- HTS-AT
 - VGGish
 - PANNs' CNN14
 - ESResNe(X)t-fbsp
@@ -383,7 +433,7 @@ The followings are supported:
 - COALA
 - BYOL-A
 
-## 7. License
+## License
 
 See [LICENSE](LICENSE) for the detail.
 

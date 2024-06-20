@@ -19,6 +19,9 @@ _defs = {
     'voxforge': [1, 5.8, None, False],
     'as20k': [1, 10.0, 'as', False],
     'as': [1, 10.0, 'as', True],
+    'audiocaps': [1, 10.0, None, False],
+    'ja_audiocaps': [1, 10.0, 'audiocaps', False],
+    'clotho': [1, 30.0, None, False],
 }
 
 _fs_table = {
@@ -29,14 +32,14 @@ _fs_table = {
     48000: '48k',
 }
 
-def get_original_folder(task):
+def get_original_folder(task, folder):
     orgs = {
         'us8k': 'UrbanSound8K',
         'esc50': 'ESC-50-master',
         'as20k': 'AudioSet',
         'as': 'AudioSet',
     }
-    return orgs[task] if task in orgs else task
+    return orgs[task] if task in orgs else folder
 
 
 def get_defs(cfg, task, original_data=False):
@@ -52,5 +55,5 @@ def get_defs(cfg, task, original_data=False):
     """
     folds, unit_sec, folder, balanced = _defs[task]
     folder = folder or task
-    workfolder = f'{WORK}/original/{get_original_folder(task)}' if original_data else f'{WORK}/{_fs_table[cfg.sample_rate]}/{folder}'
+    workfolder = f'{WORK}/original/{get_original_folder(task, folder)}' if original_data else f'{WORK}/{_fs_table[cfg.sample_rate]}/{folder}'
     return f'{METADATA_DIR}/{task}.csv', workfolder, folds, unit_sec, balanced

@@ -257,6 +257,55 @@ def surge(root):
     print(f' {sum(df.split == "train")} {sum(df.split == "valid")} {sum(df.split == "test")}')
 
 
+def audiocaps(root, wav_dir='work/original/audiocaps', header=''):
+    # Download wav files for AudioCaps: https://github.com/XinhaoMei/ACT?tab=readme-ov-file#set-up-dataset
+    wavfiles = sorted([str(f) for f in Path(wav_dir).rglob('**/*.wav')])
+    id2file = {Path(f).stem[1:12]:f for f in wavfiles}  # Yxxxxxxxxxxx.wav
+    print('# of AudioSet wav files:', len(wavfiles), 'id examples:', list(id2file.keys())[:5])
+
+    all_meta = pd.DataFrame(columns=['ytid', 'file_name', 'caption', 'split']).set_index('ytid')
+    for split in ['train', 'test', 'val']:
+        df = pd.read_csv(Path(root)/f'{split}.csv')
+        print(split, len(df))
+        missing = 0
+        ids, filenames, captions = [], [], []
+        for _id, cap in df[['youtube_id', 'caption']].values:
+            if _id in id2file:
+                ids.append(_id)
+                filenames.append(Path(id2file[_id]).relative_to(wav_dir))
+                captions.append(cap)
+            else:
+                missing += 1
+        print(f'{split} -- missing:', missing)
+        meta = pd.DataFrame({'ytid': ids, 'file_name': filenames, 'caption': captions})
+        meta['split'] = split
+        all_meta = pd.concat([all_meta, meta]) if len(all_meta) > 0 else meta
+    all_meta.to_csv(f'evar/metadata/{header}audiocaps.csv', index=None)
+    print(f'Created evar/metadata/{header}audiocaps.csv with # of samples:', len(all_meta))
+
+
+def ja_audiocaps(root, wav_dir='work/original/audiocaps'):
+    # Set root to ml-audiocaps' ja folder: /path/to/ml-audiocaps/ja
+    audiocaps(root, wav_dir=wav_dir, header='ja_')
+
+
+def clotho(root):
+    all_meta = pd.DataFrame(columns=['file_name', 'caption', 'split'])
+    for split in ['train', 'test', 'val']:
+        csvsplit = {'train': 'development', 'test': 'evaluation', 'val': 'validation'}[split]
+        df = pd.read_csv(Path(root)/f'clotho_captions_{csvsplit}.csv')
+        dfs = [df[['file_name', f'caption_{i+1}']] for i in range(5)]
+        for d in dfs:
+            d.columns = ['file_name', f'caption']
+        df = pd.concat(dfs).sort_values('file_name')
+        df['file_name'] = csvsplit + '/' + df['file_name']
+        df['split'] = split
+        print(csvsplit, len(df))
+        all_meta = pd.concat([all_meta, df]) if len(all_meta) > 0 else df
+    all_meta.to_csv('evar/metadata/clotho.csv', index=None)
+    print('Created evar/metadata/clotho.csv with # of samples:', len(all_meta))
+
+
 def __making_dataset_surge_tone_splits(root):
     tones = sorted([d.name for d in Path(root).glob('*')])
     N_tones = len(tones)

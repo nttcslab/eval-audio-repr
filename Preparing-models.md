@@ -84,7 +84,7 @@ In addition to the following steps, please download the checkpoint `HTSAT-BERT-P
 
     (cd external && git clone https://github.com/XinhaoMei/WavCaps.git)
     (cd external/WavCaps && git apply ../../external/wavcaps.patch)
-    pip install ruamel.yaml sentence_transformers wandb loguru
+    pip install ruamel.yaml sentence_transformers wandb loguru torchlibrosa
 
 ## MS-CLAP, LAION-CLAP
 
