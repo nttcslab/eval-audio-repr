@@ -65,7 +65,7 @@ The following show how to prepare CREMA-D dataset and evaluate OpenL3 (music) fe
     curl https://raw.githubusercontent.com/daisukelab/general-learning/master/MLP/torch_mlp_clf2.py -o evar/utils/torch_mlp_clf2.py
     curl https://raw.githubusercontent.com/daisukelab/sound-clf-pytorch/master/for_evar/sampler.py -o evar/sampler.py
     curl https://raw.githubusercontent.com/daisukelab/sound-clf-pytorch/master/for_evar/cnn14_decoupled.py -o evar/cnn14_decoupled.py
-    wget https://raw.githubusercontent.com/XinhaoMei/WavCaps/master/retrieval/tools/utils.py -O evar/utils/wavcaps_utils.py
+    curl https://raw.githubusercontent.com/XinhaoMei/WavCaps/master/retrieval/tools/utils.py -o evar/utils/wavcaps_utils.py
     pip install -r requirements.txt
     ```
 
@@ -344,7 +344,7 @@ Zero-shot evaluation: esc50_ar_wavcaps.AR_WavCaps_221affa2 zs_esc50 -> 0.94850
  -> results/scores.csv
 ```
 
-## 8. Autio to text or text to audio retrieval (ATR)
+## 6. Autio to text or text to audio retrieval (ATR)
 
 ATR is available with the `retr_a2t_t2a.py`.
 
@@ -358,7 +358,7 @@ Tasks are:
 - `audiocaps`: ATR using the [AudioCaps](https://audiocaps.github.io/) dataset
 - `ja_audiocaps`: ATR using the Japanese captions of the [ML-AudioCaps](https://github.com/sarulab-speech/ml-audiocaps) dataset
 
-### 8-1. ATR example
+### 6-1. ATR example
 
 WavCaps examples.
 
