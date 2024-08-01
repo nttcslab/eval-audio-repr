@@ -19,12 +19,12 @@ def available_tasks(df):
 
 
 def summarize(weight_file, post=True):
+    # summarize LE
     df = pd.read_csv(f'{RESULT_DIR}/scores.csv')
     df = df[df.report.str.contains(weight_file)]
     df['weight'] = get_weight(weight_file)
     src_df = df.copy()
 
-    # summarize
     df = pd.pivot_table(df, index=['weight'], columns=['task'], values=['score'], aggfunc=np.mean)
     df.columns = df.columns.get_level_values(1)
     df = df[available_tasks(df)]
@@ -32,6 +32,24 @@ def summarize(weight_file, post=True):
         print(f'No data for {weight_file}.')
         return
     df['average'] = df.mean(1)
+
+    # summarize ATR
+    if Path(f'{RESULT_DIR}/scores.csv').exists():
+        d = pd.read_csv(f'{RESULT_DIR}/retrieval_scores.csv')
+        d = d[d.weight.str.contains(weight_file, na=False)]
+        if len(d) > 0:
+            d = d.set_index('model')
+            d['weight'] = get_weight(weight_file)
+            d.columns = ['task', 'a2tR1', 'a2tR5', 'a2tR10', 't2aR1', 't2aR5', 't2aR10', 'weight']
+            new_d = None
+            for t, shortname in [('audiocaps', 'A'), ('clotho', 'C')]:
+                d_ = d[d.task == t][['a2tR1', 'a2tR5', 'a2tR10', 't2aR1', 't2aR5', 't2aR10']]
+                d_.columns = [shortname + c for c in list(d_.columns)]
+                d_.index = ['same_index']
+                new_d = d_ if new_d is None else pd.concat([new_d, d_], axis=1)
+            new_d['weight'] = get_weight(weight_file)
+            new_d = new_d.set_index('weight')
+            df = pd.concat([df, new_d], axis=1) * 0.01
 
     # report
     report = df.applymap(lambda x: f'{x*100:.2f}%' if str(x).isnumeric else x).to_markdown()

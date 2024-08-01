@@ -24,7 +24,7 @@ The papers used EVAR are:
 - Niizumi et al. (EUSIPCO 2022): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Composing General Audio Representation by Fusing Multilayer Features of a Pre-trained Model," in EUSIPCO, 2022](https://arxiv.org/abs/2205.08138).* 👉  [GitHub](https://github.com/nttcslab/composing-general-audio-repr)
 - BYOL-A (IJCNN 2021): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," in IJCNN, 2021](https://arxiv.org/abs/2103.06695).* 👉 [GitHub](https://github.com/nttcslab/byol-a)
 
-## What's new
+## Update History
 
 ### Jun 20, 2024 -- Supported autio to text or text to audio retrieval (ATR).
 - ATR evaluator: `retr_a2t_t2a.py`
@@ -40,6 +40,8 @@ The papers used EVAR are:
 - Fix: An issue related to resampling quality by migrating from torchaudio to soundfile+librosa.
 - Fix: M2D to use fixed normalization statistic values.
 
+<details><summary>Older history</summary>
+
 ### Jan 12, 2024 -- Supported weighted CE loss with fine-tuning and added more models.
 - Loss function: Supported (for fine-tuning) weighted cross entropy loss.
 - New model: Supported (for linear evaluation) ATST/ATST-Frame, BEATs, CED, HTSAT.
@@ -52,6 +54,8 @@ The papers used EVAR are:
 - New task: Supported AudioSet20K.
 - New model: Supported (for linear evaluation) data2vec, HuBERT, and WavLM.
 - New model: Supported (for linear evaluation and fine-tuning) BYOL-A (v2, TASLP 2023).
+
+</details>
 
 ## 1. Quick start (Linear evaluation)
 
