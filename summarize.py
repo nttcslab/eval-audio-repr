@@ -48,8 +48,8 @@ def summarize(weight_file, post=True):
                 d_.index = ['same_index']
                 new_d = d_ if new_d is None else pd.concat([new_d, d_], axis=1)
             new_d['weight'] = get_weight(weight_file)
-            new_d = new_d.set_index('weight')
-            df = pd.concat([df, new_d], axis=1) * 0.01
+            new_d = new_d.set_index('weight') * 0.01
+            df = pd.concat([df, new_d], axis=1)
 
     # report
     report = df.applymap(lambda x: f'{x*100:.2f}%' if str(x).isnumeric else x).to_markdown()

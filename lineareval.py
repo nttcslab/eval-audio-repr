@@ -95,7 +95,7 @@ def to_embeddings(emb_ar, data_loader, device, _id=None, fold=1, cache=False):
 
     emb_ar.eval()
     embs, gts = [], []
-    for X, y in tqdm(data_loader):
+    for X, y in tqdm(data_loader, mininterval=5.0):
         with torch.no_grad():
             X = X if emb_ar.module.cfg.return_filename else X.to(device)
             embs.append(emb_ar(X).detach().cpu())

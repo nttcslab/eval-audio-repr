@@ -91,7 +91,7 @@ def to_embeddings(ar, data_loader, device, _id=None, reliable_count=10):
 
     ar.eval()
     audio_embs, cap_embs = [], []
-    for i in tqdm(range(len(dataset))):
+    for i in tqdm(range(len(dataset)), mininterval=5.0):
         X, y = dataset[i]
         with torch.no_grad():
             X = [X] if ar.cfg.return_filename else X.unsqueeze(0).to(device)
@@ -142,8 +142,8 @@ def audio_text_retrieval(config_file, task, options=''):
     logging.info('{}: Audio to caption: r1: {:.2f}, r5: {:.2f}, '
                      'r10: {:.2f}, r50: {:.2f}, medr: {:.2f}, meanr: {:.2f}, mAP10: {:.3f}'.format(split, *results_t2a))
     df = pd.DataFrame({'model': [cfg.id], 'task': [task],
-                       'a2tR1': results_a2t[:1], 'a2tR5': results_a2t[1:2], 'a2tR10': results_a2t[2:3],
-                       't2aR1': results_t2a[:1], 't2aR5': results_t2a[1:2], 't2aR10': results_t2a[2:3],
+                       'a2tR1': [results_a2t[0]], 'a2tR5': [results_a2t[1]], 'a2tR10': [results_a2t[2]], 'a2tmAP10': [results_a2t[-1]],
+                       't2aR1': [results_t2a[0]], 't2aR5': [results_t2a[1]], 't2aR10': [results_t2a[2]], 't2amAP10': [results_t2a[-1]],
                        'weight': [cfg.weight_file]})
     append_to_csv(f'{RESULT_DIR}/retrieval_scores.csv', df)
 

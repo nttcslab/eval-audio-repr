@@ -70,7 +70,7 @@ def to_embeddings(ar, data_loader, device, _id=None, fold=1):
 
     ar.eval()
     embs, gts = [], []
-    for X, y in tqdm(data_loader):
+    for X, y in tqdm(data_loader, mininterval=5.0):
         with torch.no_grad():
             X = X if ar.cfg.return_filename else X.to(device)
             cur_emb = ar.encode_audio(X)
@@ -130,7 +130,9 @@ def zeroshot_downstream(config_file, task, options='', unit_sec=None):
             classes = train_loader.dataset.classes
             captions = class_to_caption(task, classes)
             print('Captions:', captions[:3], '...')
-            caption_embeddings = ar.encode_text(captions).detach().cpu()
+            # convert one by one to save memory for a large text encoder. -- caption_embeddings = ar.encode_text(captions).detach().cpu()
+            embs = [ar.encode_text([c]).detach().cpu() for c in captions]
+            caption_embeddings = torch.vstack(embs)
 
         # audio embeddings
         audio_embeddings, gts = to_embeddings(ar, test_loader, device, _id=cfg.id, fold=fold)
