@@ -1,0 +1,11 @@
+diff -ur src_org/model/models_cola.py src/model/models_cola.py
+--- src_org/model/models_cola.py	2024-12-13 22:35:31.594477687 +0900
++++ src/model/models_cola.py	2024-12-14 00:05:54.756510677 +0900
+@@ -1,6 +1,6 @@
+ import pytorch_lightning as pl
+ import torch
+-from efficientnet_pytorch import EfficientNet
++#from efficientnet_pytorch import EfficientNet
+ from torch.nn import functional as F
+ import numpy as np
+ from src.model.htsat.htsat import HTSATWrapper

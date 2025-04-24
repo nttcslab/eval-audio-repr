@@ -1,0 +1,33 @@
+# AR parameters such as FFT parameters.
+audio_repr: ar_opera.AR_OPERA_CT
+weight_file: external/OPERA/encoder-operaCT.ckpt
+feature_d: 768
+sample_rate: 16000
+n_fft: 1024
+# window_size: 1024
+hop_size: 512
+n_mels: 64
+f_min: 50
+f_max: 8000
+# window: hanning
+
+# Linear evaluation/Fine-tuning common parameters.
+training_mask: 0.0
+
+# Linear evaluaition parameters.
+batch_size: 128
+lr_lineareval: 0.0003
+report_per_epochs: 50
+early_stop_epochs: 20
+
+# Fine-tuning parameters.
+warmup_epochs: 5
+mixup: 0.5
+ft_bs: 128
+ft_lr: 2.0
+ft_early_stop_epochs: -1  # -1: no early stopping
+ft_epochs: 200
+ft_freq_mask: 8
+ft_time_mask: 64
+ft_noise: 0.0
+ft_rrc: True

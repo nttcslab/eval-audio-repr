@@ -1,0 +1,16 @@
+# AR parameters such as FFT parameters.
+audio_repr: ar_dasheng.AR_Dasheng
+feature_d: 768
+sample_rate: 16000
+# temporal_pooling_type: mean_max
+
+# Training parameters.
+batch_size: 256
+lr_lineareval: 0.0003
+report_per_epochs: 20
+early_stop_epochs: 20
+
+# Model specific parameters.
+# model_name: mispeech/dasheng-base
+# model_name: mispeech/dasheng-0.6B
+model_name: mispeech/dasheng-1.2B
