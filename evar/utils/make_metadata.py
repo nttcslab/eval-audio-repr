@@ -306,6 +306,64 @@ def clotho(root):
     print('Created evar/metadata/clotho.csv with # of samples:', len(all_meta))
 
 
+def musiccaps(csvfile, as_dir='work/16k/as'):
+    df = pd.read_csv(csvfile)
+
+    # mark existing samples.
+    files = list(Path(as_dir).glob('*/**/*.wav'))
+    _ids = [f.stem[:11] for f in files]
+    filenames = [str(f).replace(as_dir+'/', '') for f in files]
+    id2file = {_id: _file for _id, _file in zip(_ids, filenames)}
+    df['exists'] = [(str(ytid) in id2file) for ytid in df.ytid.values]
+    df['split'] = ['test' if r.is_audioset_eval else 'train' for _, r in df.iterrows()]
+    print('Official total:', len(df), ', exists:', df.exists.sum())
+    print(f'Official train:test={sum(df.split == "train")}:{sum(df.split == "test")}')
+    # remove unavailable samples.
+    df = df[df.exists].copy()
+    df['file_name'] = [id2file[ytid] for ytid in df.ytid.values]
+
+    all_meta = df[['file_name', 'caption', 'audioset_positive_labels', 'aspect_list']]
+    all_meta.to_csv('evar/metadata/musiccaps.csv', index=None)
+    print('Created evar/metadata/musiccaps.csv with # of samples:', len(all_meta))
+    print(f'Final train:test={sum(df.split == "train")}:{sum(df.split == "test")}')
+
+
+def vocalsound(root):
+    metadf = pd.read_csv(root + '/meta/all_meta.csv', header=None)
+    label2name = {k:v for k, v in pd.read_csv(root + '/class_labels_indices_vs.csv')[['mid', 'display_name']].values}
+
+    try:
+        with open(root + '/datafiles/tr.json', mode="r", encoding="utf-8") as reader:
+            train = json.loads(reader.read())['data']
+        with open(root + '/datafiles/val.json', mode="r", encoding="utf-8") as reader:
+            valid = json.loads(reader.read())['data']
+        with open(root + '/datafiles/te.json', mode="r", encoding="utf-8") as reader:
+            test = json.loads(reader.read())['data']
+    except:
+        with open(root + '/datafiles/tr_rev.json', mode="r", encoding="utf-8") as reader:
+            train = json.loads(reader.read())['data']
+        with open(root + '/datafiles/val_rev.json', mode="r", encoding="utf-8") as reader:
+            valid = json.loads(reader.read())['data']
+        with open(root + '/datafiles/te_rev.json', mode="r", encoding="utf-8") as reader:
+            test = json.loads(reader.read())['data']
+
+    d1 = pd.DataFrame({'spk_id': [d['spk_id'] for d in train], 'file_name': [d['wav'].split('/')[-1] for d in train], 'label': [label2name[d['labels']] for d in train], 'split': ['train' for _ in train]})
+    d2 = pd.DataFrame({'spk_id': [d['spk_id'] for d in valid], 'file_name': [d['wav'].split('/')[-1] for d in valid], 'label': [label2name[d['labels']] for d in valid], 'split': ['valid' for _ in valid]})
+    d3 = pd.DataFrame({'spk_id': [d['spk_id'] for d in test], 'file_name': [d['wav'].split('/')[-1] for d in test], 'label': [label2name[d['labels']] for d in test], 'split': ['test' for _ in test]})
+    df = pd.concat([d1, d2, d3])
+
+    for _, r in metadf.iterrows():
+        df.loc[df.spk_id == r[0], 'sex'] = r[1]
+        df.loc[df.spk_id == r[0], 'age'] = r[2]
+        df.loc[df.spk_id == r[0], 'nationality'] = r[3]
+        df.loc[df.spk_id == r[0], 'language'] = r[4]
+        df.loc[df.spk_id == r[0], 'q'] = r[5]
+
+    all_meta = df[['file_name', 'label', 'split', 'spk_id', 'sex', 'age', 'nationality', 'language', 'q']]
+    all_meta.to_csv('evar/metadata/vocalsound.csv', index=None)
+    print('Created evar/metadata/vocalsound.csv with # of samples:', len(all_meta))
+
+
 def __making_dataset_surge_tone_splits(root):
     tones = sorted([d.name for d in Path(root).glob('*')])
     N_tones = len(tones)

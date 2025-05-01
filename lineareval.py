@@ -68,6 +68,8 @@ import evar.ar_htsat
 import evar.ar_laionclap
 import evar.ar_msclap
 import evar.ar_wavcaps
+import evar.ar_opera
+import evar.ar_dasheng
 
 
 torch.backends.cudnn.benchmark = True

@@ -22,13 +22,15 @@ class AR_Hubert(BaseAudioRepr):
     def __init__(self, cfg):
         super().__init__(cfg=cfg)
 
-        self.processor = Wav2Vec2Processor.from_pretrained('facebook/wav2vec2-base-960h') # instead of cfg.pretrained_model because non-ft models fail. wav2vec2-base-960h should be fine for preprocessing.
+        self.processor = Wav2Vec2Processor.from_pretrained('facebook/wav2vec2-base-960h')
+        # instead of cfg.pretrained_model because non-ft models fail. wav2vec2-base-960h should be fine for preprocessing.
         self.backbone = HubertModel.from_pretrained(cfg.pretrained_model)
 
     def encode_frames(self, batch_audio):
         device = batch_audio.device
         preprocessed = self.processor(batch_audio.cpu().numpy(), return_tensors="pt", sampling_rate=16000).input_values
-        preprocessed = preprocessed[0].to(device) # [1, B, raw wave length] -> [B, raw wave length]
+        preprocessed = preprocessed[0] if preprocessed.shape[0] == 1 else preprocessed  # [1, B, raw wave length] -> [B, raw wave length]
+        preprocessed = preprocessed.to(device)
         hidden_states = self.backbone(preprocessed, output_hidden_states=True).hidden_states # [B, T, D]
         # stack layer outputs
         states_to_stack = [hidden_states[index] for index in self.cfg.output_layers] if self.cfg.output_layers else hidden_states

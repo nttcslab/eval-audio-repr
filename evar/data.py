@@ -8,6 +8,7 @@ from .sampler import BalancedRandomSampler, InfiniteSampler
 from sklearn.preprocessing import MultiLabelBinarizer
 from torch.utils.data import WeightedRandomSampler
 import librosa
+import logging
 
 
 class BaseRawAudioDataset(torch.utils.data.Dataset):
@@ -176,9 +177,11 @@ def create_dataloader(cfg, fold=1, seed=42, batch_size=None, always_one_hot=Fals
         classes=train_dataset.classes)
     test_dataset = WavDataset(cfg, 'test', holdout_fold=fold, always_one_hot=always_one_hot, random_crop=False,
         classes=train_dataset.classes)
+    logging.info(f' classes: {train_dataset.classes}')
 
-    train_sampler = BalancedRandomSampler(train_dataset, batch_size, seed) if train_dataset.multi_label else \
-        InfiniteSampler(train_dataset, batch_size, seed, shuffle=True)
+    if balanced_random:
+        train_sampler = BalancedRandomSampler(train_dataset, batch_size, seed) if train_dataset.multi_label else \
+            InfiniteSampler(train_dataset, batch_size, seed, shuffle=True)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_sampler=train_sampler, pin_memory=pin_memory,
                                             num_workers=num_workers) if balanced_random else \

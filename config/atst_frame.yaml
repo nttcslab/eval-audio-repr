@@ -1,7 +1,7 @@
 # AR parameters such as FFT parameters.
 audio_repr: ar_atst_frame.AR_ATST_Frame
 weight_file: external/atstframe_base.ckpt
-feature_d: 1536
+feature_d: 9216
 sample_rate: 16000
 n_fft: 1024
 window_size: 1024

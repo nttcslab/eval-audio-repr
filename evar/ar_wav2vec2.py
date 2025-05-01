@@ -29,7 +29,8 @@ class AR_Wav2Vec2Logit(BaseAudioRepr):
     def encode_frames(self, batch_audio):
         device = batch_audio.device
         preprocessed = self.processor(batch_audio.cpu().numpy(), return_tensors="pt", sampling_rate=16000).input_values
-        preprocessed = preprocessed[0].to(device) # [1, B, raw wave length] -> [B, raw wave length]
+        preprocessed = preprocessed[0] if preprocessed.shape[0] == 1 else preprocessed  # [1, B, raw wave length] -> [B, raw wave length]
+        preprocessed = preprocessed.to(device)
         logits = self.backbone(preprocessed).logits # [B, T, D]
         return logits.transpose(1, 2) # [B, D, T]
 
@@ -45,7 +46,8 @@ class AR_Wav2Vec2Context(AR_Wav2Vec2Logit):
     def encode_frames(self, batch_audio):
         device = batch_audio.device
         preprocessed = self.processor(batch_audio.cpu().numpy(), return_tensors="pt", sampling_rate=16000).input_values
-        preprocessed = preprocessed[0].to(device) # [1, B, raw wave length] -> [B, raw wave length]
+        preprocessed = preprocessed[0] if preprocessed.shape[0] == 1 else preprocessed  # [1, B, raw wave length] -> [B, raw wave length]
+        preprocessed = preprocessed.to(device)
         features = self.backbone.wav2vec2(preprocessed, output_hidden_states=True).hidden_states # [B, T, D]
         hidden_states = self.backbone(preprocessed, output_hidden_states=True).hidden_states # [B, T, D]
         # stack layer outputs
@@ -60,7 +62,8 @@ class AR_Wav2Vec2Feature(AR_Wav2Vec2Logit):
     def encode_frames(self, batch_audio):
         device = batch_audio.device
         preprocessed = self.processor(batch_audio.cpu().numpy(), return_tensors="pt", sampling_rate=16000).input_values
-        preprocessed = preprocessed[0].to(device) # [1, B, raw wave length] -> [B, raw wave length]
+        preprocessed = preprocessed[0] if preprocessed.shape[0] == 1 else preprocessed  # [1, B, raw wave length] -> [B, raw wave length]
+        preprocessed = preprocessed.to(device)
         features = self.backbone.wav2vec2.feature_extractor(preprocessed) # [B, D, T]
         features = features.transpose(1, 2) # -> [B, T, D]
         return features.transpose(1, 2) # [B, D, T]

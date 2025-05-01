@@ -94,15 +94,22 @@ class ToLogMelSpec(nn.Module):
 
 def _calculate_stats(device, data_loader, converter, max_samples):
     running_stats = RunningStats()
-    sample_count = 0
-    for batch_audio, _ in data_loader:
+    sample_count, batch_count, initial_cycle = 0, 0, True
+    for batch_audio in data_loader:
+        batch_audio = batch_audio if isinstance(batch_audio, (torch.Tensor)) else batch_audio[0]  # Use audio samples only
+        if initial_cycle and len(batch_audio.shape) != 2:
+            logging.warning(f'len(batch_audio.shape) is not 2 but {batch_audio.shape}')
         with torch.no_grad():
             converteds = converter(batch_audio.to(device)).detach().cpu()
         running_stats.put(converteds)
         sample_count += len(batch_audio)
+        batch_count += 1
         if sample_count >= max_samples:
             break
-    return torch.tensor(running_stats())
+        initial_cycle = False
+    stats = running_stats()
+    print(f' Done _calculate_stats stats={stats}, sample_count={sample_count}, batch_count={batch_count}, batch_size={data_loader.batch_size}')
+    return torch.tensor(stats)
 
 
 def calculate_norm_stats(device, data_loader, converter, max_samples=5000):

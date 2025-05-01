@@ -12,6 +12,7 @@ import sys
 import logging
 import torch
 try:
+    sys.path.append('../../external/hf_transformers_custom_model_ced')
     sys.path.append('external/hf_transformers_custom_model_ced')
     from ced_model.feature_extraction_ced import CedFeatureExtractor
     from ced_model.modeling_ced import CedForAudioClassification

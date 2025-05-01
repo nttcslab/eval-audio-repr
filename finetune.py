@@ -12,7 +12,7 @@ import timm.scheduler
 import timm.optim
 
 from evar.data import create_dataloader
-from evar.model_utils import show_layers_trainable, MLP
+from evar.model_utils import set_layers_trainable, show_layers_trainable, MLP
 from lineareval import *
 
 
@@ -209,18 +209,19 @@ def arg_conf_str(args, defaults={
     return confstr
 
 
-def _train(cfg, ar_model, device, logpath, train_loader, valid_loader, test_loader, multi_label, seed, lr, balanced, verbose):
+def _train(cfg, ar_model, device, logpath, train_loader, valid_loader, test_loader, loss_fn, multi_label, seed, lr, balanced, verbose):
     classes = train_loader.dataset.classes
 
-    loss_fn = loss_bce if multi_label else loss_nll
+    loss_fn = loss_fn if loss_fn is not None else (loss_bce if multi_label else loss_nll)
     eval_fn = eval_map if multi_label else eval_acc
     crit_str = 'mAP' if eval_fn == eval_map else 'acc'
-    optimizer = {
-        'adamw': torch.optim.AdamW(ar_model.parameters(), lr=lr, weight_decay=0.0001, betas=(0.9, 0.95), eps=1e-08, amsgrad=True),
-        'sgd': torch.optim.SGD(ar_model.parameters(), lr, momentum=0.9, weight_decay=0),
-        'lars': timm.optim.Lars(ar_model.parameters(), lr, momentum=0.9, weight_decay=0),
-        'lamb': timm.optim.Lamb(ar_model.parameters(), lr),
-    }[cfg.optim]
+
+    if cfg.optim == 'adamw': optimizer = torch.optim.AdamW(ar_model.parameters(), lr=lr, weight_decay=0.0001, betas=(0.9, 0.95), eps=1e-08, amsgrad=True)
+    elif cfg.optim == 'sgd': optimizer = torch.optim.SGD(ar_model.parameters(), lr, momentum=0.9, weight_decay=0)
+    elif cfg.optim == 'lars': optimizer = timm.optim.Lars(ar_model.parameters(), lr, momentum=0.9, weight_decay=0)
+    elif cfg.optim == 'lamb': optimizer = timm.optim.Lamb(ar_model.parameters(), lr)
+    assert cfg.optim in ['adamw', 'sgd', 'lars', 'lamb']
+
     scheduler = timm.scheduler.CosineLRScheduler(optimizer, t_initial=cfg.ft_epochs, lr_min=1e-7, warmup_t=cfg.warmup_epochs, warmup_lr_init=0)
     logging.info(f'Using {loss_fn.__name__}, {eval_fn.__name__}, and {optimizer}')
 
@@ -251,7 +252,8 @@ def _train(cfg, ar_model, device, logpath, train_loader, valid_loader, test_load
             # Train
             ar_model.train()
             X_aug, y_aug = mixup(batch)
-            X_aug, y_aug = X_aug.to(device), y_aug.to(device)
+            if not isinstance(X_aug, list):
+                X_aug, y_aug = X_aug.to(device), y_aug.to(device)
 
             probs = ar_model(X_aug)
             loss = loss_fn(probs, y_aug)
@@ -343,7 +345,7 @@ class TaskNetwork(torch.nn.Module):
 def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=None, batch_size=None,
                           epochs=None, early_stop_epochs=None, warmup_epochs=None,
                           freq_mask=None, time_mask=None, rrc=None, training_mask=None,
-                          optim='sgd', unit_sec=None, verbose=True, eval_only=False, data_path='work'):
+                          optim='sgd', unit_sec=None, verbose=True, eval_only=False, freeze_ar=False, loss_fn=None, data_path='work'):
     cfg, n_folds, balanced = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
     lr = lr or cfg.ft_lr
     cfg.mixup = mixup if mixup is not None else cfg.mixup
@@ -353,6 +355,7 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
     cfg.ft_freq_mask = freq_mask if freq_mask is not None else cfg.ft_freq_mask
     cfg.ft_time_mask = time_mask if time_mask is not None else cfg.ft_time_mask
     cfg.ft_rrc = rrc if rrc is not None else (cfg.ft_rrc if 'ft_rrc' in cfg else False)
+    cfg.freeze_ar = freeze_ar
     cfg.training_mask = training_mask if training_mask is not None else (cfg.training_mask if 'training_mask' in cfg else 0.0)
     cfg.ft_bs = batch_size or cfg.ft_bs
     cfg.optim = optim
@@ -363,7 +366,7 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
     train_loader, _, _, _ = create_dataloader(cfg, fold=0, seed=seed, batch_size=cfg.ft_bs, balanced_random=balanced, pin_memory=False)
 
     cfg.runtime_cfg = kwarg_cfg(lr=lr, seed=seed, hidden=hidden, mixup=cfg.mixup, bs=cfg.ft_bs,
-                                freq_mask=cfg.ft_freq_mask, time_mask=cfg.ft_time_mask, rrc=cfg.ft_rrc, epochs=cfg.ft_epochs,
+                                freq_mask=cfg.ft_freq_mask, time_mask=cfg.ft_time_mask, rrc=cfg.ft_rrc, freeze_ar=cfg.freeze_ar, epochs=cfg.ft_epochs,
                                 early_stop_epochs=cfg.ft_early_stop_epochs, n_class=len(train_loader.dataset.classes))
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -385,6 +388,8 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
             ar.precompute_lms(device, train_loader)
         else:
             ar.precompute(device, train_loader)
+        if freeze_ar:
+            set_layers_trainable(ar, trainable=False)
         task_model = TaskNetwork(cfg, ar).to(device)
         task_model_dp = torch.nn.DataParallel(task_model).to(device)
         logging.info(f'Head = {task_model.head}')
@@ -397,7 +402,7 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
             return [best_result], cfg.weight_file, 'eval only', cfg, logpath
 
         best_result, best_path, name = _train(cfg, task_model_dp, device, logpath, train_loader, valid_loader, test_loader,
-            multi_label, seed, lr, balanced, verbose)
+            loss_fn, multi_label, seed, lr, balanced, verbose)
 
         scores.append(best_result)
         if n_folds > 1:
@@ -408,11 +413,11 @@ def run_eval(config_file, task, options='', seed=42, lr=None, hidden=(), mixup=N
 
 def finetune_main(config_file, task, options='', seed=42, lr=None, hidden=(), epochs=None, early_stop_epochs=None, warmup_epochs=None,
                   mixup=None, freq_mask=None, time_mask=None, rrc=None, training_mask=None, batch_size=None,
-                  optim='sgd', unit_sec=None, verbose=False, eval_only=False, data_path='work'):
+                  optim='sgd', unit_sec=None, verbose=False, eval_only=False, freeze_ar=False, loss_fn=None, data_path='work'):
     scores, best_path, name, cfg, logpath = run_eval(config_file, task, options=options, seed=seed, lr=lr, hidden=hidden, mixup=mixup,
         batch_size=batch_size, epochs=epochs, early_stop_epochs=early_stop_epochs, warmup_epochs=warmup_epochs,
         freq_mask=freq_mask, time_mask=time_mask, rrc=rrc, training_mask=training_mask, optim=optim,
-        unit_sec=unit_sec, verbose=verbose, eval_only=eval_only, data_path=data_path)
+        unit_sec=unit_sec, verbose=verbose, eval_only=eval_only, freeze_ar=freeze_ar, loss_fn=loss_fn, data_path=data_path)
     mean_score = np.mean(scores)
     report = f'Finetuning {name} on {cfg.task_name} -> mean score: {mean_score:.5f}'
     if eval_only:

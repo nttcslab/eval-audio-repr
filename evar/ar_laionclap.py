@@ -8,10 +8,10 @@ Large-Scale Contrastive Language-Audio Pretraining with Feature Fusion and Keywo
 """
 
 from evar.ar_base import BaseCLAP
-from packaging import version
-import torch
-import transformers, os
 try:
+    from packaging import version
+    import torch
+    import transformers, os
     import laion_clap
 except:
     pass  # please install: pip install laion-clap

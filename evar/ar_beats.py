@@ -12,7 +12,10 @@ import sys
 import logging
 import torch
 try:
-    sys.path.append('external/unilm/beats')
+    import os
+    evar_home = os.getenv('EVAR', '')
+    sys.path.append(os.path.join(evar_home, 'external/unilm/beats'))
+    sys.path.append('../../external/unilm/beats')
     from Tokenizers import TokenizersConfig, Tokenizers
     from BEATs import BEATs, BEATsConfig
 except:

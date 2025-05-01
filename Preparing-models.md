@@ -12,13 +12,6 @@ The followings are command lines to prepare models.
     pip install wget
     cd ..
 
-## BYOL-A (IJCNN2021) & BYOL-A v2 (TASLP2023)
-
-    cd external/
-    git clone https://github.com/nttcslab/byol-a.git
-    mv byol-a byol_a
-    cd ..
-
 ## ATST & ATST-Frame
 
 In addition to the following steps, please download the ATST-Frame checkpoint as `external/atstframe_base.ckpt` from https://github.com/Audio-WestlakeU/audiossl/tree/main/audiossl/methods/atstframe.
@@ -33,17 +26,17 @@ In addition to the following steps, please download the BEATs_iter3 and BEATs_it
 
     (cd external && git clone https://github.com/microsoft/unilm.git)
 
+## BYOL-A (IJCNN2021) & BYOL-A v2 (TASLP2023)
+
+    cd external/
+    git clone https://github.com/nttcslab/byol-a.git
+    mv byol-a byol_a
+    cd ..
+
 ## CED
 
     (cd external && git clone https://github.com/jimbozhang/hf_transformers_custom_model_ced.git)
     pip install transformers
-
-## HTS-AT
-
-In addition to the following steps, please download the checkpoint as `external/HTSAT_AudioSet_Saved_1.ckpt` from https://github.com/RetroCirce/HTS-Audio-Transformer?tab=readme-ov-file#model-checkpoints.
-
-    (cd external && git clone https://github.com/RetroCirce/HTS-Audio-Transformer.git htsat)
-    pip install h5py museval torchlibrosa
 
 ## COALA
 
@@ -52,6 +45,10 @@ In addition to the following steps, please download the checkpoint as `external/
     cd coala
     patch -p1 < ../../external/coala.patch
     cd ../..
+
+## Dasheng
+
+    pip install git+https://github.com/jimbozhang/hf_transformers_custom_model_dasheng.git
 
 ## ESResNe(X)t-fbsp
 
@@ -69,6 +66,41 @@ In addition to the following steps, please download the checkpoint as `external/
     sed -i 's/from utils/from \./' utils/datasets.py
     cd ../..
 
+## HTS-AT
+
+In addition to the following steps, please download the checkpoint as `external/HTSAT_AudioSet_Saved_1.ckpt` from https://github.com/RetroCirce/HTS-Audio-Transformer?tab=readme-ov-file#model-checkpoints.
+
+    (cd external && git clone https://github.com/RetroCirce/HTS-Audio-Transformer.git htsat)
+    pip install h5py museval torchlibrosa
+
+## M2D
+
+To get M2D ready, follow the steps 👉 [M2D setup](https://github.com/nttcslab/m2d?tab=readme-ov-file#1-setup):
+
+    cd external
+    << follow the steps described in https://github.com/nttcslab/m2d?tab=readme-ov-file#1-setup >>
+
+Download the weights from the GitHub. Example:
+
+    wget https://github.com/nttcslab/m2d/releases/download/v0.3.0/m2d_clap_vit_base-80x1001p16x16-240128_AS-FT_enconly.zip
+    unzip m2d_clap_vit_base-80x1001p16x16-240128_AS-FT_enconly.zip
+
+You will find the `m2d_clap_vit_base-80x1001p16x16-240128_AS-FT_enconly` folder.
+The following runs a linear evaluation on CREMA-D.
+
+    python lineareval.py config/m2d.yaml cremad weight_file=m2d_clap_vit_base-80x1001p16x16-240128_AS-FT_enconly/weights_ep67it3124-0.48558.pth
+
+## MS-CLAP, LAION-CLAP
+
+    pip install msclap
+    pip install laion-clap
+
+## Opera
+
+    (cd external && git clone https://github.com/evelyn0414/OPERA.git)
+    (cd external/OPERA && curl -L -O https://huggingface.co/evelyn0414/OPERA/resolve/main/encoder-operaCT.ckpt)
+    (cd external/OPERA && patch -p0 < ../opera.patch)
+
 ## VGGish
 
     cd external
@@ -85,9 +117,4 @@ In addition to the following steps, please download the checkpoint `HTSAT-BERT-P
     (cd external && git clone https://github.com/XinhaoMei/WavCaps.git)
     (cd external/WavCaps && git apply ../../external/wavcaps.patch)
     pip install ruamel.yaml sentence_transformers wandb loguru torchlibrosa
-
-## MS-CLAP, LAION-CLAP
-
-    pip install msclap
-    pip install laion-clap
 

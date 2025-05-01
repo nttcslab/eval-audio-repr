@@ -12,7 +12,10 @@ import sys
 import logging
 import torch
 try:
-    sys.path.append('external/htsat')
+    import os
+    evar_home = os.getenv('EVAR', '')
+    sys.path.append(os.path.join(evar_home, 'external/htsat'))
+    sys.path.append('../../external/htsat')
     from model.htsat import HTSAT_Swin_Transformer
     import config
 except:

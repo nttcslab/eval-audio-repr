@@ -1,0 +1,198 @@
+--- test/org/args.py	2025-05-01 10:43:58.032260791 +0900
++++ test/new/args.py	2025-05-01 10:25:46.146791873 +0900
+@@ -2,6 +2,11 @@
+ 
+ parser = argparse.ArgumentParser()
+ 
++#EVAR
++parser.add_argument("config", type=str)
++parser.add_argument("--head", type=str, default='mlp')
++parser.add_argument("--freeze_body", action='store_true') #freeze ViT embedding layer
++
+ #Generic
+ parser.add_argument("--method", type=str, default='sl') #method in ['sl','scl','hybrid']
+ parser.add_argument("--mscl", action='store_true') #use scl on metadata + scl on class
+@@ -19,7 +24,7 @@
+ 
+ #Data
+ parser.add_argument("--dataset", type=str, default='ICBHI') # which dataset to use ['ICBHI', 'SPRS']
+-parser.add_argument("--mode", type=str, default='inter') # for SPRS dataset, there are two test splits ['inter', 'intra']
++parser.add_argument("--appmode", type=str, default='inter') # for SPRS dataset, there are two test splits ['inter', 'intra']
+ parser.add_argument("--datapath", type=str, default='data/ICBHI') # path of the dataset files
+ parser.add_argument("--metadata", type=str, default='metadata.csv') #metadata file
+ parser.add_argument("--metalabel", type=str, default='sa') #meta label used for mscl, 's' stands for sex, 'a' for age, and 'c' for respiratory class
+@@ -44,4 +49,10 @@
+ parser.add_argument("--alpha", type=float, default=0.5) #tradeoff between cross entropy and nt xent
+ parser.add_argument("--lam", type=float, default=0.75) #tradeoff between scl label and scl metadata
+ 
+-args = parser.parse_args()
+\ No newline at end of file
++#M2D
++parser.add_argument("--freeze_embed", action='store_true') #freeze ViT embedding layer
++parser.add_argument("--adjust_pos", action='store_true')   #adjust positional embedding length
++parser.add_argument("--split_iter", type=int, default=1)   #for a low-memory run, split actual batch size by this number
++
++
++args = parser.parse_args()
+--- test/org/ce.py	2025-05-01 10:43:58.057260922 +0900
++++ test/new/ce.py	2025-05-01 10:22:27.844294369 +0900
+@@ -2,35 +2,43 @@
+ import torch
+ from args import args
+ 
+-def train_epoch(model, train_loader, train_transform, criterion, optimizer, scheduler):
++def train_epoch(model, train_loader, train_transform, criterion, optimizer, scheduler, n_classes, K=1):
+     
+-    TP = [0, 0, 0 ,0]
+-    GT = [0, 0, 0, 0]
++    TP = [0 for _ in range(n_classes)]
++    GT = [0 for _ in range(n_classes)]
+ 
+     epoch_loss = 0.0
+ 
+     model.train()
+ 
+-    for data, target, _ in train_loader:
+-        data, target = data.to(args.device), target.to(args.device)
++    for batch_data, batch_target, _ in train_loader:
++        batch_data_t, batch_target = batch_data.to(args.device), batch_target.to(args.device)
+ 
+-        with torch.no_grad():
+-            data_t = train_transform(data) 
++        if train_transform is not None:
++            with torch.no_grad():
++                batch_data_t = train_transform(batch_data_t)
+         
+         optimizer.zero_grad()
+ 
+-        output = model(data_t)
+-        loss = criterion(output, target)
++        L = len(batch_data_t)
++        D = L // K
++        for i in range(K):
++            data = batch_data_t[i*D:(i+1)*D]
++            target = batch_target[i*D:(i+1)*D]
++
++            output = model(data)
++            loss = criterion(output, target)
+             
+-        epoch_loss += loss.item()
++            epoch_loss += loss.item()
+ 
+-        _, labels_predicted = torch.max(output, dim=1)
++            _, labels_predicted = torch.max(output, dim=1)
+ 
+-        for idx in range(len(TP)):
+-            TP[idx] += torch.logical_and((labels_predicted==idx),(target==idx)).sum().item()
+-            GT[idx] += (target==idx).sum().item()
++            for idx in range(len(TP)):
++                TP[idx] += torch.logical_and((labels_predicted==idx),(target==idx)).sum().item()
++                GT[idx] += (target==idx).sum().item()
+         
+-        loss.backward()
++            loss.backward()
++
+         optimizer.step()
+ 
+     scheduler.step()
+@@ -43,10 +51,10 @@
+ 
+     return epoch_loss, se, sp, icbhi_score, acc
+ 
+-def val_epoch(model, val_loader, val_transform, criterion):
++def val_epoch(model, val_loader, val_transform, criterion, n_classes, K=1):
+ 
+-    TP = [0, 0, 0 ,0]
+-    GT = [0, 0, 0, 0]
++    TP = [0 for _ in range(n_classes)]
++    GT = [0 for _ in range(n_classes)]
+ 
+     epoch_loss = 0.0
+ 
+@@ -54,18 +62,26 @@
+ 
+     with torch.no_grad():
+ 
+-        for data, target, _ in val_loader:
+-            data, target = data.to(args.device), target.to(args.device)
++        for batch_data, batch_target, _ in val_loader:
++            batch_data, batch_target = batch_data.to(args.device), batch_target.to(args.device)
+             
+-            output = model(val_transform(data))
+-            loss = criterion(output, target)
+-            epoch_loss += loss.item()
+-
+-            _, labels_predicted = torch.max(output, dim=1)
+-
+-            for idx in range(len(TP)):
+-                TP[idx] += torch.logical_and((labels_predicted==idx),(target==idx)).sum().item()
+-                GT[idx] += (target==idx).sum().item()
++            L = len(batch_data)
++            D = L // K
++            for i in range(K):
++                data = batch_data[i*D:(i+1)*D]
++                target = batch_target[i*D:(i+1)*D]
++
++                if val_transform is not None:
++                    data = val_transform(data)
++                output = model(data)
++                loss = criterion(output, target)
++                epoch_loss += loss.item()
++
++                _, labels_predicted = torch.max(output, dim=1)
++
++                for idx in range(len(TP)):
++                    TP[idx] += torch.logical_and((labels_predicted==idx),(target==idx)).sum().item()
++                    GT[idx] += (target==idx).sum().item()
+ 
+ 
+     epoch_loss = epoch_loss / len(val_loader)
+@@ -76,7 +92,7 @@
+ 
+     return epoch_loss, se, sp, icbhi_score, acc
+ 
+-def train_ce(model, train_loader, val_loader, train_transform, val_transform, criterion, optimizer, epochs, scheduler):
++def train_ce(model, train_loader, val_loader, train_transform, val_transform, criterion, optimizer, epochs, scheduler, n_classes, K=1):
+ 
+     train_losses = []; val_losses = []; train_se_scores = []; train_sp_scores = []; train_icbhi_scores = []; train_acc_scores = []; val_se_scores = []; val_sp_scores = []; val_icbhi_scores = []; val_acc_scores = []
+ 
+@@ -86,16 +102,17 @@
+     best_sp = 0
+     best_epoch_acc = 0
+     best_epoch_icbhi = 0
++    best_weight = None
+ 
+     for i in range(1, epochs+1):
+         
+-        print(f"Epoch {i}")
++        print(f"Epoch {i}", flush=True)
+ 
+-        train_loss, train_se, train_sp, train_icbhi_score, train_acc = train_epoch(model, train_loader, train_transform, criterion, optimizer, scheduler)
++        train_loss, train_se, train_sp, train_icbhi_score, train_acc = train_epoch(model, train_loader, train_transform, criterion, optimizer, scheduler, n_classes, K)
+         train_losses.append(train_loss); train_se_scores.append(train_se); train_sp_scores.append(train_sp); train_icbhi_scores.append(train_icbhi_score); train_acc_scores.append(train_acc)
+         print(f"Train loss : {format(train_loss, '.4f')}\tTrain SE : {format(train_se, '.4f')}\tTrain SP : {format(train_sp, '.4f')}\tTrain Score : {format(train_icbhi_score, '.4f')}\tTrain Acc : {format(train_acc, '.4f')}")
+ 
+-        val_loss, val_se, val_sp, val_icbhi_score, val_acc = val_epoch(model, val_loader, val_transform, criterion)
++        val_loss, val_se, val_sp, val_icbhi_score, val_acc = val_epoch(model, val_loader, val_transform, criterion, n_classes, K)
+         val_losses.append(val_loss); val_se_scores.append(val_se); val_sp_scores.append(val_sp); val_icbhi_scores.append(val_icbhi_score); val_acc_scores.append(val_acc)
+         print(f"Val loss : {format(val_loss, '.4f')}\tVal SE : {format(val_se, '.4f')}\tVal SP : {format(val_sp, '.4f')}\tVal Score : {format(val_icbhi_score, '.4f')}\tVal Acc : {format(val_acc, '.4f')}")          
+ 
+@@ -112,11 +129,15 @@
+             best_icbhi_score = val_icbhi_score
+             best_se = val_se
+             best_sp = val_sp
++            best_weight = {k: v.cpu() for k, v in model.state_dict().items()}
+         
+         if best_val_acc < val_acc:
+             best_epoch_acc = i
+             best_val_acc = val_acc
+ 
+-    print(f"best icbhi score is {format(best_icbhi_score, '.4f')} (se:{format(best_se, '.4f')} sp:{format(best_sp, '.4f')}) at epoch {best_epoch_icbhi}")
++        print(f"Val loss : {format(val_loss, '.4f')}\tVal SE : {format(val_se, '.4f')}\tVal SP : {format(val_sp, '.4f')}\tVal Score : {format(val_icbhi_score, '.4f')}\tVal Acc : {format(val_acc, '.4f')} best_icbhi_score so far: {format(best_icbhi_score, '.4f')}", flush=True)
++
++    report = f"best icbhi score is {format(best_icbhi_score, '.4f')} (se:{format(best_se, '.4f')} sp:{format(best_sp, '.4f')}) at epoch {best_epoch_icbhi}"
++    print(report)
+ 
+-    return train_losses, val_losses, train_se_scores, train_sp_scores, train_icbhi_scores, train_acc_scores, val_se_scores, val_sp_scores, val_icbhi_scores, val_acc_scores
+\ No newline at end of file
++    return report, (best_sp, best_se, best_icbhi_score, best_weight), train_losses, val_losses, train_se_scores, train_sp_scores, train_icbhi_scores, train_acc_scores, val_se_scores, val_sp_scores, val_icbhi_scores, val_acc_scores

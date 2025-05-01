@@ -11,4 +11,5 @@ report_per_epochs: 20
 early_stop_epochs: 20
 
 # Model specific parameters.
-wav2vec_model: facebook/wav2vec2-large-960h-lv60
+wav2vec_model: facebook/wav2vec2-base-960h
+# wav2vec_model: facebook/wav2vec2-large-960h-lv60

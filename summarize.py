@@ -19,9 +19,9 @@ def available_tasks(df):
 
 
 def summarize(weight_file, post=True):
-    # summarize LE
+    # Summarize LE
     df = pd.read_csv(f'{RESULT_DIR}/scores.csv')
-    df = df[df.report.str.contains(weight_file)]
+    df = df[df.report.str.contains(weight_file, na=False, regex=False)]
     df['weight'] = get_weight(weight_file)
     src_df = df.copy()
 
@@ -33,14 +33,14 @@ def summarize(weight_file, post=True):
         return
     df['average'] = df.mean(1)
 
-    # summarize ATR
+    # Summarize ATR
     if Path(f'{RESULT_DIR}/scores.csv').exists():
         d = pd.read_csv(f'{RESULT_DIR}/retrieval_scores.csv')
-        d = d[d.weight.str.contains(weight_file, na=False)]
+        d = d[d.weight.str.contains(weight_file, na=False, regex=False)]
         if len(d) > 0:
             d = d.set_index('model')
             d['weight'] = get_weight(weight_file)
-            d.columns = ['task', 'a2tR1', 'a2tR5', 'a2tR10', 't2aR1', 't2aR5', 't2aR10', 'weight']
+            d.columns = ['task', 'a2tR1', 'a2tR5', 'a2tR10', 'a2tmAP10', 't2aR1', 't2aR5', 't2aR10', 't2amAP10', 'weight']
             new_d = None
             for t, shortname in [('audiocaps', 'A'), ('clotho', 'C')]:
                 d_ = d[d.task == t][['a2tR1', 'a2tR5', 'a2tR10', 't2aR1', 't2aR5', 't2aR10']]
@@ -51,11 +51,11 @@ def summarize(weight_file, post=True):
             new_d = new_d.set_index('weight') * 0.01
             df = pd.concat([df, new_d], axis=1)
 
-    # report
+    # Report
     report = df.applymap(lambda x: f'{x*100:.2f}%' if str(x).isnumeric else x).to_markdown()
     print(report)
 
-    # save source results to a csv.
+    # Save source results to a csv
     report_csv = RESULT_DIR + '/' + str(df.index[0]).replace('/', '_') + '.csv'
     src_df.report = src_df.report.str.replace('\n', ' ')
     src_df.to_csv(report_csv, index=None)

@@ -31,6 +31,8 @@ class AST_Feature(torch.nn.Module):
                 dither=0.0, frame_shift=10)
             return fbank
         device = waveforms.device
+        if len(waveforms.shape) == 1:  # [L] -> [1, L]
+            waveforms = waveforms.unsqueeze(0)
         fbanks = torch.stack([get_one(w.unsqueeze(0)) for w in waveforms])
         return fbanks.to(device)
 

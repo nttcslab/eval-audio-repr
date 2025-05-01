@@ -21,7 +21,7 @@ class AR_MSCLAP(BaseCLAP):
         # MS CLAP accepts file name as audio input.
         self.filename_mode = True
 
-        self.backbone = CLAP(version=str(cfg.weight_file), use_cuda=False)
+        self.backbone = CLAP(version=str(cfg.weight_file), use_cuda=True)
 
     def encode_frames(self, batch_audio):
         assert False, 'encode_frames for MS CLAP is not supported for now'

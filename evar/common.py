@@ -81,7 +81,7 @@ def complete_cfg(cfg, options, no_id=False):
             parent = weight_path.parent.stem if len(weight_path.parent.stem) > 0 else str(cfg.audio_repr.split(',')[-1])
             name = f'{parent}-{weight_path.stem}'
         else:
-            str(cfg.audio_repr.split(',')[-1])
+            name = str(cfg.audio_repr.split(',')[-1])
         cfg.id = name + '_' + task + '_' + hash_text(str(cfg), L=8)
     return cfg
 

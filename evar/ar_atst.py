@@ -13,7 +13,10 @@ import torchaudio
 import logging
 import sys
 try:
-    sys.path.append('external/audiossl')
+    import os
+    evar_home = os.getenv('EVAR', '')
+    sys.path.append(os.path.join(evar_home, 'external/audiossl'))
+    sys.path.append('../../external/audiossl')
     from audiossl.models.atst.audio_transformer import AST, AST_base
 except Exception as e:
     class AST:  # dummy

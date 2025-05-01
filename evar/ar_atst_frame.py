@@ -12,7 +12,10 @@ import logging
 import sys
 from einops import rearrange
 try:
-    sys.path.append('external/audiossl')
+    import os
+    evar_home = os.getenv('EVAR', '')
+    sys.path.append(os.path.join(evar_home, 'external/audiossl'))
+    sys.path.append('../../external/audiossl')
     from audiossl.methods.atstframe.embedding import load_model, get_scene_embedding, get_timestamp_embedding
 except Exception as e:
     pass  # Please clone audiossl

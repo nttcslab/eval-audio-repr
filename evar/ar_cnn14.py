@@ -22,7 +22,7 @@ class AR_Cnn14(BaseAudioRepr):
         self.feature_extractor = AudioFeatureExtractor(n_fft=cfg.n_fft, hop_length=cfg.hop_size, win_length=cfg.window_size,
             sample_rate=cfg.sample_rate, n_mels=cfg.n_mels, f_min=cfg.f_min, f_max=cfg.f_max)
         self.body = Cnn14_Decoupled()
-        weight_file = 'external/Cnn14_16k_mAP=0.438.pth'
+        weight_file = 'external/Cnn14_16k_mAP=0.438.pth' if cfg.weight_file is None else cfg.weight_file
         ensure_weights(weight_file, 'https://zenodo.org/record/3987831/files/Cnn14_16k_mAP%3D0.438.pth')
         load_pretrained_weights(self.body, weight_file)
 

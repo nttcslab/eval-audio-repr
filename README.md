@@ -14,8 +14,9 @@ This evaluation package is intended for researchers who wish to compare ARs unde
 The papers used EVAR are:
 
 - M2D (TASLP 2024): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Masked Modeling Duo: Towards a Universal Audio Pre-Training Framework,” IEEE/ACM Trans. Audio, Speech, Language Process., vol. vol. 32, pp. 2391-2406, 2024](http://dx.doi.org/10.1109/TASLP.2024.3389636).* 👉 [GitHub](https://github.com/nttcslab/m2d)
-- M2D-CLAP (Interspeech 2024): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, M. Yasuda, S. Tsubaki, and K. Imoto, "M2D-CLAP: Masked Modeling Duo Meets CLAP for Learning General-purpose Audio-Language Representation," to appear at Interspeech 2024](https://arxiv.org/abs/2406.02032).* 👉 [GitHub](https://github.com/nttcslab/m2d/tree/master/clap)
-- Niizumi et al. (IEEE EMBC 2024): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Exploring Pre-trained General-purpose Audio Representations for Heart Murmur Detection," to appear at IEEE EMBC, 2024](https://arxiv.org/abs/2404.17107).* 👉  [GitHub](https://github.com/nttcslab/m2d/tree/master/app/circor)
+- M2D-CLAP (Interspeech 2024): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, M. Yasuda, S. Tsubaki, and K. Imoto, "M2D-CLAP: Masked Modeling Duo Meets CLAP for Learning General-purpose Audio-Language Representation," in Interspeech, 2024, pp. 57-61](https://www.isca-archive.org/interspeech_2024/niizumi24_interspeech.html).* 👉 [GitHub](https://github.com/nttcslab/m2d/tree/master/clap)
+- Niizumi et al. (IEEE EMBC 2025): *[D. Niizumi, D. Takeuchi, M. Yasuda, B. T. Nguyen, Y. Ohishi, and N. Harada, "Assessing the Utility of Audio Foundation Models for Heart and Respiratory Sound Analysis," to appear at IEEE EMBC, 2025](https://arxiv.org/abs/2504.18004).* 👉  [GitHub](https://github.com/nttcslab/eval-audio-repr/tree/main/app).
+- Niizumi et al. (IEEE EMBC 2024): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Exploring Pre-trained General-purpose Audio Representations for Heart Murmur Detection," IEEE EMBC, 2024, pp. 1-4](https://ieeexplore.ieee.org/document/10782479).* 👉  [GitHub](https://github.com/nttcslab/m2d/tree/master/app/circor).
 - BYOL-A (TASLP 2023): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, “BYOL for Audio: Exploring pre-trained general-purpose audio representations,” IEEE/ACM Trans. Audio, Speech, Language Process., vol. 31, pp. 137–151, 2023](http://dx.doi.org/10.1109/TASLP.2022.3221007).* 👉 [GitHub](https://github.com/nttcslab/byol-a/tree/master/v2)
 - SELFIE (ICASSP 2023) *[B. Nguyen, S. Uhlich and F. Cardinaux, "Improving Self-Supervised Learning for Audio Representations by Feature Diversity and Decorrelation," in ICASSP, 2023](https://ieeexplore.ieee.org/document/10097100).*
 - M2D (ICASSP 2023): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Masked Modeling Duo: Learning Representations by Encouraging Both Networks to Model the Input," in ICASSP, 2023](https://ieeexplore.ieee.org/document/10097236).* 👉 [GitHub](https://github.com/nttcslab/m2d)
@@ -25,6 +26,12 @@ The papers used EVAR are:
 - BYOL-A (IJCNN 2021): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," in IJCNN, 2021](https://arxiv.org/abs/2103.06695).* 👉 [GitHub](https://github.com/nttcslab/byol-a)
 
 ## Update History
+
+### May 1, 2025 -- Supported new models and fixed compatibility issues.
+- New model: Dasheng, Opera
+- (will have one more tomorrow)
+
+<details><summary>Older history</summary>
 
 ### Jun 20, 2024 -- Supported autio to text or text to audio retrieval (ATR).
 - ATR evaluator: `retr_a2t_t2a.py`
@@ -39,8 +46,6 @@ The papers used EVAR are:
 - New model: Supported (for linear and zero-shot evaluation) WavCaps, LAION CLAP, and MS CLAP.
 - Fix: An issue related to resampling quality by migrating from torchaudio to soundfile+librosa.
 - Fix: M2D to use fixed normalization statistic values.
-
-<details><summary>Older history</summary>
 
 ### Jan 12, 2024 -- Supported weighted CE loss with fine-tuning and added more models.
 - Loss function: Supported (for fine-tuning) weighted cross entropy loss.
@@ -392,7 +397,7 @@ test: Caption to audio: r1: 50.99, r5: 82.24, r10: 88.82, r50: 98.75, medr: 1.00
 test: Audio to caption: r1: 37.43, r5: 72.12, r10: 84.74, r50: 97.66, medr: 2.00, meanr: 7.32, mAP10: 52.044
 ```
 
-## 7. Other information
+## 7. Supported datasets/models
 
 ### 7-1. Supported datasets
 
@@ -423,6 +428,7 @@ The followings are supported:
 - ATST(-Clip), ATST-Frame
 - BEATs
 - CED (using a pre-trained weight on the Huggingface)
+- Dasheng (using a pre-trained weight on the Huggingface)
 - HTS-AT
 - VGGish
 - PANNs' CNN14
@@ -436,6 +442,7 @@ The followings are supported:
 - TRILL
 - COALA
 - BYOL-A
+- [OPERA](https://github.com/evelyn0414/OPERA) (For app/icbhi_sprs only)
 
 ## License
 

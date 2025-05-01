@@ -16,12 +16,19 @@ _defs = {
     'spcv2': [1, 1.0, None, False],
     'surge': [1, 4.0, None, False],
     'vc1': [1, 8.2, None, False],
+    'vocalsound': [1, 4.18, None, False],
     'voxforge': [1, 5.8, None, False],
     'as20k': [1, 10.0, 'as', False],
     'as': [1, 10.0, 'as', True],
     'audiocaps': [1, 10.0, None, False],
     'ja_audiocaps': [1, 10.0, 'audiocaps', False],
     'clotho': [1, 30.0, None, False],
+    'circor1': [1, 5.0, None, False],
+    'circor2': [1, 5.0, None, False],
+    'circor3': [1, 5.0, None, False],
+    'bmdhs1': [1, 20.0, 'bmdhs', False],
+    'bmdhs2': [1, 20.0, 'bmdhs', False],
+    'bmdhs3': [1, 20.0, 'bmdhs', False],
 }
 
 _fs_table = {
@@ -38,6 +45,7 @@ def get_original_folder(task, folder):
         'esc50': 'ESC-50-master',
         'as20k': 'AudioSet',
         'as': 'AudioSet',
+        'vocalsound': 'vocalsound_44k/data_44k',
     }
     return orgs[task] if task in orgs else folder
 

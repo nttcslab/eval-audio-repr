@@ -2,12 +2,17 @@
 
 Some applications use their own evaluation protocols, including specialized metrics, and their benchmarking code typically restricts the models that can be evaluated. To address this limitation and enable evaluation code to work with models available on EVAR (with wrapper implementations), we modify these applications to support a broader range of models. This subproject outlines the precise steps and codes required to integrate EVAR into each application.
 
-WORK IN PROGRESS.
+## Assessing the Utility of Audio Foundation Models for Heart and Respiratory Sound Analysis
 
-- Heart sound task: CirCor
+For our paper:
 
-- Heart sound task: BMD-HS
+Niizumi et al. (IEEE EMBC 2025): *[D. Niizumi, D. Takeuchi, M. Yasuda, B. T. Nguyen, Y. Ohishi, and N. Harada, "Assessing the Utility of Audio Foundation Models for Heart and Respiratory Sound Analysis," to appear at IEEE EMBC, 2025](https://arxiv.org/abs/2504.18004).*
 
-- Respiratory sound task: SPRSound (SPRS)
+We provide code to reproduce experiments for the tasks:
 
-- Respiratory sound task: ICBHI2017
+- Heart sound task: CirCor  👉 WORK IN PROGRESS.
+- Heart sound task: BMD-HS  👉 WORK IN PROGRESS.
+- Respiratory sound task: SPRSound (SPRS) 👉  [icbhi_sprs](icbhi_sprs/README_ICBHI_SPRS.md)
+- Respiratory sound task: ICBHI2017 👉  [icbhi_sprs](icbhi_sprs/README_ICBHI_SPRS.md)
+
+Please follow the instructions in each folder.

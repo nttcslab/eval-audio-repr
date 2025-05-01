@@ -13,8 +13,12 @@ import logging
 
 try:
     import sys
-    sys.path.append('external/m2d')
+    import os
+    evar_home = os.getenv('EVAR', '')
+    sys.path.append(os.path.join(evar_home, 'external/m2d'))
+    # for backward compatibility
     sys.path.append('..')
+    sys.path.append('../m2d')  # for running in external/xxx
     from m2d.runtime_audio import RuntimeM2D
 except Exception as e:
     pass  # print(f'(For M2D users) Build your EVAR in your M2D folder.')

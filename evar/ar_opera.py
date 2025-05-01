@@ -5,10 +5,6 @@ Towards Open Respiratory Acoustic Foundation Models: Pretraining and Benchmarkin
 ## Reference
 - [1] https://arxiv.org/abs/2406.16148
 - [2] https://github.com/evelyn0414/OPERA
-
-(cd external && git clone https://github.com/evelyn0414/OPERA.git)
-(cd external/OPERA && curl -L -O https://huggingface.co/evelyn0414/OPERA/resolve/main/encoder-operaCT.ckpt)
-(cd external/OPERA && patch -p0 < ../opera.patch)
 """
 
 from evar.ar_base import BaseAudioRepr, np
@@ -19,8 +15,11 @@ import logging
 try:
     import sys
     sys.path.append('../../external/OPERA')
-    sys.path.append('external/OPERA')
+    import os
+    evar_home = os.getenv('EVAR', '')
+    sys.path.append(os.path.join(evar_home, 'external/OPERA'))
     from src.model.models_cola import Cola
+    from src.util import _equally_slice_pad_sample, _duplicate_padding
 except Exception as e:
     pass  # print(f'(For M2D users) Build your EVAR in your M2D folder.')
 
@@ -105,6 +104,9 @@ class AR_OPERA_CT(BaseAudioRepr):
 
     def __init__(self, cfg):
         super().__init__(cfg=cfg)
+        if 'icbhi_sprs_mode' not in cfg:
+            logging.error('\n\n *** The model supports app/ICBHI_SPRT only. Exiting... ***\n')
+            exit(-1)
         self.backbone = Cola(encoder="htsat")
         ckpt = torch.load(cfg.weight_file)
         self.backbone.load_state_dict(ckpt["state_dict"], strict=False)
