@@ -51,3 +51,25 @@ bash ev_icbhi_m2d.sh ../../m2d_clap_vit_base-80x1001p16x16-240128_AS-FT_enconly/
 Find the shell scripts for more evaluations.
 
 **NOTE: All the evaluations employ a transformer head except for ev_icbhi_mlp_m2d.sh, which uses MLP instead.** 
+
+The following is the list of command lines for reproduction.
+
+```sh
+bash ev_icbhi_ast.sh 5
+bash ev_icbhi_beats.sh 5
+bash ev_icbhi_byola.sh 5
+bash ev_icbhi_opera.sh 5
+bash ev_icbhi_m2d.sh m2d_vit_base-80x608p16x16-221006-mr7/checkpoint-300.pth 5
+bash ev_icbhi_m2d.sh m2d_vit_base-80x200p16x4-230529/checkpoint-300.pth 5
+
+bash ev_sprs_ast.sh 5
+bash ev_sprs_beats.sh 5
+bash ev_sprs_byola.sh 5
+bash ev_sprs_opera.sh 5
+bash ev_sprs_m2d.sh m2d_vit_base-80x608p16x16-221006-mr7/checkpoint-300.pth 5
+bash ev_sprs_m2d.sh m2d_vit_base-80x200p16x4-230529/checkpoint-300.pth 5
+
+# Ablations: M2D (16×4, MLP)
+bash ev_icbhi_mlp_m2d.sh m2d_vit_base-80x200p16x4-230529/checkpoint-300.pth 5
+bash ev_sprs_mlp_m2d.sh m2d_vit_base-80x200p16x4-230529/checkpoint-300.pth 5
+```

@@ -29,7 +29,7 @@ The papers used EVAR are:
 
 ### May 1, 2025 -- Supported new models and fixed compatibility issues.
 - New model: Dasheng, Opera
-- (will have one more tomorrow)
+- Code for the [EMBC 2025 paper](https://github.com/nttcslab/eval-audio-repr/tree/main/app#assessing-the-utility-of-audio-foundation-models-for-heart-and-respiratory-sound-analysis).
 
 <details><summary>Older history</summary>
 

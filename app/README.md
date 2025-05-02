@@ -6,12 +6,12 @@ Some applications use their own evaluation protocols, including specialized metr
 
 For our paper:
 
-Niizumi et al. (IEEE EMBC 2025): *[D. Niizumi, D. Takeuchi, M. Yasuda, B. T. Nguyen, Y. Ohishi, and N. Harada, "Assessing the Utility of Audio Foundation Models for Heart and Respiratory Sound Analysis," to appear at IEEE EMBC, 2025](https://arxiv.org/abs/2504.18004).*
+*[D. Niizumi, D. Takeuchi, M. Yasuda, B. T. Nguyen, Y. Ohishi, and N. Harada, "Assessing the Utility of Audio Foundation Models for Heart and Respiratory Sound Analysis," to appear at IEEE EMBC, 2025](https://arxiv.org/abs/2504.18004).*
 
 We provide code to reproduce experiments for the tasks:
 
-- Heart sound task: CirCor  👉 WORK IN PROGRESS.
-- Heart sound task: BMD-HS  👉 WORK IN PROGRESS.
+- Heart sound task: CirCor  👉 [circor](circor/README_CirCor.md).
+- Heart sound task: BMD-HS  👉 [bmdhs](bmdhs/README_BMDHS.md).
 - Respiratory sound task: SPRSound (SPRS) 👉  [icbhi_sprs](icbhi_sprs/README_ICBHI_SPRS.md)
 - Respiratory sound task: ICBHI2017 👉  [icbhi_sprs](icbhi_sprs/README_ICBHI_SPRS.md)
 
