@@ -28,6 +28,9 @@ The papers used EVAR are:
 
 ## Update History
 
+### June 5, 2025 -- Supported OPERA & MARBLE benchmarks.
+- You can expand models for [MARBLE music benchmark](https://github.com/a43992899/MARBLE-Benchmark) or [OPERA respiratory audio benchmark](https://github.com/evelyn0414/OPERA) by integrating EVAR. 👉  [plugin folder](https://github.com/nttcslab/eval-audio-repr/tree/main/plugin).
+
 ### May 1, 2025 -- Supported new models and fixed compatibility issues.
 - New model: Dasheng, Opera
 - Code for the [EMBC 2025 paper](https://github.com/nttcslab/eval-audio-repr/tree/main/app#assessing-the-utility-of-audio-foundation-models-for-heart-and-respiratory-sound-analysis).

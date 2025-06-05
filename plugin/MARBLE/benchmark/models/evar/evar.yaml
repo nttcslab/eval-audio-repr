@@ -1,0 +1,7 @@
+name: evar
+target_sr: 16000
+num_features: 
+pretrain_folder: benchmark/models/evar
+evar_config: m2d.yaml
+weight: m2d_vit_base-80x608p16x16-221006-mr7/checkpoint-300.pth
+options: 

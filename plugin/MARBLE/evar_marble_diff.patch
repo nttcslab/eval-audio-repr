@@ -1,0 +1,85 @@
+diff --git a/benchmark/constants/model_constants.py b/benchmark/constants/model_constants.py
+index beaf1a6..ff474df 100644
+--- a/benchmark/constants/model_constants.py
++++ b/benchmark/constants/model_constants.py
+@@ -54,6 +54,7 @@ NAME_TO_EXTRACT_FEATURES_MAIN = {
+     "music2vec_target12": "extract_data2vec_audio_features_main",
+     "music2vec_span15": "extract_data2vec_audio_features_main",
+     "yue": "extract_yue_features_main",     
++    'evar': "extract_evar_features_main",
+ }
+ 
+ SUPPORTED_REPRESENTATIONS = list(NAME_TO_EXTRACT_FEATURES_MAIN.keys())
+diff --git a/benchmark/extract.py b/benchmark/extract.py
+index 3869b43..8308d98 100644
+--- a/benchmark/extract.py
++++ b/benchmark/extract.py
+@@ -7,11 +7,12 @@ def main(args):
+     from benchmark.models.data2vec.extract_data2vec_features import main as extract_data2vec_audio_features_main #data2vec-audio
+     from benchmark.models.handcrafted.extract_handcrafted_features import main as extract_handcrafted_features_main
+     from benchmark.models.jukebox.extract_jukemir_features import main as extract_jukemir_features_main
+-    from benchmark.models.musicnn.extract_musicnn_features import main as extract_musicnn_features_main
++    #from benchmark.models.musicnn.extract_musicnn_features import main as extract_musicnn_features_main
+     from benchmark.models.clmr.extract_clmr_features import main as extract_clmr_features_main
+-    from benchmark.models.mule.extract_mule_features import main as extract_mule_features_main
++    #from benchmark.models.mule.extract_mule_features import main as extract_mule_features_main
+     from benchmark.models.hubert.extract_hubert_features import main as extract_speech_hubert_features_main #hubert
+-    from benchmark.models.yue.extract_yue_features import main as extract_yue_features_main
++    #from benchmark.models.yue.extract_yue_features import main as extract_yue_features_main
++    from benchmark.models.evar.extract_evar_features import main as extract_evar_features_main
+ 
+     config = load_config(args.config, namespace=True)
+ 
+diff --git a/benchmark/probe.py b/benchmark/probe.py
+index 4f2b746..7aaad6d 100644
+--- a/benchmark/probe.py
++++ b/benchmark/probe.py
+@@ -1,6 +1,8 @@
+ import wandb
+ import argparse
+ import torch
++import pandas as pd
++from pathlib import Path
+ import pytorch_lightning as pl
+ 
+ import benchmark as bench
+@@ -27,6 +29,12 @@ def main(args):
+     assert cfg.trainer.paradigm == 'probe', "paradigm must be probe for probe.py"
+     pl.seed_everything(cfg.trainer.seed)
+ 
++    if cfg.dataset.pre_extract.feature_extractor.pretrain.num_features is None:
++        import yaml
++        with open(cfg.dataset.pre_extract.feature_extractor.pretrain.evar_config) as f:
++            evar_cfg = yaml.safe_load(f)
++        cfg.dataset.pre_extract.feature_extractor.pretrain.num_features = evar_cfg['feature_d']
++
+     logger = get_logger(cfg)
+     model = get_model(cfg)
+     train_loader, valid_loader, test_loader = get_dataloaders(cfg)
+@@ -73,5 +81,26 @@ def main(args):
+         # does it really save the best model?
+         if cfg.checkpoint.save_best_to is not None: trainer.save_checkpoint(cfg.checkpoint.save_best_to)
+ 
++    def append_to_csv(csv_filename, data):
++        filename = Path(csv_filename)
++        filename.parent.mkdir(parents=True, exist_ok=True)
++        df = pd.read_csv(filename) if filename.exists() else pd.DataFrame()
++        df = pd.concat([df, data], ignore_index=True).to_csv(filename, index=False)
++
++    csvname = f'score_{cfg.dataset.dataset}.csv'
++    model = cfg.dataset.pre_extract.feature_extractor.pretrain.name
++    model = Path(cfg.dataset.pre_extract.feature_extractor.pretrain.evar_config).stem if model == 'evar' else model
++    weight = Path(str(cfg.dataset.pre_extract.feature_extractor.pretrain.weight))
++    report = {
++        'model': [model],
++        'weight': [weight.parent.name + '/' + weight.name],
++        'task': [cfg.dataset.dataset],
++    }
++    for k in trainer.logged_metrics:
++        report[k] = trainer.logged_metrics[k].item()
++    result_df = pd.DataFrame(report)
++    append_to_csv(csvname, result_df)
++    print(report)
++
+     wandb.finish()
+ 

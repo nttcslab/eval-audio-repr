@@ -1,0 +1,299 @@
+diff --git a/src/benchmark/baseline/extract_feature.py b/src/benchmark/baseline/extract_feature.py
+index bd34111..4df363c 100644
+--- a/src/benchmark/baseline/extract_feature.py
++++ b/src/benchmark/baseline/extract_feature.py
+@@ -11,7 +11,7 @@ import glob as gb
+ from tqdm import tqdm
+ import torch
+ import torchaudio
+-import opensmile
++#import opensmile
+ import requests
+  
+ 
+@@ -158,6 +158,57 @@ def extract_audioMAE_feature(sound_dir_loc, input_sec=10):
+     return x_data
+ 
+ 
++import sys
++def extract_evar_feature(sound_dir_loc, evar_base, config_file, options, input_sec=10):
++    sys.path.append(evar_base)
++    import evar
++    import pandas as pd
++    from lineareval import make_cfg
++
++    class WavDataset(evar.data.BaseRawAudioDataset):
++        def __init__(self, cfg, files, holdout_fold=1, always_one_hot=False, random_crop=True, classes=None):
++            super().__init__(cfg.unit_samples, tfms=None, random_crop=random_crop, return_filename=cfg.return_filename)
++            self.cfg = cfg
++            self.df = pd.DataFrame({'file_name': files})
++            self.cfg.task_data = 'dummy'
++
++        def __len__(self):
++            return len(self.df)
++
++        def __getitem__(self, index):
++            wav = super().__getitem__(index)
++            if self.cfg.return_filename:
++                return wav.replace('dummy/', '')
++            return wav
++
++        def get_audio(self, index):
++            filename = self.df.file_name.values[index]
++            wav, sr = librosa.load(filename, sr=self.cfg.sample_rate, mono=True)
++            wav = torch.tensor(wav).to(torch.float32)
++            return wav
++
++    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
++
++    config_file = f'{evar_base}/{config_file}'
++    options = options[0] if options else ''
++    options = options.replace('weight_file=', f'weight_file={evar_base}/') if 'weight_file=/' not in options else options
++    cfg, n_folds, balanced = make_cfg(config_file, 'as20k', options, extras={}, abs_unit_sec=input_sec)  # as20k is a dummy task
++    ar = eval('evar.'+cfg.audio_repr)(cfg).to(device)
++
++    dataset = WavDataset(cfg, sound_dir_loc)
++    data_loader = torch.utils.data.DataLoader(dataset, batch_size=cfg.batch_size, shuffle=False)
++    ar.precompute(device, data_loader)
++
++    embeddings = []
++    for X in tqdm(data_loader, mininterval=5.0):
++        with torch.no_grad():
++            X = X if ar.cfg.return_filename else X.to(device)
++            embeddings.extend(ar(X).detach().cpu().numpy())
++
++    x_data = np.array(embeddings)
++    return x_data
++
++
+ def get_split_signal_fbank(data_folder, filename, input_sec=10, sample_rate=16000):
+   
+     data, rate = librosa.load(os.path.join(data_folder, filename+'.wav'), sr=sample_rate)
+diff --git a/src/benchmark/linear_eval.py b/src/benchmark/linear_eval.py
+index 488b647..48202e2 100644
+--- a/src/benchmark/linear_eval.py
++++ b/src/benchmark/linear_eval.py
+@@ -944,3 +944,17 @@ if __name__ == "__main__":
+         print("Five times mean task {} feature {} results: MAPE mean {:.3f} ± {:.3f}".format(args.task, feature, np.mean(mapes), np.std(mapes)) )
+         print("=" * 48)
+     
++    import pandas as pd
++    result_df = pd.DataFrame({
++        'representation': [args.pretrain],
++        'task': [args.task],
++        'mean': [np.mean(maes)] if args.LOOCV else [np.mean(auc_scores)],
++        'std':  [np.std(maes)] if args.LOOCV else [np.std(auc_scores)],
++        'raw_scores': [str(np.mean(maes) if args.LOOCV else auc_scores)],
++    })
++    def append_to_csv(csv_filename, data):
++        filename = Path(csv_filename)
++        filename.parent.mkdir(parents=True, exist_ok=True)
++        df = pd.read_csv(filename) if filename.exists() else pd.DataFrame()
++        df = pd.concat([df, data], ignore_index=True).to_csv(filename, index=False)
++    append_to_csv(f'opera-scores.csv', result_df)
+diff --git a/src/benchmark/processing/copd_processing.py b/src/benchmark/processing/copd_processing.py
+index 8cd4b7f..e36e669 100644
+--- a/src/benchmark/processing/copd_processing.py
++++ b/src/benchmark/processing/copd_processing.py
+@@ -96,8 +96,7 @@ def check_demographic(trait="label"):
+ 
+ 
+ def extract_and_save_embeddings_baselines(feature="opensmile"):
+-    from src.benchmark.baseline.extract_feature import extract_opensmile_features, extract_vgg_feature, extract_clap_feature, extract_audioMAE_feature
+-
++    from src.benchmark.baseline.extract_feature import extract_opensmile_features, extract_vgg_feature, extract_clap_feature, extract_audioMAE_feature, extract_evar_feature
+     sound_dir_loc = np.load(feature_dir + "sound_dir_loc.npy")
+ 
+     if feature == "opensmile":
+@@ -118,6 +117,11 @@ def extract_and_save_embeddings_baselines(feature="opensmile"):
+         audiomae_feature = extract_audioMAE_feature(sound_dir_loc)
+         np.save(feature_dir + "audiomae_feature.npy",
+                 np.array(audiomae_feature))
++    elif feature.startswith("evar:"):
++        _, evar_base, config, name, *options = feature.split(":")
++        features = extract_evar_feature(sound_dir_loc, evar_base, config, options)
++        np.save(feature_dir + f"{name}{len(features[0])}_feature.npy",
++                np.array(features))
+ 
+ 
+ def extract_and_save_embeddings(feature="operaCE", input_sec=8, dim=1280):
+@@ -142,7 +146,7 @@ if __name__ == '__main__':
+         preprocess_split()
+         check_demographic()
+ 
+-    if args.pretrain in ["vggish", "opensmile", "clap", "audiomae"]:
++    if args.pretrain in ["vggish", "opensmile", "clap", "audiomae"] or args.pretrain.startswith("evar:"):
+         extract_and_save_embeddings_baselines(args.pretrain)
+     else:
+         if args.pretrain == "operaCT":
+diff --git a/src/benchmark/processing/coswara_processing.py b/src/benchmark/processing/coswara_processing.py
+index cb573d2..dd876fd 100644
+--- a/src/benchmark/processing/coswara_processing.py
++++ b/src/benchmark/processing/coswara_processing.py
+@@ -10,7 +10,7 @@ from src.util import get_entire_signal_librosa
+ import os
+ 
+ feature_dir = "feature/coswara_eval/"  # "datasets/Coswara-Data/coswara_eval/"
+-data_dir = "datasets/Coswara-Data/Extracted_data/"
++data_dir = "datasets/Coswara-Data/Extracted_data"
+ 
+ 
+ def check_data_dir():
+@@ -225,7 +225,7 @@ def preprocess_spectrogram(modality, label="sex"):
+ 
+ 
+ def extract_and_save_embeddings_baselines(modality, label="sex", feature="opensmile"):
+-    from src.benchmark.baseline.extract_feature import extract_opensmile_features,  extract_vgg_feature, extract_clap_feature, extract_audioMAE_feature
++    from src.benchmark.baseline.extract_feature import extract_opensmile_features,  extract_vgg_feature, extract_clap_feature, extract_audioMAE_feature, extract_evar_feature
+     opensmile_features = []
+ 
+     check_data_dir()
+@@ -252,6 +252,11 @@ def extract_and_save_embeddings_baselines(modality, label="sex", feature="opensm
+         audiomae_feature = extract_audioMAE_feature(sound_dir_loc)
+         np.save(feature_dir + "audiomae_feature_{}_{}.npy".format(modality,
+                 label), np.array(audiomae_feature))
++    elif feature.startswith("evar:"):
++        _, evar_base, config, name, *options = feature.split(":")
++        features = extract_evar_feature(sound_dir_loc, evar_base, config, options)
++        np.save(feature_dir + f"{name}{len(features[0])}_feature_{modality}_{label}.npy",
++                np.array(features))
+ 
+ 
+ def extract_and_save_embeddings(feature, modality, label="sex", input_sec=8, dim=1280):
+@@ -292,10 +297,10 @@ if __name__ == '__main__':
+         #  run once
+         for label in ["sex", "smoker"]:
+             # preprocess_label(label)
+-            for modality in ["breathing", "cough"][1:]:
++            for modality in ["breathing", "cough-shallow"][1:]:
+                 preprocess_modality(modality, label)
+ 
+-    if args.pretrain in ["vggish", "opensmile", "clap", "audiomae"]:
++    if args.pretrain in ["vggish", "opensmile", "clap", "audiomae"] or args.pretrain.startswith("evar:"):
+         extract_and_save_embeddings_baselines(
+             args.modality, args.label, args.pretrain)
+     else:
+diff --git a/src/benchmark/processing/coughvid_processing.py b/src/benchmark/processing/coughvid_processing.py
+index 3d7e247..36c9abc 100644
+--- a/src/benchmark/processing/coughvid_processing.py
++++ b/src/benchmark/processing/coughvid_processing.py
+@@ -69,7 +69,7 @@ def preprocess_label(label="covid"):
+ 
+ 
+ def extract_and_save_embeddings_baselines(label, feature="opensmile"):
+-    from src.benchmark.baseline.extract_feature import extract_opensmile_features, extract_vgg_feature, extract_clap_feature, extract_audioMAE_feature
++    from src.benchmark.baseline.extract_feature import extract_opensmile_features, extract_vgg_feature, extract_clap_feature, extract_audioMAE_feature, extract_evar_feature
+ 
+     sound_dir_loc = np.load(feature_dir + "sound_dir_loc_{}.npy".format(label))
+ 
+@@ -92,6 +92,11 @@ def extract_and_save_embeddings_baselines(label, feature="opensmile"):
+         audiomae_feature = extract_audioMAE_feature(sound_dir_loc)
+         np.save(feature_dir + "audiomae_feature_{}.npy".format(label),
+                 np.array(audiomae_feature))
++    elif feature.startswith("evar:"):
++        _, evar_base, config, name, *options = feature.split(":")
++        features = extract_evar_feature(sound_dir_loc, evar_base, config, options)
++        np.save(feature_dir + f"{name}{len(features[0])}_feature_{label}.npy",
++                np.array(features))
+ 
+ 
+ def extract_and_save_embeddings(feature="operaCE", label="covid", input_sec=2, dim=1280):
+@@ -118,7 +123,7 @@ if __name__ == '__main__':
+         for label in ["covid", "gender"]:
+             preprocess_label(label)
+ 
+-    if args.pretrain in ["vggish", "opensmile", "clap", "audiomae"]:
++    if args.pretrain in ["vggish", "opensmile", "clap", "audiomae"] or args.pretrain.startswith("evar:"):
+         extract_and_save_embeddings_baselines(args.label, args.pretrain)
+     else:
+         if args.pretrain == "operaCT":
+diff --git a/src/benchmark/processing/icbhi_processing.py b/src/benchmark/processing/icbhi_processing.py
+index a808471..623ec63 100644
+--- a/src/benchmark/processing/icbhi_processing.py
++++ b/src/benchmark/processing/icbhi_processing.py
+@@ -55,7 +55,7 @@ def process_disease():
+ 
+ 
+ def extract_and_save_embeddings_baselines(feature="opensmile"):
+-    from src.benchmark.baseline.extract_feature import extract_opensmile_features, extract_vgg_feature, extract_clap_feature, extract_audioMAE_feature
++    from src.benchmark.baseline.extract_feature import extract_opensmile_features, extract_vgg_feature, extract_clap_feature, extract_audioMAE_feature, extract_evar_feature
+     sound_dir_loc = np.load(feature_dir + "sound_dir_loc.npy")
+ 
+     if feature == "opensmile":
+@@ -76,6 +76,11 @@ def extract_and_save_embeddings_baselines(feature="opensmile"):
+         audiomae_feature = extract_audioMAE_feature(sound_dir_loc)
+         np.save(feature_dir + "audiomae_feature.npy",
+                 np.array(audiomae_feature))
++    elif feature.startswith("evar:"):
++        _, evar_base, config, name, *options = feature.split(":")
++        features = extract_evar_feature(sound_dir_loc, evar_base, config, options)
++        np.save(feature_dir + f"{name}{len(features[0])}_feature.npy",
++                np.array(features))
+ 
+ 
+ def extract_and_save_embeddings(feature="operaCE", input_sec=8, dim=1280):
+@@ -101,7 +106,7 @@ if __name__ == '__main__':
+         os.makedirs(feature_dir)
+         process_disease()
+ 
+-    if args.pretrain in ["vggish", "opensmile", "clap", "audiomae"]:
++    if args.pretrain in ["vggish", "opensmile", "clap", "audiomae"] or args.pretrain.startswith("evar:"):
+         extract_and_save_embeddings_baselines(args.pretrain)
+     else:
+         if args.pretrain == "operaCT":
+diff --git a/src/benchmark/processing/kauh_processing.py b/src/benchmark/processing/kauh_processing.py
+index abc4329..d82a45b 100644
+--- a/src/benchmark/processing/kauh_processing.py
++++ b/src/benchmark/processing/kauh_processing.py
+@@ -108,8 +108,9 @@ def check_demographic(trait="label"):
+ 
+ 
+ def extract_and_save_embeddings_baselines(feature="opensmile"):
+-    from src.benchmark.baseline.extract_feature import extract_opensmile_features, extract_vgg_feature, extract_clap_feature, extract_audioMAE_feature
++    from src.benchmark.baseline.extract_feature import extract_opensmile_features, extract_vgg_feature, extract_clap_feature, extract_audioMAE_feature, extract_evar_feature
+     sound_dir_loc_subset = np.load(feature_dir + "sound_dir_loc_subset.npy")
++
+     if feature == "opensmile":
+         opensmile_features = []
+         for file in tqdm(sound_dir_loc_subset):
+@@ -117,6 +118,7 @@ def extract_and_save_embeddings_baselines(feature="opensmile"):
+             opensmile_features.append(opensmile_feature)
+         np.save(feature_dir + "opensmile_feature_both.npy",
+                 np.array(opensmile_features))
++
+     elif feature == "vggish":
+         vgg_features = extract_vgg_feature(sound_dir_loc_subset)
+         np.save(feature_dir + "vggish_feature_both.npy", vgg_features)
+@@ -127,6 +129,11 @@ def extract_and_save_embeddings_baselines(feature="opensmile"):
+         audiomae_feature = extract_audioMAE_feature(sound_dir_loc_subset)
+         np.save(feature_dir + "audiomae_feature_both.npy",
+                 np.array(audiomae_feature))
++    elif feature.startswith("evar:"):
++        _, evar_base, config, name, *options = feature.split(":")
++        features = extract_evar_feature(sound_dir_loc_subset, evar_base, config, options)
++        np.save(feature_dir + f"{name}{len(features[0])}_feature_both.npy",
++                np.array(features))
+ 
+ 
+ def extract_and_save_embeddings(feature="operaCE", input_sec=8,  dim=1280):
+@@ -155,7 +162,7 @@ if __name__ == '__main__':
+         for trait in ["label", "sex", "age"]:
+             check_demographic(trait)
+ 
+-    if args.pretrain in ["vggish", "opensmile", "clap", "audiomae"]:
++    if args.pretrain in ["vggish", "opensmile", "clap", "audiomae"] or args.pretrain.startswith("evar:"):
+         extract_and_save_embeddings_baselines(args.pretrain)
+     else:
+         if args.pretrain == "operaCT":
+diff --git a/src/model/models_cola.py b/src/model/models_cola.py
+index 556ebce..7a4dd57 100644
+--- a/src/model/models_cola.py
++++ b/src/model/models_cola.py
+@@ -1,6 +1,6 @@
+ import pytorch_lightning as pl
+ import torch
+-from efficientnet_pytorch import EfficientNet
++#from efficientnet_pytorch import EfficientNet
+ from torch.nn import functional as F
+ import numpy as np
+ from src.model.htsat.htsat import HTSATWrapper
