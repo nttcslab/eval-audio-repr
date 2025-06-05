@@ -1,6 +1,6 @@
 # Towards Pre-training an Effective Respiratory Audio Foundation Model
 
-This repository provides the code to integrate EVAR as a plugin model into the OPERA benchmark, enabling OPERA to evaluate pre-trained audio representation models supported by EVAR. Based on this OPERA extension, it also provides scripts and instructions to reproduce the results from the paper *"Towards Pre-training an Effective Respiratory Audio Foundation Model"*.
+This repository provides the code to integrate EVAR as a plugin model into the [OPERA](https://github.com/evelyn0414/OPERA) benchmark for respiratory sounds, enabling OPERA to evaluate pre-trained audio representation models supported by EVAR. Based on this OPERA extension, it also provides scripts and instructions to reproduce the results from the paper *"Towards Pre-training an Effective Respiratory Audio Foundation Model"*.
 
 ## How to Integrate with the OPERA Benchmark
 
@@ -74,29 +74,7 @@ torchrun --nproc_per_node=4 -m train_audio --input_size 80x608 --patch_size 16x1
 
 ## Referecnces
 
+- OPERA: *[Y. Zhang, T. Xia, J. Han, Y. Wu, G. Rizos, Y. Liu, M. Mosuily, J. Chauhan, and C. Mascolo, “Towards open respiratory acoustic foundation models: Pretraining and benchmarking,” in NeurIPS, 2024.](https://neurips.cc/virtual/2024/poster/97457).* 👉  [GitHub](https://github.com/evelyn0414/OPERA).
+
 - Niizumi et al. (Interspeech 2025): *[D. Niizumi, D. Takeuchi, M. Yasuda, B. T. Nguyen, Y. Ohishi, and N. Harada, "Towards Pre-training an Effective Respiratory Audio Foundation Model," to appear at Interspeech, 2025](https://arxiv.org/abs/TBD).* 👉  [GitHub](https://github.com/nttcslab/eval-audio-repr/tree/main/plugin/OPERA).
 
-
-### Test
-
-```sh
-export EVAR=/lab/eval-audio-repr
-
-git clone https://github.com/evelyn0414/OPERA.git
-cd OPERA
-git checkout 3622310e667afb8aa40169050b4dd45de75946a2
-
-cp $EVAR/plugin/OPERA/evar_* .
-patch -p1 < $EVAR/plugin/OPERA/evar_opera_diff.patch
-
-
-
-
-mkdir test
-cd test
-cp -r /lab/OPERA .
-cd OPERA
-cp /lab/eval-audio-repr/plugin/OPERA/evar_* .
-patch -p1 < /lab/eval-audio-repr/plugin/OPERA/evar_opera_diff.patch
-
-```
