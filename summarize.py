@@ -34,7 +34,7 @@ def summarize(weight_file, post=True):
     df['average'] = df.mean(1)
 
     # Summarize ATR
-    if Path(f'{RESULT_DIR}/scores.csv').exists():
+    if Path(f'{RESULT_DIR}/retrieval_scores.csv').exists():
         d = pd.read_csv(f'{RESULT_DIR}/retrieval_scores.csv')
         d = d[d.weight.str.contains(weight_file, na=False, regex=False)]
         if len(d) > 0:
