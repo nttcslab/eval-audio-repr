@@ -1,6 +1,11 @@
 # Towards Pre-training an Effective Respiratory Audio Foundation Model
 
-This repository provides the code to integrate EVAR as a plugin model into the [OPERA](https://github.com/evelyn0414/OPERA) benchmark for respiratory sounds, enabling OPERA to evaluate pre-trained audio representation models supported by EVAR. Based on this OPERA extension, it also provides scripts and instructions to reproduce the results from the paper *"Towards Pre-training an Effective Respiratory Audio Foundation Model"*.
+This repository provides:
+- Code to integrate EVAR as a plugin model into the [OPERA](https://github.com/evelyn0414/OPERA) benchmark for respiratory sounds.
+  This extension enables OPERA to evaluate 20+ additional audio models supported by EVAR.
+- Scripts and instructions to reproduce the results of our Interspeech 2025 paper.
+- Pre-trained M2D+Resp weights that achieved the best results in our Interspeech 2025 paper. 👉 [release](https://github.com/nttcslab/eval-audio-repr/releases/tag/0.1.0)
+- Example notebook for using M2D+Resp. 👉 [Example-M2D+Resp.ipynb](Example-M2D+Resp.ipynb)
 
 ## How to Integrate with the OPERA Benchmark
 
@@ -24,7 +29,7 @@ The setup will enable the extraction of features using EVAR models from within O
 For the task datasets for OPERA, follow the instructions provided by the OPERA.
 
 
-## Reproducing the Paper
+## Reproducing our Interspeech 2025 Paper
 
 The provided `evar_*.sh` are the scripts used to evaluate each model in the paper. These scripts run OPERA’s `processing` to extract features from task-specific audio samples using the target models, followed by `linear_eval` to evaluate task performance. For each task, the average and standard deviation of five evaluation runs are recorded in a CSV file, `opera-scores.csv`.
 
@@ -39,6 +44,8 @@ bash ./evar_m2d.sh m2d_vit_base-80x608p16x16-221006-mr7/checkpoint-300.pth 3840
 
 ### Pre-training for "Ablations using M2D"
 
+Note: **The M2D+Resp weight is available. 👉 [release](https://github.com/nttcslab/eval-audio-repr/releases/tag/0.1.0)**
+
 The ablation study involves pre-training with M2D.
 
 1. Set up M2D and prepare for pre-training on AudioSet. --> Follow the instructions: [M2D:Pre-training From Scratch](https://github.com/nttcslab/m2d?tab=readme-ov-file#3-pre-training-from-scratch) and [M2D:Pre-training data](https://github.com/nttcslab/m2d/blob/master/data/README.md)
@@ -48,7 +55,7 @@ The ablation study involves pre-training with M2D.
 Once the above preparations are complete, you can pre-train using the command line below. After the pre-training, use the resulting model with the OPERA evaluation script as the following example:
 
 ```sh
-bash ./evar_m2d.sh m2d_vit_base-80x608p16x16p16k-250106-MdfASRFM4s3-e50/checkpoint-50.pth 3840
+bash ./evar_m2d.sh m2d_vit_base-80x608p16x16p16k-250826-AS+Resp400K/checkpoint-50.pth 3840
 ```
 
 #### Command lines for M2D pre-training
@@ -76,5 +83,5 @@ torchrun --nproc_per_node=4 -m train_audio --input_size 80x608 --patch_size 16x1
 
 - OPERA: *[Y. Zhang, T. Xia, J. Han, Y. Wu, G. Rizos, Y. Liu, M. Mosuily, J. Chauhan, and C. Mascolo, “Towards open respiratory acoustic foundation models: Pretraining and benchmarking,” in NeurIPS, 2024.](https://neurips.cc/virtual/2024/poster/97457).* 👉  [GitHub](https://github.com/evelyn0414/OPERA).
 
-- Niizumi et al. (Interspeech 2025): *[D. Niizumi, D. Takeuchi, M. Yasuda, B. T. Nguyen, Y. Ohishi, and N. Harada, "Towards Pre-training an Effective Respiratory Audio Foundation Model," to appear at Interspeech, 2025](https://arxiv.org/abs/TBD).* 👉  [GitHub](https://github.com/nttcslab/eval-audio-repr/tree/main/plugin/OPERA).
+- Niizumi et al. (Interspeech 2025): *[D. Niizumi, D. Takeuchi, M. Yasuda, B. T. Nguyen, Y. Ohishi, and N. Harada, "Towards Pre-training an Effective Respiratory Audio Foundation Model," at Interspeech, 2025](https://www.isca-archive.org/interspeech_2025/niizumi25_interspeech.html).* 👉  [GitHub](https://github.com/nttcslab/eval-audio-repr/tree/main/plugin/OPERA).
 
