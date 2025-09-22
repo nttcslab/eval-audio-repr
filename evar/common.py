@@ -78,7 +78,7 @@ def complete_cfg(cfg, options, no_id=False):
             name = cfg.name
         elif 'weight_file' in cfg and len(str(cfg['weight_file'])) > 0:
             weight_path = Path(str(cfg['weight_file']))
-            parent = weight_path.parent.stem if len(weight_path.parent.stem) > 0 else str(cfg.audio_repr.split(',')[-1])
+            parent = weight_path.parent.name.replace('.', '_') if len(weight_path.parent.name) > 0 else str(cfg.audio_repr.split(',')[-1])
             name = f'{parent}-{weight_path.stem}'
         else:
             name = str(cfg.audio_repr.split(',')[-1])
