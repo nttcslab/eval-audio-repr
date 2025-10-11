@@ -43,6 +43,8 @@ class WavDataset(evar.data.BaseRawAudioDataset):
 
     def get_audio(self, index):
         filename = self.df.file_name.values[index]
+        if self.cfg.return_filename:
+            return filename
         wav, sr = librosa.load(filename, sr=self.cfg.sample_rate, mono=True)
         wav = torch.tensor(wav).to(torch.float32)
         return wav
@@ -53,6 +55,8 @@ class WavDataset(evar.data.BaseRawAudioDataset):
 
 
 def collate_trunc_wav(original_batch):
+    if isinstance(original_batch[0], (str)):
+        return original_batch  # return_filename
     # truncate all items to the size of the shortest item
     truncated = []
     shortest = min([b.shape[-1] for b in original_batch])
@@ -107,7 +111,8 @@ def main(config):
         # extract features
         #waveform = waveform.squeeze().cpu().numpy()
         with torch.no_grad():
-            embeddings = model(waveform.to(device)) # [dims]
+            audio_data = [audio_file] if cfg.return_filename else waveform.to('cuda')
+            embeddings = model(audio_data) # [dims]
         # reshape to [1, 1, dims]
         out = embeddings.reshape(1, 1, -1).cpu().detach().numpy()
         

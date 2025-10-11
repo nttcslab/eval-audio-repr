@@ -219,7 +219,7 @@ The followings will get resampled copies ready.
 
 We provide the metadata as `evar/metadata/voxforge.csv` by default for reproducibility purposes.
 
-## Audio Captioning (Audio to Text Retrieval) Datasets
+## Audio Captioning (& Audio to Text Retrieval) Datasets
 
 ### AudioCaps/ML-AudioCaps
 
@@ -253,6 +253,18 @@ Unpack the 7z archives and place the files under `work/original` folder:
 The following will make the metadata for Clotho. The `/path/to/clotho` should have *.csv files.
 
     python evar/utils/make_metadata.py clotho /path/to/clotho
+
+### MusicCaps
+
+Download the metadata file `musiccaps-public.csv`.
+
+    wget https://huggingface.co/datasets/google/MusicCaps/resolve/main/musiccaps-public.csv
+
+Create the metadata file.
+
+    python evar/utils/make_metadata.py musiccaps /path/to/your/musiccaps-public.csv
+
+For the audio files, donwloading from
 
 ## Example command lines
 

@@ -89,3 +89,46 @@ class AR_M2D_CLAP(AR_M2D, BaseCLAP):
     def encode_text(self, batch_text):
         return self.runtime.encode_clap_text(batch_text)
 
+
+class AR_M2D_CLAP_PORTABLE(BaseCLAP):
+
+    def __init__(self, cfg, make_runtime=True):
+        super().__init__(cfg=cfg)
+        from examples.portable_m2d import PortableM2D
+
+        if make_runtime:
+            self.runtime = PortableM2D(cfg=cfg, weight_file=cfg.weight_file)
+            self.runtime.eval()
+            self.cfg = self.runtime.cfg
+
+    def precompute_lms(self, device, data_loader):
+        self.precompute(device, data_loader)
+        self.lms_mode = True
+
+    def encode_frames(self, batch_audio):
+        x = self.runtime.to_normalized_feature(batch_audio)
+        x = self.augment_if_training(x)
+        features = self.runtime.encode_lms(x)
+        return features.transpose(1, 2) # [B, T, D] -> [B, D, T]
+
+    def forward(self, batch_audio):
+        if hasattr(self, 'lms_mode'):
+            x = self.encode_frames_lms(batch_audio)
+        else:
+            x = self.encode_frames(batch_audio)
+        return x.mean(dim=-1) # [B, D, T] -> [B, D]
+
+    def encode_frames_lms(self, batch_lms):
+        x = normalize_spectrogram(self.norm_stats, batch_lms)
+        x = self.augment_if_training(x)
+        hidden_states = self.runtime.encode_lms(x, return_layers=True)
+        # stack layer outputs
+        states_to_stack = [hidden_states[index] for index in self.cfg.output_layers] if self.cfg.output_layers else [h for h in hidden_states]
+        features = torch.cat(states_to_stack, axis=-1)
+        return features.transpose(1, 2) # [B, T, D] -> [B, D, T]
+
+    def encode_audio(self, batch_audio):
+        return self.runtime.encode_clap_audio(batch_audio)
+
+    def encode_text(self, batch_text):
+        return self.runtime.encode_clap_text(batch_text)
