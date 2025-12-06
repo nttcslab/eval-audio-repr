@@ -50,10 +50,13 @@ class AR_M2D(BaseAudioRepr):
         if len(self.cfg.output_layers) > 1: return True
         return self.cfg.output_layers[0] != -1
 
-    def encode_frames(self, batch_audio):
-        x = self.runtime.to_feature(batch_audio)
-        x = normalize_spectrogram(self.norm_stats, x)
+    def to_norm_aug_lms(self, batch_audio): # Convert raw audio to normalized and augmented (only if self.training) LMS
+        x = self.runtime.to_normalized_spec(batch_audio)
         x = self.augment_if_training(x)
+        return x
+
+    def encode_frames(self, batch_audio):
+        x = self.to_norm_aug_lms(batch_audio)
         features = self.runtime.encode_lms(x, return_layers=self.using_non_last_layer_output())
         # stack layer outputs
         if self.using_non_last_layer_output():
@@ -84,7 +87,8 @@ class AR_M2D_CLAP(AR_M2D, BaseCLAP):
         super().__init__(cfg=cfg, make_runtime=make_runtime)
 
     def encode_audio(self, batch_audio):
-        return self.runtime.encode_clap_audio(batch_audio)
+        x = self.encode_frames(batch_audio).transpose(1, 2)
+        return self.runtime.project_audio(x)
 
     def encode_text(self, batch_text):
         return self.runtime.encode_clap_text(batch_text)
@@ -128,7 +132,8 @@ class AR_M2D_CLAP_PORTABLE(BaseCLAP):
         return features.transpose(1, 2) # [B, T, D] -> [B, D, T]
 
     def encode_audio(self, batch_audio):
-        return self.runtime.encode_clap_audio(batch_audio)
+        x = self.encode_frames(batch_audio).transpose(1, 2)
+        return self.runtime.project_audio(x)
 
     def encode_text(self, batch_text):
         return self.runtime.encode_clap_text(batch_text)

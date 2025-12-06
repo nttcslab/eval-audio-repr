@@ -10,7 +10,7 @@ This repository offers a comprehensive evaluation package for audio representati
 In early 2021, we lacked a cohesive codebase for evaluating models across various tasks under consistent test settings, which prompted the creation of this repository.
 By the end of 2021, other similar options, such as ([SERAB](https://github.com/Neclow/serab/), [SUPERB](https://superbbenchmark.org/), [HEAR 2021 NeurIPS Challenge](https://neuralaudio.ai/hear2021-datasets.html), and [HARES](https://arxiv.org/abs/2111.12124)), had emerged. However, this repository was developed independently for our specific study.
 
-This evaluation package is intended for researchers who wish to compare ARs under the same test setup as employed in our study.
+This evaluation package, EVAR, is intended for researchers who wish to compare ARs under the same test setup as employed in our study.
 The papers used EVAR are:
 
 - M2D-CLAP (IEEE Access 2025): *[D. Niizumi, D. Takeuchi, M. Yasuda, B. T. Nguyen, Y. Ohishi, and N. Harada, "M2D-CLAP: Exploring General-purpose Audio-Language Representations Beyond CLAP," IEEE Access,  vol. 13, pp. 163313-163330, 2025](https://ieeexplore.ieee.org/document/11168481).* 👉 [GitHub](https://github.com/nttcslab/m2d/tree/master/clap)
@@ -28,6 +28,11 @@ The papers used EVAR are:
 - Niizumi et al. (EUSIPCO 2022): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Composing General Audio Representation by Fusing Multilayer Features of a Pre-trained Model," in EUSIPCO, 2022](https://arxiv.org/abs/2205.08138).* 👉  [GitHub](https://github.com/nttcslab/composing-general-audio-repr)
 
 ## Update History
+
+### Dec 6, 2025 -- Minor improvements.
+- EVAR is now more portable and reusable in external experiments. The new environment variable `EVAR` will point to your local copy, and the EVAR code will locate local modules based on this variable.
+
+    EVAR=/your/copy/evar python ...
 
 ### June 5, 2025 -- Supported OPERA & MARBLE benchmarks.
 - You can expand models for [MARBLE music benchmark](https://github.com/a43992899/MARBLE-Benchmark) or [OPERA respiratory audio benchmark](https://github.com/evelyn0414/OPERA) by integrating EVAR. 👉  [plugin folder](https://github.com/nttcslab/eval-audio-repr/tree/main/plugin).

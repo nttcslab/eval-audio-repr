@@ -1,6 +1,6 @@
 """Downstream task definitions."""
 
-from evar.common import (pd, np, WORK, METADATA_DIR)
+from evar.common import (os, Path, WORK, METADATA_DIR)
 
 
 _defs = {
@@ -29,6 +29,8 @@ _defs = {
     'bmdhs1': [1, 20.0, 'bmdhs', False],
     'bmdhs2': [1, 20.0, 'bmdhs', False],
     'bmdhs3': [1, 20.0, 'bmdhs', False],
+    'xacle': [1, 10.0, None, False],
+    'xacle_test': [1, 10.0, 'xacle', False],
 }
 
 _fs_table = {
@@ -63,5 +65,6 @@ def get_defs(cfg, task, original_data=False):
     """
     folds, unit_sec, folder, balanced = _defs[task]
     folder = folder or task
+    evar_path = Path(os.environ.get('EVAR', '.'))
     workfolder = f'{WORK}/original/{get_original_folder(task, folder)}' if original_data else f'{WORK}/{_fs_table[cfg.sample_rate]}/{folder}'
-    return f'{METADATA_DIR}/{task}.csv', workfolder, folds, unit_sec, balanced
+    return str(evar_path/f'{METADATA_DIR}/{task}.csv'), str(evar_path/workfolder), folds, unit_sec, balanced

@@ -53,14 +53,18 @@ def set_layers_trainable(layer, trainable=False):
         p.requires_grad = trainable
 
 
-def show_layers_trainable(layer, show_all_trainable=True):
+def show_layers_trainable(layer, show_all_trainable=True, print_str=True):
     total_params = sum(p.numel() for p in layer.parameters())
     total_trainable_params = sum(p.numel() for p in layer.parameters() if p.requires_grad)
-    print(f'Total number of parameters: {total_params:,} (trainable {total_trainable_params:,})')
+    str_total = f'Total number of parameters: {total_params:,} (trainable {total_trainable_params:,})\n'
+    if print_str: print(str_total)
     trainable = [n for n, p in layer.named_parameters() if p.requires_grad]
+    str_trainable = f'Trainable parameters: {trainable if show_all_trainable else trainable[:10]} ...\n'
     frozen = [n for n, p in layer.named_parameters() if not p.requires_grad]
-    print('Trainable parameters:', trainable if show_all_trainable else f'{trainable[:10]} ...')
-    print('Others are frozen such as:', frozen[:3], '...' if len(frozen) >= 3 else '')
+    str_frozen = f'\nOthers are frozen such as: {frozen[:3]} ...' if len(frozen) >= 3 else ''
+    if print_str: print(str_trainable)
+    if print_str: print(str_frozen)
+    return str_total + str_trainable + str_frozen
 
 
 def initialize_layers(layer):

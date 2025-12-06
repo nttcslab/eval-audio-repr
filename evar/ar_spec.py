@@ -5,7 +5,7 @@ Mel-spectrogram and linear spectrogram.
 
 from evar.ar_base import (BaseAudioRepr, ToLogMelSpec,
     calculate_norm_stats, normalize_spectrogram, temporal_pooling)
-import nnAudio.Spectrogram
+import nnAudio.features
 
 
 class AR_MelSpec(BaseAudioRepr):
@@ -28,7 +28,7 @@ class AR_MelSpec(BaseAudioRepr):
 class ToLogLinSpec(ToLogMelSpec):
     def __init__(self, cfg):
         super().__init__(cfg)
-        self.to_spec = nnAudio.Spectrogram.STFT(n_fft=cfg.n_fft, win_length=cfg.window_size,
+        self.to_spec = nnAudio.features.STFT(n_fft=cfg.n_fft, win_length=cfg.window_size,
             freq_bins=None, hop_length=cfg.hop_size, 
             center=True, sr=cfg.sample_rate,
             output_format="Magnitude",
