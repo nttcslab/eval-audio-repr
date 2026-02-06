@@ -386,7 +386,7 @@ def __making_dataset_surge_tone_splits(root):
 
 
 def __making_voxforge_metadata(url_folders):
-    ## CAUTION: following will not work, leaving here for providing the detail.
+    ## CAUTION: the following will not work, leaving here for providing the detail.
     N = len(url_folders)
     folders_train = list(np.random.choice(url_folders, size=int(N * 0.7), replace=False))
     rest = [folder for folder in url_folders if folder not in folders_train]
@@ -415,7 +415,7 @@ def __making_voxforge_metadata(url_folders):
 
 
 def __making_cremad_metadata(not_working_just_a_note):
-    ## CAUTION: following will not work, leaving here for providing the detail.
+    ## CAUTION: the following will not work, leaving here for providing the detail.
     TFDS_URL = 'https://storage.googleapis.com/tfds-data/manual_checksums/crema_d.txt'
 
     contents = requests.get(TFDS_URL)
@@ -456,6 +456,25 @@ def __making_cremad_metadata(not_working_just_a_note):
     Ltrn, Lval, Ltest, L = sum(ns == 'train'), sum(ns == 'valid'), sum(ns == 'test'), len(ns)
     print(f'Train:valid:test = {Ltrn/L:.2f}:{Lval/L:.2f}:{Ltest/L:.2f}, total={Ltrn + Lval + Ltest}')
     # Train:valid:test = 0.69:0.10:0.21, total=7438
+
+
+def __convert_cremad_to_gender():
+    ## NOTE: the following code works, but you do not need to do it again, leaving here for providing the detail.
+    demographics_url = "https://raw.githubusercontent.com/CheyneyComputerScience/CREMA-D/master/VideoDemographics.csv"
+    df_demo = pd.read_csv(demographics_url)
+    gender_map = dict(zip(df_demo['ActorID'], df_demo['Sex']))
+
+    df_crema = pd.read_csv(f'{BASE}/cremad.csv')
+    df_crema['emotion'] = df_crema['label']
+    df_crema['label'] = df_crema['speaker_id'].map(gender_map)
+
+    missing_count = df_crema['label'].isna().sum()
+    if missing_count > 0:
+        print(f"⚠️ Warning: {missing_count} items are missing.")
+    else:
+        print("✅ completed.")
+
+    df_crema.to_csv(f'{BASE}/cremad_gender.csv', index=False)
 
 
 if __name__ == "__main__":
