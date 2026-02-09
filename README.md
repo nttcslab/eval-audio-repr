@@ -29,10 +29,17 @@ The papers used EVAR are:
 
 ## Update History
 
+### Feb 9, 2026 -- EAT & NSynth tasks.
+- New model: EAT
+- New task: nspitch, nsvelocity
+- Added class-wise accuracy reporting.
+
 ### Dec 6, 2025 -- Minor improvements.
 - EVAR is now more portable and reusable in external experiments. The new environment variable `EVAR` will point to your local copy, and the EVAR code will locate local modules based on this variable.
 
     EVAR=/your/copy/evar python ...
+
+<details><summary>Older history</summary>
 
 ### June 5, 2025 -- Supported OPERA & MARBLE benchmarks.
 - You can expand models for [MARBLE music benchmark](https://github.com/a43992899/MARBLE-Benchmark) or [OPERA respiratory audio benchmark](https://github.com/evelyn0414/OPERA) by integrating EVAR. 👉  [plugin folder](https://github.com/nttcslab/eval-audio-repr/tree/main/plugin).
@@ -40,8 +47,6 @@ The papers used EVAR are:
 ### May 1, 2025 -- Supported new models and fixed compatibility issues.
 - New model: Dasheng, Opera
 - Code for the [EMBC 2025 paper](https://github.com/nttcslab/eval-audio-repr/tree/main/app#assessing-the-utility-of-audio-foundation-models-for-heart-and-respiratory-sound-analysis).
-
-<details><summary>Older history</summary>
 
 ### Jun 20, 2024 -- Supported autio to text or text to audio retrieval (ATR).
 - ATR evaluator: `retr_a2t_t2a.py`

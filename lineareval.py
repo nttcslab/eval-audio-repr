@@ -70,6 +70,7 @@ import evar.ar_msclap
 import evar.ar_wavcaps
 import evar.ar_opera
 import evar.ar_dasheng
+import evar.ar_eat
 
 
 torch.backends.cudnn.benchmark = True
@@ -116,7 +117,7 @@ def to_embeddings(emb_ar, data_loader, device, _id=None, fold=1, cache=False):
     return embs, gts
 
 
-def _one_linear_eval(X, y, X_val, y_val, X_test, y_test, hidden_sizes, epochs, early_stop_epochs, lr, classes, standard_scaler, mixup, debug): 
+def _one_linear_eval(X, y, X_val, y_val, X_test, y_test, hidden_sizes, epochs, early_stop_epochs, lr, classes, standard_scaler, mixup, debug, save_path): 
     logging.info(f'🚀 Started {"Linear" if hidden_sizes == () else f"MLP with {hidden_sizes}"} evaluation:')
     clf = TorchMLPClassifier2(hidden_layer_sizes=hidden_sizes, max_iter=epochs, learning_rate_init=lr,
                               early_stopping=early_stop_epochs > 0, n_iter_no_change=early_stop_epochs,
@@ -124,6 +125,10 @@ def _one_linear_eval(X, y, X_val, y_val, X_test, y_test, hidden_sizes, epochs, e
     clf.fit(X, y, X_val=X_val, y_val=y_val)
 
     score, df = clf.score(X_test, y_test, classes)
+
+    if save_path is not None:
+        clf.save(save_path)
+
     return score, df
 
 
@@ -170,8 +175,34 @@ def short_model_desc(model, head_len=5, tail_len=1):
     return '\n'.join(text)
 
 
+def report_classwise_accuracy(df, last_score=None):
+    df['correct'] = (df['GT'] == df['prediction']).astype(float)
+    stats = df.groupby('GT')['correct'].agg(['mean', 'count'])
+
+    print("\n[Class-wise Results]")
+    print(f"{'Class':<20} | {'Accuracy':<10} | {'Diff (%)':<20} | {'Samples':<8}")
+    print("-" * 60)
+
+    current_results = {}
+    for cls_idx, row in stats.iterrows():
+        acc = float(row['mean'])
+        current_results[cls_idx] = acc
+
+        diff_str = "n/a"
+        if last_score is not None and cls_idx in last_score:
+            diff = acc - float(last_score[cls_idx].iloc[0])
+            #diff_str = f"{diff:+.4f}" # 符号付きで表示
+            diff_str = f"{diff:+.4f} ({diff * 100:+.2f}%)"  # 小数点2桁 + %記号
+
+        print(f"{str(cls_idx):<20} | {acc:<10.4f} | {diff_str:<20} | {int(row['count']):<8}")
+
+    print("-" * 60)
+
+    return current_results
+
+
 def lineareval_downstream(config_file, task, options='', seed=42, lr=None, hidden=(), standard_scaler=True, mixup=False,
-                          epochs=None, early_stop_epochs=None, unit_sec=None, step='1pass'):
+                          epochs=None, early_stop_epochs=None, unit_sec=None, step='1pass', save=False):
     cfg, n_folds, _ = make_cfg(config_file, task, options, extras={}, abs_unit_sec=unit_sec)
     lr = lr or cfg.lr_lineareval
     epochs = epochs or 200
@@ -209,7 +240,8 @@ def lineareval_downstream(config_file, task, options='', seed=42, lr=None, hidde
 
         score, df = _one_linear_eval(X, y, X_val, y_val, X_test, y_test, hidden_sizes=hidden, epochs=epochs,
                                      early_stop_epochs=early_stop_epochs, lr=lr, classes=classes,
-                                     standard_scaler=standard_scaler, mixup=mixup, debug=(fold == 1))
+                                     standard_scaler=standard_scaler, mixup=mixup, debug=(fold == 1),
+                                     save_path=(logpath if save else None))
         scores.append(score)
         if n_folds > 1:
             print(f' fold={fold}: {score:.5f}')
@@ -229,6 +261,10 @@ def lineareval_downstream(config_file, task, options='', seed=42, lr=None, hidde
         'run_id': [re_hashed],
         'report': [report],
     })
+    if not multi_label:
+        by_class_score = report_classwise_accuracy(df)
+        pd.DataFrame([by_class_score]).to_csv(logpath/'last_score_by_class.csv', index=None)
+
     append_to_csv(f'{RESULT_DIR}/scores.csv', result_df)
     logging.info(report)
     logging.info(f' -> {RESULT_DIR}/scores.csv')

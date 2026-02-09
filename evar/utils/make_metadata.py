@@ -136,6 +136,12 @@ def convert_nsynth_metadata(root, nsynth='nsynth', label_column='instrument_fami
 def nsynth(root):
     convert_nsynth_metadata(root)
 
+def nspitch(root):
+    convert_nsynth_metadata(root, nsynth='nspitch.csv', label_column='pitch')
+
+def nsvelocity(root):
+    convert_nsynth_metadata(root, nsynth='nsvelocity.csv', label_column='velocity')
+
 
 # FSDnoisy18k http://www.eduardofonseca.net/FSDnoisy18k/
 
