@@ -71,6 +71,9 @@ import evar.ar_wavcaps
 import evar.ar_opera
 import evar.ar_dasheng
 import evar.ar_eat
+import evar.ar_whisper
+import evar.ar_owsm
+import evar.ar_qwen2
 
 
 torch.backends.cudnn.benchmark = True

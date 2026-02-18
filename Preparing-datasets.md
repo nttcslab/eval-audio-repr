@@ -118,9 +118,11 @@ If we have NSynth files under a folder `downloads/nsynth`, the followings will g
     python prepare_wav.py downloads/nsynth work/44k/nsynth 44100
     python prepare_wav.py downloads/nsynth work/48k/nsynth 48000
 
-The following creates metadata/nsynth.csv:
+The following creates metadata/nsynth.csv, nspitch.csv, nsvelocity.csv:
 
     python evar/utils/make_metadata.py nsynth /your/nsynth
+    python evar/utils/make_metadata.py nspitch /your/nsynth
+    python evar/utils/make_metadata.py nsvelocity /your/nsynth
 
 ## SPCV1/V2
 

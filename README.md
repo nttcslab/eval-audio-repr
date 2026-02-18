@@ -20,6 +20,7 @@ The papers used EVAR are:
 - M2D for Speech (Interspeech 2023): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Masked Modeling Duo for Speech: Specializing General-Purpose Audio Representation to Speech using Denoising Distillation," in Interspeech, 2023](https://www.isca-speech.org/archive/interspeech_2023/niizumi23_interspeech.html).* 👉 Corrected [arXiv](https://arxiv.org/abs/2305.14079) version 👉 [GitHub](https://github.com/nttcslab/m2d/tree/master/speech)
 - BYOL-A (TASLP 2023): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, “BYOL for Audio: Exploring pre-trained general-purpose audio representations,” IEEE/ACM Trans. Audio, Speech, Language Process., vol. 31, pp. 137–151, 2023](http://dx.doi.org/10.1109/TASLP.2022.3221007).* 👉 [GitHub](https://github.com/nttcslab/byol-a/tree/master/v2)
 - BYOL-A (IJCNN 2021): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "BYOL for Audio: Self-Supervised Learning for General-Purpose Audio Representation," in IJCNN, 2021](https://arxiv.org/abs/2103.06695).* 👉 [GitHub](https://github.com/nttcslab/byol-a)
+- Kawamura et al., 2026: *[T. Kawamura, D. Niizumi, N. Ono, "What Do Neurons Listen To? A Neuron-level Dissection of a General-purpose Audio Model," arXiv preprint arXiv:2602.15307, 2026](https://arxiv.org/abs/2602.15307)* 👉 [GitHub](https://github.com/onolab-tmu/AAPE)
 - Niizumi et al. (Interspeech 2025): *[D. Niizumi, D. Takeuchi, M. Yasuda, B. T. Nguyen, Y. Ohishi, and N. Harada, "Towards Pre-training an Effective Respiratory Audio Foundation Model," in Interspeech, 2025](https://www.isca-archive.org/interspeech_2025/niizumi25_interspeech.html).* 👉  [GitHub](https://github.com/nttcslab/eval-audio-repr/tree/main/plugin/OPERA).
 - Niizumi et al. (IEEE EMBC 2025): *[D. Niizumi, D. Takeuchi, M. Yasuda, B. T. Nguyen, Y. Ohishi, and N. Harada, "Assessing the Utility of Audio Foundation Models for Heart and Respiratory Sound Analysis," in IEEE EMBC, 2025](https://arxiv.org/abs/2504.18004).* 👉  [GitHub](https://github.com/nttcslab/eval-audio-repr/tree/main/app).
 - Niizumi et al. (IEEE EMBC 2024): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Exploring Pre-trained General-purpose Audio Representations for Heart Murmur Detection," IEEE EMBC, 2024, pp. 1-4](https://ieeexplore.ieee.org/document/10782479).* 👉  [GitHub](https://github.com/nttcslab/m2d/tree/master/app/circor).
@@ -28,6 +29,9 @@ The papers used EVAR are:
 - Niizumi et al. (EUSIPCO 2022): *[D. Niizumi, D. Takeuchi, Y. Ohishi, N. Harada, and K. Kashino, "Composing General Audio Representation by Fusing Multilayer Features of a Pre-trained Model," in EUSIPCO, 2022](https://arxiv.org/abs/2205.08138).* 👉  [GitHub](https://github.com/nttcslab/composing-general-audio-repr)
 
 ## Update History
+
+### Feb 19, 2026 -- Big models.
+- New model: Whisper, OWSM, and Qwen2.5-Omni.
 
 ### Feb 9, 2026 -- EAT & NSynth tasks.
 - New model: EAT
@@ -435,28 +439,47 @@ The followings are supported datasets with a short name and subdomain:
 
 ### 7-2. Supported pre-trained models
 
-The followings are supported:
+The followings and their linear evaluation results are as follows::
 
-- WavCaps
-- LAION CLAP
-- MS CLAP  (caution: very slow to load audio files.)
-- ATST(-Clip), ATST-Frame
-- BEATs
-- CED (using a pre-trained weight on the Huggingface)
-- Dasheng (using a pre-trained weight on the Huggingface)
-- HTS-AT
-- VGGish
-- PANNs' CNN14
-- ESResNe(X)t-fbsp
-- OpenL3
-- AST
-- Wav2Vec2 (using a pre-trained weight on the Huggingface)
-- Data2vec (using a pre-trained weight on the Huggingface)
-- HuBERT (using a pre-trained weight on the Huggingface)
-- WavLM (using a pre-trained weight on the Huggingface)
-- TRILL
-- COALA
-- BYOL-A
+| Model      | ESC-50 | US8K   | SPCV2   | VoxCeleb1    | VoxForge   | CREMA-D   | GTZAN   | NSynth   | Surge   | Average   |
+|:------------|:--------|:-------|:--------|:-------|:-----------|:---------|:--------|:---------|:--------|:----------|
+| BYOL-A | 83.2 ± 0.6 | 79.7 ± 0.5 | 93.1 ± 0.4 | 57.6 ± 0.2 | 93.3 ± 0.3 | 63.8 ± 1.0 | 70.1 ± 3.6 | 73.1 ± 0.8 | 37.6 ± 0.3 | 72.4 |
+| M2D | 91.3 ±0.6 | 87.6 ±0.2 | 96.0 ±0.1 | 73.4 ±0.2 | 98.3 ±0.0 | 73.0 ±0.7 | 84.1 ±2.7 | 75.7 ±0.1 | 42.1 ±0.2 | 80.2 |
+| M2D-AS | 96.7 ±0.5 | 89.3 ±0.1 | 93.2 ±0.2 | 52.7 ±0.6 | 96.9 ±0.0 | 69.5 ±1.8 | 87.6 ±0.9 | 75.6 ±0.6 | 40.5 ±0.4 | 78.0 |
+| M2D-CLAP (2025) | 97.9 ±0.5 | 89.7 ±0.3 | 94.8 ±0.2 | 56.3 ±0.5 | 97.1 ±0.0 | 69.7 ±0.3 | 86.3 ±1.8 | 76.7 ±0.4 | 41.1 ±0.3 | 78.8 |
+| M2D-CLAP (2024) | 96.3 ±0.3 | 88.8 ±0.6 | 95.8 ±0.3 | 70.3 ±0.4 | 98.3 ±0.1 | 73.4 ±0.2 | 84.1 ±1.5 | 78.0 ±0.5 | 42.4 ±0.6 | 80.8 |
+| QWEN2.5 7B | 91.7 ±0.6 | 82.6 ±0.7 | 98.4 ±0.2 | 39.7 ±0.9 | 99.9 ±0.0 | 76.7 ±1.4 | 84.0 ±4.0 | 74.9 ±0.3 | 33.9 ±0.6 | 75.8 |
+| QWEN2.5 3B | 91.5 ±0.7 | 81.6 ±0.6 | 98.4 ±0.1 | 33.9 ±1.6 | 99.9 ±0.0 | 74.7 ±0.5 | 84.5 ±1.5 | 74.6 ±0.8 | 33.7 ±0.6 | 74.8 |
+| Whisper large v3 | 82.0 ±1.6 | 78.4 ±0.3 | 98.2 ±0.0 | 44.9 ±0.4 | 99.9 ±0.0 | 76.2 ±0.6 | 70.6 ±2.8 | 70.9 ±1.3 | 26.0 ±0.8 | 71.9 |
+| Whisper base | 78.0 ±0.7 | 76.3 ±0.7 | 97.6 ±0.1 | 35.0 ±0.6 | 99.7 ±0.1 | 70.8 ±1.2 | 71.7 ±3.7 | 65.5 ±0.6 | 25.4 ±0.3 | 68.9 |
+| OWSM v3.1 ebf base | 50.9 ±1.5 | 63.1 ±0.3 | 97.8 ±0.0 | 7.9 ±0.3 | 99.8 ±0.0 | 58.3 ±0.8 | 53.0 ±9.4 | 53.2 ±0.2 | 14.6 ±0.2 | 55.4 |
+| Dasheng 1.2B | 88.8 ±0.5 | 83.5 ±0.4 | 97.6 ±0.1 | 77.8 ±0.7 | 99.7 ±0.1 | 76.9 ±1.0 | 44.7 ±10.1 | 76.9 ±1.5 | 40.0 ±0.5 | 76.2 |
+| EAT base | 85.6 ±0.4 | 81.7 ±0.3 | 81.5 ±0.4 | 39.6 ±0.5 | 92.6 ±0.0 | 64.9 ±2.8 | 73.7 ±0.5 | 71.9 ±0.1 | 39.0 ±0.3 | 70.0 |
+| SSLAM Base | 85.7 ±1.3 | 81.4 ±0.3 | 82.5 ±0.4 | 33.9 ±0.8 | 92.0 ±0.1 | 66.4 ±1.5 | 70.9 ±2.5 | 73.8 ±0.7 | 38.0 ±0.9 | 69.4 |
+| ATST-Clip | 94.1 ±0.6 | 85.8 | 95.1 | 72.0 | 97.6 ±0.0 | 68.8 ±1.3 | 78.9 ±3.5 | 76.2 | 32.8 ±0.0 | 77.9 |
+| ATST-Frame | 90.9 ±0.6 | 85.8 | 94.9 | 77.4 | 98.8 ±0.3 | 72.3 ±0.7 | 82.9 ±6.0 | 75.9 | 40.6 ±0.2 | 79.9 |
+| BEATs_iter3 | 86.9 ±1.4 | 84.8 ±0.1 | 89.4 ±0.1 | 41.4 ±0.7 | 94.1 ±0.3 | 64.7 ±0.8 | 72.6 ±4.3 | 75.9 ±0.2 | 39.3 ±0.4 | 72.1 |
+| BEATs_iter3+ | 95.5 ±0.3 | 87.6 ±0.3 | 86.7 ±0.1 | 37.0 ±0.2 | 92.5 ±0.1 | 67.6 ±1.5 | 84.6 ±0.5 | 73.1 ±0.4 | 35.7 ±0.3 | 73.4 |
+| CED | 97.3 ±0.5 | 87.8 ±0.2 | 89.0 ±0.3 | 35.2 ±0.2 | 94.8 ±0.1 | 66.1 ±1.3 | 42.3 ±15.4 | 75.6 ±0.5 | 38.9 ±0.6 | 69.7 |
+| HTS-AT | 95.7 ±0.7 | 83.8 ±0.1 | 82.1 ±0.3 | 18.1 ±0.4 | 82.3 ±0.3 | 56.2 ±0.6 | 85.1 ±0.5 | 73.3 ±0.8 | 26.3 ±0.5 | 67.0 |
+| LAION-CLAP | 97.3 ±0.5 | 86.9 ±0.5 | 75.9 ±0.5 | 13.4 ±0.4 | 80.3 ±0.2 | 54.6 ±1.0 | 84.3 ±2.6 | 72.2 ±1.1 | 14.8 ±0.5 | 64.4 |
+| CLAP_2022 | 93.8 ±0.1 | 84.2 ±0.7 | 59.0 ±1.1 | 8.9 ±0.6 | 75.8 ±1.3 | 54.4 ±0.8 | 79.3 | 68.2 ±0.6 | 8.4 ±0.7 | 59.1 |
+| CLAP_2023 | 97.7 ±0.5 | 88.4 ±0.1 | 86.2 ±0.8 | 21.1 ±0.3 | 89.6 ±0.8 | 62.5 ±1.8 | 82.3 ±0.5 | 80.5 ±0.1 | 27.2 ±0.5 | 70.6 |
+| WavCaps | 97.2 ±0.3 | 63.6 ±0.6 | 73.3 ±1.7 | 16.9 ±0.2 | 80.0 ±1.0 | 58.6 ±0.7 | 80.2 ±1.3 | 74.4 ±0.9 | 21.1 ±0.2 | 62.8 |
+| PANNs CNN14 | 90.7 ±0.8 | 81.9 ±0.1 | 51.8 ±0.3 | 7.8 ±0.1 | 75.1 ±0.2 | 51.8 ±1.3 | 78.7 ±3.0 | 65.9 ±0.2 | 10.9 ±0.3 | 57.2 |
+| AST | 94.6 ±0.7 | 85.4 ±0.6 | 72.6 ±0.0 | 16.5 ±0.3 | 81.2 ±0.3 | 58.4 ±3.1 | 85.1 ±0.5 | 72.9 ±0.9 | 25.7 ±0.1 | 65.8 |
+| VGGish | 68.2 ± 1.1 | 75.1 ± 0.3 | 14.3 ± 0.3 | 9.0 ± 0.2 | 75.7 ± 0.3 | 44.4 ± 1.1 | 75.3 ± 6.7 | 53.9 ± 0.4 | 8.8 ± 0.2 | 47.2 |
+| VGGish-4K | 79.5 ± 0.4 | 78.5 ± 0.3 | 47.0 ± 0.6 | 25.0 ± 1.1 | 85.4 ± 0.2 | 50.8 ± 1.8 | 70.2 ± 8.6 | 68.8 ± 0.5 | 19.7 ± 0.1 | 58.3 |
+| ESResNeXt | 89.0 ± 1.2 | 84.3 ± 0.4 | 68.0 ± 0.9 | 17.7 ± 0.4 | 82.6 ± 0.9 | 57.1 ± 1.0 | 81.3 ± 1.3 | 69.5 ± 0.8 | 18.2 ± 1.2 | 63.1 |
+| COALA | 74.7 ± 1.3 | 71.9 ± 1.0 | 56.6 ± 0.3 | 12.1 ± 0.4 | 73.9 ± 0.2 | 49.3 ± 0.3 | 58.3 ± 5.4 | 71.3 ± 1.1 | 29.5 ± 0.1 | 55.3 |
+| OpenL3-E | 81.2 ± 1.3 | 80.7 ± 0.4 | 86.8 ± 0.2 | 40.1 ± 0.9 | 88.8 ± 0.2 | 59.6 ± 1.4 | 72.9 ± 0.5 | 74.0 ± 0.8 | 38.0 ± 0.2 | 69.1 |
+| OpenL3-M | 82.2 ± 0.8 | 80.4 ± 0.3 | 87.9 ± 0.1 | 40.7 ± 0.6 | 90.1 ± 0.6 | 60.4 ± 1.0 | 73.3 ± 3.0 | 75.6 ± 0.5 | 36.4 ± 0.6 | 69.7 |
+| TRILL | 75.4 ± 0.7 | 75.2 ± 1.3 | 78.4 ± 0.8 | 40.1 ± 1.1 | 88.8 ± 0.3 | 58.8 ± 2.3 | 64.4 ± 1.8 | 74.3 ± 1.8 | 28.7 ± 1.0 | 64.9 |
+| Wav2Vec2-F | 65.6 ± 1.7 | 67.8 ± 0.3 | 85.8 ± 0.2 | 32.0 ± 0.3 | 81.7 ± 0.1 | 56.4 ± 0.5 | 62.3 ± 1.0 | 62.2 ± 0.8 | 30.0 ± 0.4 | 60.4 |
+| Wav2Vec2-C | 57.6 ± 0.8 | 66.9 ± 0.4 | 96.6 ± 0.0 | 40.9 ± 0.6 | 99.2 ± 0.1 | 65.5 ± 1.7 | 57.8 ± 1.3 | 56.6 ± 0.6 | 15.2 ± 0.9 | 61.8 |
+
+Additionally supported:
+
 - [OPERA](https://github.com/evelyn0414/OPERA) (For app/icbhi_sprs only)
 
 ## License

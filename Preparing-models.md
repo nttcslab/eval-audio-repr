@@ -48,7 +48,7 @@ In addition to the following steps, please download the BEATs_iter3 and BEATs_it
 
 ## Dasheng
 
-    pip install git+https://github.com/jimbozhang/hf_transformers_custom_model_dasheng.git
+    pip install transformers
 
 ## ESResNe(X)t-fbsp
 

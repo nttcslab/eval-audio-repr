@@ -1,0 +1,27 @@
+# AR parameters such as FFT parameters.
+audio_repr: ar_qwen2.AR_Qwen2_5
+weight_file: Qwen/Qwen2.5-Omni-3B
+#Qwen/Qwen2.5-Omni-7B
+#Qwen/Qwen2.5-Omni-7B-AWQ
+feature_d: 1280
+sample_rate: 16000
+n_mels: 128
+window: hanning # paper is typo (https://github.com/YuanGongND/ast/issues/13)
+
+# Training parameters.
+batch_size: 128
+lr_lineareval: 0.0003
+report_per_epochs: 20
+early_stop_epochs: 20
+
+# Fine-tuning parameters.
+## CAUTION: The following parameters not confirmed to work. ##
+warmup_epochs: 4
+mixup: 0.5
+ft_bs: 64
+ft_lr: 2.0
+ft_early_stop_epochs: -1 # -1: no early stopping
+ft_epochs: 200
+ft_freq_mask: 24 # for ESC-50 in this case
+ft_time_mask: 96 # for ESC-50
+ft_rrc: True
