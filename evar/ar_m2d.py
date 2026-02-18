@@ -137,3 +137,55 @@ class AR_M2D_CLAP_PORTABLE(BaseCLAP):
 
     def encode_text(self, batch_text):
         return self.runtime.encode_clap_text(batch_text)
+
+
+##### For ablation study on the paper:
+#   "What Do Neurons Listen To? A Neuron-level Dissection of a General-purpose Audio Model"
+#   Takao Kawamura, Daisuke Niizumi, and Nobutaka Ono
+#   arXiv link: https://arxiv.org/abs/2602.15307
+
+def get_activation_steering_hook(neuron_indices, gain=0.0):
+    """
+    Creates a forward hook to adjust the response of specific neurons.
+    
+    Args:
+        neuron_indices (list or torch.Tensor): Indices of the target neurons to be modified.
+        gain (float): Scaling factor applied to the output. 
+                      - 0.0: Complete ablation (suppression).
+                      - 0.0 < gain < 1.0: Attenuation (weakening).
+                      - gain > 1.0: Amplification (strengthening).
+    """
+    def hook(module, input, output):
+        # Ensure we are working with the actual activation tensor.
+        # If output is a tuple (common in some models), we take the first element.
+        target_output = output[0] if isinstance(output, tuple) else output
+        
+        # Create a mask to avoid potential in-place modification issues
+        # and ensure the change propagates to the next layer.
+        device = target_output.device
+        mask = torch.ones(target_output.shape[-1], device=device)
+        mask[neuron_indices] = gain
+        
+        # Apply the mask across the last dimension
+        new_output = target_output * mask
+        
+        # Return the modified tensor in the same format as the original output
+        return (new_output,) if isinstance(output, tuple) else new_output
+
+    return hook
+
+
+class AR_M2D_Steering_Neurons(AR_M2D):
+
+    def __init__(self, cfg, make_runtime=True):
+        super().__init__(cfg=cfg)
+
+        layer_map = defaultdict(list)
+        for l, n in cfg.int_neurons:
+            layer_map[l].append(n)
+
+        for name, module in self.runtime.backbone.named_modules():
+            for layer_idx, neurons in layer_map.items():
+                if name.endswith(f".{layer_idx}.mlp.act"):
+                    handle = module.register_forward_hook(get_activation_steering_hook(neurons, cfg.int_gain))
+                    print(f"Steering {name} neurons: {neurons} with a gain: {cfg.int_gain}")

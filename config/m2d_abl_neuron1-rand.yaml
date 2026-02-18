@@ -1,0 +1,56 @@
+# AR parameters such as FFT parameters.
+audio_repr: ar_m2d.AR_M2D_Steering_Neurons
+weight_file: external/m2d/m2d_vit_base-80x608p16x16-221006-mr7/checkpoint-300.pth
+feature_d: 3840
+sample_rate: 16000
+n_fft: 400
+window_size: 400
+hop_size: 160
+n_mels: 80
+f_min: 50
+f_max: 8000
+window: hanning
+
+# Statistics for normalization: average and standard deviation
+mean: -7.1
+std: 4.2
+
+# Model specific parameters.
+output_layers: [-1]  # List of layers to stack
+encoder_only: True
+dur_frames:  # None for no desired number of frames
+freeze_embed:  # Set True if freezing PatchEmbed during fine-tuning [2211.09359] How to Fine-Tune Vision Models with SGD
+
+# Linear evaluation/Fine-tuning common parameters.
+flat_features: False  # 768-d if True else 3840-d
+
+# Linear evaluaition parameters.
+batch_size: 128
+lr_lineareval: 0.00003
+report_per_epochs: 50
+early_stop_epochs: 20
+
+# Fine-tuning parameters.
+training_mask: 0.0
+warmup_epochs: 5
+
+# Neuron intervention
+
+### ['cremad: ANG', 'cremad: HAP']
+# Reproduction steps:
+# 1. Get the normal results and save the linear layer weights.
+# python lineareval.py config/m2d.yaml cremad --seed=6 --save
+# 2. Get the steered results.
+# python le_eval_only.py config/m2d_abl_neuron1-rand.yaml cremad logs/m2d_vit_base-80x608p16x16-221006-mr7-checkpoint-300_cremad_64f492be
+
+int_gain: 0.0
+int_neurons: [[0, 2],[0, 113],[0, 794],[3, 383],[3, 742],[3, 756],[3, 1960],[3, 2098],[3, 2234],[5, 1431],[5, 2472],[6, 1197],[7, 639],[7, 1158],[7, 2500],[8, 387],[8, 2555],[9, 348],[10, 394],[10, 2121],[10, 2370],[10, 2664]]
+
+# Class                | Accuracy   | Diff (%)             | Samples 
+# ------------------------------------------------------------
+# ANG                  | 0.8377     | -0.0038 (-0.38%)     | 265
+# DIS                  | 0.6566     | +0.0075 (+0.75%)     | 265
+# FEA                  | 0.6667     | +0.0000 (+0.00%)     | 264
+# HAP                  | 0.7547     | +0.0000 (+0.00%)     | 265
+# NEU                  | 0.9207     | +0.0000 (+0.00%)     | 227
+# SAD                  | 0.5623     | +0.0038 (+0.38%)     | 265

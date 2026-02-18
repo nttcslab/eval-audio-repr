@@ -9,25 +9,14 @@ Open Whisper-style Speech Models (OWSM, pronounced as “awesome”)
 from evar.ar_base import BaseAudioRepr, temporal_pooling, np
 import logging
 import torch
+import math
 try:
     from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
     from espnet2.bin.s2t_inference import Speech2Text
     import torch.nn.functional as F
     from espnet2.torch_utils.device_funcs import to_device
-
-    ListOfHypothesis = List[
-        Tuple[
-            Optional[str],
-            List[str],
-            List[int],
-            Optional[str],
-        ]
-    ]
 except:
     logging.error('Install ESPnet2.\n>>> pip install git+https://github.com/espnet/espnet@7bcb169291f5d4a9b1fd00f8bfe554de84e50024\n>>> pip install espnet_model_zoo')
-
-import torch
-import math
 
 
 def call_s2t(
@@ -37,14 +26,8 @@ def call_s2t(
     lang_sym: Optional[str] = None,
     task_sym: Optional[str] = None,
     predict_time: Optional[bool] = None,
-) -> Union[
-    ListOfHypothesis,
-    Tuple[
-        ListOfHypothesis,
-        Optional[Dict[int, List[str]]],
-    ],
-]:
-    """Using inference code for a single utterance.
+):
+    """Using inference code for a single utterance, borrowed from:
     https://github.com/espnet/espnet/blob/4bb3c8f8ac6cb111fca8021a91b275aa63f0fa57/espnet2/bin/s2t_inference.py#L383
     """
 
@@ -112,21 +95,6 @@ def call_s2t(
     # b. Forward Encoder
     enc, enc_olens = self.s2t_model.encode(**batch)
 
-    # intermediate_outs = None
-    # if isinstance(enc, tuple):
-    #     enc, intermediate_outs = enc
-
-    # assert len(enc) == 1, len(enc)
-
-    # # c. Pass the encoder result to the beam search
-    # results = self._decode_single_sample(enc[0])
-
-    # # Encoder intermediate CTC predictions
-    # if intermediate_outs is not None:
-    #     encoder_interctc_res = self._decode_interctc(intermediate_outs)
-    #     results = (results, encoder_interctc_res)
-
-    # return results
     return enc
 
 
