@@ -178,6 +178,8 @@ def get_activation_steering_hook(neuron_indices, gain=0.0):
 class AR_M2D_Steering_Neurons(AR_M2D):
 
     def __init__(self, cfg, make_runtime=True):
+        from collections import defaultdict
+
         super().__init__(cfg=cfg)
 
         layer_map = defaultdict(list)

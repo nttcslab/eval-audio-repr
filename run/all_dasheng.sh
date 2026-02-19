@@ -1,4 +1,4 @@
-NAME=Dasheng_1.2B
+NAME=Dasheng_1_2B
 python 2pass_lineareval.py config/dasheng.yaml cremad batch_size=16,name=$NAME
 python 2pass_lineareval.py config/dasheng.yaml gtzan batch_size=16,name=$NAME
 python 2pass_lineareval.py config/dasheng.yaml spcv2 batch_size=64,name=$NAME

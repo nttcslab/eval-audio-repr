@@ -1,4 +1,4 @@
-NAME=OWSM_3.1_ebf
+NAME=OWSM_3_1_ebf
 python 2pass_lineareval.py config/owsm.yaml cremad batch_size=16,name=$NAME
 python 2pass_lineareval.py config/owsm.yaml gtzan batch_size=16,name=$NAME
 python 2pass_lineareval.py config/owsm.yaml spcv2 batch_size=64,name=$NAME
